@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+
+    <!-- 1800: org.bluetooth.service.generic_access -->
+    <service uuid="1800" id="generic_access">
+        <description>Generic Access</description>
+
+        <!-- 2A00: org.bluetooth.characteristic.gap.device_name -->
+        <characteristic uuid="2A00" id="c_device_name">
+            <description>Device Name</description>
+            <properties read="true" const="true" />
+            <!-- It's a good idea to keep this <= 19 characters, for proper display on iOS -->
+            <value>BGLib Arduino</value>
+        </characteristic>
+
+        <!-- 2A01: org.bluetooth.characteristic.gap.appearance -->
+        <characteristic uuid="2A01" id="c_appearance">
+            <description>Appearance</description>
+            <properties read="true" const="true" />
+            <!-- 128: Generic Computer, Generic category -->
+            <value type="hex">0080</value>
+        </characteristic>
+
+    </service>
+
+    <!-- 180A: org.bluetooth.service.device_information -->
+    <service uuid="180A" id="device_information">
+        <description>Device Information</description>
+
+        <!-- 2A29: org.bluetooth.characteristic.manufacturer_name_string -->
+        <!-- (support for this characteristic is MANDATORY according to the profile spec) -->
+        <characteristic uuid="2A29" id="c_manufacturer_name">
+            <description>Manufacturer Name</description>
+            <properties read="true" const="true" />
+            <value>Jeff Rowberg</value>
+        </characteristic>
+
+        <!-- 2A24: org.bluetooth.characteristic.model_number_string -->
+        <characteristic uuid="2A24" id="c_model_number">
+            <description>Model Number</description>
+            <properties read="true" const="true" />
+            <value>SF-BGLIB-ARDUINO</value>
+        </characteristic>
+
+    </service>
+
+    <!-- custom service for output data -->
+    <service uuid="224FA300-2E97-11E2-81C2-0800200C9A66" id="data_server" advertise="true">
+        <description>Throughput Server</description>
+
+        <characteristic uuid="2A29" id="c_txdata">
+            <description>TX Data</description>
+            <properties indicate="true" />
+            <value length="20"></value>
+        </characteristic>
+
+    </service>
+
+</configuration>
