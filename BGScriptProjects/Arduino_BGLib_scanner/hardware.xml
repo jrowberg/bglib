@@ -2,6 +2,7 @@
 
 <hardware>
     <sleeposc enable="false" ppm="30" />
+    <usb enable="true" endpoint="api" />
     <txpower power="15" bias="5" />
     <!-- UART 1, alternate 1:
         P0_5 = RX
@@ -9,6 +10,5 @@
         P0_3 = RTS
         P0_2 = CTS
     -->
-    <usart channel="1" alternate="1" baud="9600" endpoint="api" />
-    <pmux regulator_pin="7" />
+    <usart channel="1" alternate="1" baud="38400" endpoint="api" flow="false" />
 </hardware>

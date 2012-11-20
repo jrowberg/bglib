@@ -90,7 +90,7 @@ void setup() {
     ble112.ble_evt_gap_scan_response = my_evt_gap_scan_response;
 
     // set the data rate for the SoftwareSerial port
-    bleSerialPort.begin(9600);
+    bleSerialPort.begin(38400);
 }
 
 void loop() {

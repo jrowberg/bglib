@@ -20,7 +20,7 @@
             <!-- 128: Generic Computer, Generic category -->
             <value type="hex">0080</value>
         </characteristic>
-
+        
     </service>
 
     <!-- 180A: org.bluetooth.service.device_information -->
@@ -32,7 +32,7 @@
         <characteristic uuid="2A29" id="c_manufacturer_name">
             <description>Manufacturer Name</description>
             <properties read="true" const="true" />
-            <value>Jeff Rowberg</value>
+            <value>SectorFej</value>
         </characteristic>
 
         <!-- 2A24: org.bluetooth.characteristic.model_number_string -->
@@ -44,14 +44,20 @@
 
     </service>
 
-    <!-- custom service for output data -->
-    <service uuid="224FA300-2E97-11E2-81C2-0800200C9A66" id="data_server" advertise="true">
-        <description>Throughput Server</description>
+    <!-- custom service for data transmission test -->
+    <service uuid="195AE58A-437A-489B-B0CD-B7C9C394BAE4" id="data_transceiver" advertise="true">
+        <description>Data transceiver service</description>
 
-        <characteristic uuid="2A29" id="c_txdata">
+        <characteristic uuid="5FC569A0-74A9-4FA4-B8B7-8354C86E45A4" id="c_rx_data">
+            <description>RX Data</description>
+            <properties read="true" write="true" />
+            <value variable_length="true" length="20"></value>
+        </characteristic>
+
+        <characteristic uuid="21819AB0-C937-4188-B0DB-B9621E1696CD" id="c_tx_data">
             <description>TX Data</description>
-            <properties indicate="true" />
-            <value length="20"></value>
+            <properties read="true" notify="true" indicate="true" />
+            <value variable_length="true" length="20"></value>
         </characteristic>
 
     </service>
