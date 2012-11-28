@@ -26,18 +26,6 @@ THE SOFTWARE.
 ===============================================
 */
 
-
-
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-// KNOWN BUG:
-// After scanning is enabled, further UART commands don't work correctly.
-// I believe this is a flow control issue, but I am still working on it.
-
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
-
 #include <SoftwareSerial.h>
 #include "BGLib.h"
 
@@ -47,7 +35,7 @@ THE SOFTWARE.
 // - DK P0_5 -> Arduino Digital Pin 3 (BLE RX -> Arduino TX)
 
 // NOTE: this demo REQUIRES the BLE112 be programmed with the UART connected
-// to the "api" endpoint in hardware.xml, and be configured for 9600 baud,
+// to the "api" endpoint in hardware.xml, and be configured for 38400 baud,
 // 8,n,1. This may change in the future, but be aware. The BLE SDK archive
 // contains an /examples/uartdemo project which is a good starting point for
 // this communication. The BGLib repository also includes a project you can
@@ -148,6 +136,10 @@ void loop() {
     }
 }
 
+// ================================================================
+// INTERNAL BGLIB CLASS CALLBACK FUNCTIONS
+// ================================================================
+
 void onBusy() {
     // turn LED on when we're busy
     digitalWrite(LED_PIN, HIGH);
@@ -161,6 +153,10 @@ void onIdle() {
 void onTimeout() {
     Serial.println("!!!\tTimeout occurred!");
 }
+
+// ================================================================
+// USER-DEFINED BGLIB RESPONSE CALLBACKS
+// ================================================================
 
 void my_rsp_system_hello(const ble_msg_system_hello_rsp_t *msg) {
     Serial.println("<--\tsystem_hello");
@@ -184,6 +180,10 @@ void my_rsp_gap_end_procedure(const ble_msg_gap_end_procedure_rsp_t *msg) {
     Serial.println(" }");
 }
 
+// ================================================================
+// USER-DEFINED BGLIB EVENT CALLBACKS
+// ================================================================
+
 void my_evt_system_boot(const ble_msg_system_boot_evt_t *msg) {
     Serial.print("###\tsystem_boot: { ");
     Serial.print("major: "); Serial.print(msg -> major, HEX);
@@ -201,6 +201,7 @@ void my_evt_gap_scan_response(const ble_msg_gap_scan_response_evt_t *msg) {
     Serial.print("rssi: "); Serial.print(msg -> rssi);
     Serial.print(", packet_type: "); Serial.print((uint8_t)msg -> packet_type, HEX);
     Serial.print(", sender: ");
+    // this is a "bd_addr" data type, which is a 6-byte uint8_t array
     for (uint8_t i = 0; i < 6; i++) {
         if (msg -> sender.addr[i] < 16) Serial.write('0');
         Serial.print(msg -> sender.addr[i], HEX);
@@ -208,6 +209,7 @@ void my_evt_gap_scan_response(const ble_msg_gap_scan_response_evt_t *msg) {
     Serial.print(", address_type: "); Serial.print(msg -> address_type, HEX);
     Serial.print(", bond: "); Serial.print(msg -> bond, HEX);
     Serial.print(", data: ");
+    // this is a "uint8array" data type, which is a length byte and a uint8_t* pointer
     for (uint8_t i = 0; i < msg -> data.len; i++) {
         if (msg -> data.data[i] < 16) Serial.write('0');
         Serial.print(msg -> data.data[i], HEX);
