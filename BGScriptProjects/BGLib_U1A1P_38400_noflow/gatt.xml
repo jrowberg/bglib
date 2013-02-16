@@ -9,8 +9,7 @@
         <characteristic uuid="2A00" id="c_device_name">
             <description>Device Name</description>
             <properties read="true" const="true" />
-            <!-- It's a good idea to keep this <= 19 characters, for proper display on iOS -->
-            <value>BGLib Arduino</value>
+            <value>BGLib U1A1P 38.4NF</value>
         </characteristic>
 
         <!-- 2A01: org.bluetooth.characteristic.gap.appearance -->
@@ -39,7 +38,7 @@
         <characteristic uuid="2A24" id="c_model_number">
             <description>Model Number</description>
             <properties read="true" const="true" />
-            <value>SF-BGLIB-ARDUINO</value>
+            <value>SF-BGLIB</value>
         </characteristic>
 
     </service>
@@ -50,7 +49,7 @@
 
         <characteristic uuid="5FC569A0-74A9-4FA4-B8B7-8354C86E45A4" id="c_rx_data">
             <description>RX Data</description>
-            <properties read="true" write="true" />
+            <properties write="true" />
             <value variable_length="true" length="20"></value>
         </characteristic>
 

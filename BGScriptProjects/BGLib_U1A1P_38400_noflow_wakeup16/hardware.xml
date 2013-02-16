@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-
 <hardware>
     <sleeposc enable="true" ppm="30" />
-    <usb enable="true" endpoint="api" />
+    <sleep enable="true" />
+    <script enable="false" />
     <txpower power="15" bias="5" />
+    <port index="0" pull="down" tristatemask="0" />
+    <port index="1" pull="down" tristatemask="0" />
+    <port index="2" pull="down" tristatemask="0" />
+    <wakeup_pin enable="true" port="1" pin="6" state="up" />
+    <usb enable="false" endpoint="api" />
+    <usart mode="packet" channel="1" alternate="1" baud="38400" endpoint="api" flow="false" />
     <!--
         UART PIN ASSIGNMENT TABLE:
         +=========+===========+======+======+======+======+
@@ -15,5 +21,4 @@
         |    1    |     2     | P1_7 | P1_6 | P1_5 | P1_4 |
         +=========+===========+======+======+======+======+
     -->
-    <usart channel="1" alternate="1" baud="38400" endpoint="api" flow="false" />
 </hardware>
