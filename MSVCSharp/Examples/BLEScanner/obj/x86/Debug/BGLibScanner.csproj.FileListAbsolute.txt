@@ -1,0 +1,7 @@
+c:\users\jeff\documents\visual studio 2010\Projects\BGLibScanner\BGLibScanner\bin\Debug\BGLibScanner.exe
+c:\users\jeff\documents\visual studio 2010\Projects\BGLibScanner\BGLibScanner\bin\Debug\BGLibScanner.pdb
+c:\users\jeff\documents\visual studio 2010\Projects\BGLibScanner\BGLibScanner\obj\x86\Debug\BGLibScanner.Properties.Resources.resources
+c:\users\jeff\documents\visual studio 2010\Projects\BGLibScanner\BGLibScanner\obj\x86\Debug\BGLibScanner.csproj.GenerateResource.Cache
+c:\users\jeff\documents\visual studio 2010\Projects\BGLibScanner\BGLibScanner\obj\x86\Debug\BGLibScanner.exe
+c:\users\jeff\documents\visual studio 2010\Projects\BGLibScanner\BGLibScanner\obj\x86\Debug\BGLibScanner.pdb
+c:\users\jeff\documents\visual studio 2010\Projects\BGLibScanner\BGLibScanner\obj\x86\Debug\BGLibScanner.frmMain.resources
