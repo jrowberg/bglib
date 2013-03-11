@@ -1,0 +1,6 @@
+c_device_name 3
+c_appearance 6
+c_manufacturer_name 10
+c_model_number 13
+c_rx_data 17
+c_tx_data 20

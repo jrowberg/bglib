@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<hardware>
+    <sleeposc enable="true" ppm="30" />
+    <sleep enable="true" />
+    <txpower power="15" bias="5" />
+    <port index="0" pull="down" tristatemask="0" />
+    <port index="1" pull="down" tristatemask="0" />
+    <port index="2" pull="down" tristatemask="0" />
+    <host_wakeup_pin enable="true" port="1" pin="5" state="up" /> 
+    <wakeup_pin enable="true" port="1" pin="6" state="up" />
+    <usb enable="false" endpoint="api" />
+    <usart mode="packet" channel="1" alternate="1" baud="38400" endpoint="api" flow="false" />
+    <!--
+        UART PIN ASSIGNMENT TABLE:
+        +=========+===========+======+======+======+======+
+        | channel | alternate |  RX  |  TX  | RTS  | CTS  |
+        +=========+===========+======+======+======+======+
+        |    0    |     1     | P0_2 | P0_3 | P0_5 | P0_4 |
+        |    0    |     2     | P1_4 | P1_5 | P1_3 | P1_2 |
+        |    1    |     1     | P0_5 | P0_4 | P0_3 | P0_2 | (SELECTED)
+        |    1    |     2     | P1_7 | P1_6 | P1_5 | P1_4 |
+        +=========+===========+======+======+======+======+
+    -->
+</hardware>
