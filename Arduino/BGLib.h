@@ -1,10 +1,16 @@
-// Bluegiga BGLib Arduino interface library
-// 2012-11-14 by Jeff Rowberg <jeff@rowberg.net>
+// Bluegiga BGLib Arduino interface library header file
+// 2013-03-14 by Jeff Rowberg <jeff@rowberg.net>
 // Updates should (hopefully) always be available at https://github.com/jrowberg/bglib
 
+// Changelog:
+//      2013-03-14 - Add support for packet mode
+//                   Add support for BLE wake-up
+//                   Fix serial data read routine to work properly
+//      2012-11-14 - Initial release
+
 /* ============================================
-BGLib library code is placed under the MIT license
-Copyright (c) 2012 Jeff Rowberg
+BGLib Arduino interface library code is placed under the MIT license
+Copyright (c) 2013 Jeff Rowberg
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +31,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ===============================================
 */
+
+// Arduino BGLib code library header file
 
 #ifndef __BGLIB_H__
 #define __BGLIB_H__
@@ -873,22 +881,28 @@ struct ble_msg_test_debug_rsp_t {
 
 class BGLib {
     public:
-        BGLib(HardwareSerial *module=0, HardwareSerial *output=0);
+        BGLib(HardwareSerial *module=0, HardwareSerial *output=0, uint8_t pMode=0);
         uint8_t checkActivity(uint16_t timeout=0);
         uint8_t checkError();
         uint8_t checkTimeout();
         void setBusy(bool busyEnabled);
+        
+        uint8_t *getLastCommand();
+        uint8_t *getLastResponse();
+        uint8_t *getLastEvent();
 
         // set/update UART port objects
         void setModuleUART(HardwareSerial *module);
         void setOutputUART(HardwareSerial *debug);
 
-        uint8_t parse(uint8_t ch, uint8_t packetMode=0);
+        uint8_t parse(uint8_t ch);
         uint8_t sendCommand(uint16_t len, uint8_t commandClass, uint8_t commandId, void *payload=0);
 
-        void (*onBusy)();
-        void (*onIdle)();
-        void (*onTimeout)();
+        void (*onBusy)();               // special function to run when entering a "busy" state (e.g. mid-packet)
+        void (*onIdle)();               // special function to run when returning to idle mode
+        void (*onTimeout)();            // special function to run when the parser times out waiting for expected data
+        void (*onBeforeTXCommand)();    // special function to run immediately before sending a command
+        void (*onTXCommandComplete)();  // special function to run immediately after command transmission is complete
 
         uint8_t ble_cmd_system_reset(uint8 boot_in_dfu);
         uint8_t ble_cmd_system_hello();
@@ -1119,8 +1133,10 @@ class BGLib {
         HardwareSerial *uOutput; // optional UART object for host/debug connection
 
         bool busy;
+        uint8_t packetMode;
         uint8_t lastCommand[2];
         uint8_t lastResponse[2];
+        uint8_t lastEvent[2];
         uint32_t timeoutStart;
         bool lastError;
         bool lastTimeout;

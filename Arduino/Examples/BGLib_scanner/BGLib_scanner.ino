@@ -1,10 +1,15 @@
 // Bluegiga BGLib Arduino interface library demonstration sketch
-// 2012-11-14 by Jeff Rowberg <jeff@rowberg.net>
+// 2013-03-14 by Jeff Rowberg <jeff@rowberg.net>
 // Updates should (hopefully) always be available at https://github.com/jrowberg/bglib
+
+// Changelog:
+//      2013-03-14 - Add support for packet mode
+//                   Add support for BLE wake-up
+//      2012-11-14 - Initial release
 
 /* ============================================
 BGLib Arduino interface library code is placed under the MIT license
-Copyright (c) 2012 Jeff Rowberg
+Copyright (c) 2013 Jeff Rowberg
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -29,29 +34,44 @@ THE SOFTWARE.
 #include <SoftwareSerial.h>
 #include "BGLib.h"
 
-// DKBLE112 development kit connections:
-// - DK P0_2 -> GND (CTS tied to ground to ignore flow control)
-// - DK P0_4 -> Arduino Digital Pin 2 (BLE TX -> Arduino RX)
-// - DK P0_5 -> Arduino Digital Pin 3 (BLE RX -> Arduino TX)
+// BLE112 module connections:
+// - BLE P0_4 -> Arduino Digital Pin 2 (BLE TX -> Arduino soft RX)
+// - BLE P0_5 -> Arduino Digital Pin 3 (BLE RX -> Arduino soft TX)
+//
+// If using the *_hwake15 project firmware:
+// - BLE P1_5 -> Arduino Digital Pin 4 (BLE host wake-up -> Arduino I/O 4)
+//
+// If useing the *_wake16 project firmware:
+// - BLE P1_6 -> Arduino Digital Pin 5 (BLE module wake-up -> Arduino I/O 5)
+//
+// If using project with flow control enabled on the BLE:
+// - BLE P0_2 -> GND (CTS tied to ground to bypass flow control)
 
 // NOTE: this demo REQUIRES the BLE112 be programmed with the UART connected
-// to the "api" endpoint in hardware.xml, and be configured for 38400 baud,
-// 8,n,1. This may change in the future, but be aware. The BLE SDK archive
-// contains an /examples/uartdemo project which is a good starting point for
-// this communication. The BGLib repository also includes a project you can
-// use for this in /BGScriptProjects/Arduino_BGLib_scanner.
+// to the "api" endpoint in hardware.xml, have "mode" set to "packet", and be
+// configured for 38400 baud, 8/N/1. This may change in the future, but be
+// aware. The BLE SDK archive contains an /examples/uartdemo project which is
+// a good starting point for this communication, though some changes are
+// required to enable packet mode and change the baud rate. The BGLib
+// repository also includes a project you can use for this in the folder
+// /BLEFirmware/BGLib_U1A1P_38400_noflow_wake16_hwake15.
 
 SoftwareSerial bleSerialPort(2, 3); // RX, TX
-BGLib ble112((HardwareSerial *)&bleSerialPort);
+BGLib ble112((HardwareSerial *)&bleSerialPort, 0, 1);
 
 uint8_t isScanActive = 0;
 
-#define LED_PIN 13 // Arduino Uno
+#define LED_PIN 13          // Arduino Uno LED
+#define BLE_WAKEUP_PIN 5    // Assuming digital pin 5 is connected to BLE wake-up pin (P1_6 in my firmware)
 
 void setup() {
     // initialize status LED
     pinMode(LED_PIN, OUTPUT);
     digitalWrite(LED_PIN, LOW);
+
+    // initialize BLE wake-up pin to allow (not force) sleep mode
+    pinMode(BLE_WAKEUP_PIN, OUTPUT);
+    digitalWrite(BLE_WAKEUP_PIN, LOW);
 
     // open Arduino USB serial (and wait, if we're using Leonardo)
     Serial.begin(115200);
@@ -65,6 +85,10 @@ void setup() {
     ble112.onBusy = onBusy;
     ble112.onIdle = onIdle;
     ble112.onTimeout = onTimeout;
+    
+    // ONLY enable these if you are using the <wakeup_pin> parameter in your firmware's hardware.xml file
+    ble112.onBeforeTXCommand = onBeforeTXCommand;
+    ble112.onTXCommandComplete = onTXCommandComplete;
 
     // set up BGLib response handlers (called almost immediately after sending commands)
     // (these are also technicaly optional)
@@ -152,6 +176,27 @@ void onIdle() {
 
 void onTimeout() {
     Serial.println("!!!\tTimeout occurred!");
+}
+
+void onBeforeTXCommand() {
+    // wake module up (assuming here that digital pin 5 is connected to the BLE wake-up pin)
+    digitalWrite(BLE_WAKEUP_PIN, HIGH);
+
+    // wait for "hardware_io_port_status" event to come through, and parse it (and otherwise ignore it)
+    uint8_t *last;
+    while (1) {
+        ble112.checkActivity();
+        last = ble112.getLastEvent();
+        if (last[0] == 0x07 && last[1] == 0x00) break;
+    }
+    
+    // give a bit of a gap between parsing the wake-up event and allowing the command to go out
+    delayMicroseconds(1000);
+}
+
+void onTXCommandComplete() {
+    // allow module to return to sleep (assuming here that digital pin 5 is connected to the BLE wake-up pin)
+    digitalWrite(BLE_WAKEUP_PIN, LOW);
 }
 
 // ================================================================

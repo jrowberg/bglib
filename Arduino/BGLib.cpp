@@ -1,10 +1,16 @@
-// Bluegiga BGLib Arduino interface library
-// 2012-11-14 by Jeff Rowberg <jeff@rowberg.net>
+// Bluegiga BGLib Arduino interface library source file
+// 2013-03-14 by Jeff Rowberg <jeff@rowberg.net>
 // Updates should (hopefully) always be available at https://github.com/jrowberg/bglib
 
+// Changelog:
+//      2013-03-14 - Add support for packet mode
+//                   Add support for BLE wake-up
+//                   Fix serial data read routine to work properly
+//      2012-11-14 - Initial release
+
 /* ============================================
-BGLib library code is placed under the MIT license
-Copyright (c) 2012 Jeff Rowberg
+BGLib Arduino interface library code is placed under the MIT license
+Copyright (c) 2013 Jeff Rowberg
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -28,9 +34,10 @@ THE SOFTWARE.
 
 #include "BGLib.h"
 
-BGLib::BGLib(HardwareSerial *module, HardwareSerial *output) {
+BGLib::BGLib(HardwareSerial *module, HardwareSerial *output, uint8_t pMode) {
     uModule = module;
     uOutput = output;
+    packetMode = pMode;
 
     // initialize packet buffers
     bgapiRXBuffer = (uint8_t *)malloc(bgapiRXBufferSize = 32);
@@ -163,8 +170,9 @@ BGLib::BGLib(HardwareSerial *module, HardwareSerial *output) {
 }
 
 uint8_t BGLib::checkActivity(uint16_t timeout) {
-    while (uModule -> available() && (timeout == 0 || millis() - timeoutStart < timeout)) {
-        parse(uModule -> read());
+    uint16_t ch;
+    while ((ch = uModule -> read()) < 256 && (timeout == 0 || millis() - timeoutStart < timeout)) {
+        parse(ch);
         if (timeout > 0) timeoutStart = millis();
     }
     if (timeout > 0 && busy && millis() - timeoutStart >= timeout) {
@@ -180,6 +188,16 @@ uint8_t BGLib::checkError() {
 }
 uint8_t BGLib::checkTimeout() {
     return lastTimeout;
+}
+
+uint8_t *BGLib::getLastCommand() {
+    return lastCommand;
+}
+uint8_t *BGLib::getLastResponse() {
+    return lastResponse;
+}
+uint8_t *BGLib::getLastEvent() {
+    return lastEvent;
 }
 
 void BGLib::setBusy(bool busyEnabled) {
@@ -203,7 +221,7 @@ void BGLib::setOutputUART(HardwareSerial *output) {
     uOutput = output;
 }
 
-uint8_t BGLib::parse(uint8_t ch, uint8_t packetMode) {
+uint8_t BGLib::parse(uint8_t ch) {
     #ifdef DEBUG
         // DEBUG: output hex value of incoming character
         if (ch < 16) Serial.write(0x30);    // leading '0'
@@ -251,7 +269,7 @@ uint8_t BGLib::parse(uint8_t ch, uint8_t packetMode) {
         } else if (bgapiRXBufferPos == bgapiRXDataLen + 4) {
             // just received last expected byte
             #ifdef DEBUG
-                Serial.print("\n<- RX [ ");
+                Serial.print("\n<=[ ");
                 for (uint8_t i = 0; i < bgapiRXBufferPos; i++) {
                     if (bgapiRXBuffer[i] < 16) Serial.write(0x30);
                     Serial.print(bgapiRXBuffer[i], HEX);
@@ -368,6 +386,12 @@ uint8_t BGLib::parse(uint8_t ch, uint8_t packetMode) {
                     else if (bgapiRXBuffer[3] == 4) { if (ble_rsp_test_get_channel_map) ble_rsp_test_get_channel_map((const struct ble_msg_test_get_channel_map_rsp_t *)(bgapiRXBuffer + 4)); }
                     else if (bgapiRXBuffer[3] == 5) { if (ble_rsp_test_debug) ble_rsp_test_debug((const struct ble_msg_test_debug_rsp_t *)(bgapiRXBuffer + 4)); }
                 }
+
+                // capture last response class/command bytes
+                lastResponse[0] = bgapiRXBuffer[2];
+                lastResponse[1] = bgapiRXBuffer[3];
+
+                // clear BUSY flag since we finished the response packet
                 setBusy(false);
             } else {
                 // 0x80 = Event packet
@@ -420,6 +444,10 @@ uint8_t BGLib::parse(uint8_t ch, uint8_t packetMode) {
                 }
                 else if (bgapiRXBuffer[2] == 8) {
                 }
+
+                // capture last event class/command bytes
+                lastEvent[0] = bgapiRXBuffer[2];
+                lastEvent[1] = bgapiRXBuffer[3];
             }
 
             // reset RX packet buffer position to be ready for new packet
@@ -438,9 +466,31 @@ uint8_t BGLib::sendCommand(uint16_t len, uint8_t commandClass, uint8_t commandId
     bgapiTXBuffer[3] = commandId;
     lastCommand[0] = commandClass;
     lastCommand[1] = commandId;
-    setBusy(true);
     if (len > 0) memcpy(bgapiTXBuffer + 4, payload, len);
+    #ifdef DEBUG
+        Serial.print("\n=>[ ");
+        if (packetMode) {
+            if (len + 4 < 16) Serial.write(0x30);
+            Serial.print(len + 4, HEX);
+            Serial.write(0x20);
+        }
+        for (uint8_t i = 0; i < len + 4; i++) {
+            if (bgapiTXBuffer[i] < 16) Serial.write(0x30);
+            Serial.print(bgapiTXBuffer[i], HEX);
+            Serial.write(0x20);
+        }
+        Serial.println("]");
+    #endif
+    if (onBeforeTXCommand) onBeforeTXCommand();
+    setBusy(true);
+    if (packetMode) uModule -> write(len + 4); // outgoing packet length byte first
     uModule -> write(bgapiTXBuffer, len + 4);
+
+    // capture last command class/command bytes
+    lastCommand[0] = bgapiTXBuffer[2];
+    lastCommand[1] = bgapiTXBuffer[3];
+
+    if (onTXCommandComplete) onTXCommandComplete();
     free(bgapiTXBuffer);
     return 0;
 }
