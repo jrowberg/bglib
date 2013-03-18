@@ -113,9 +113,9 @@ void setup() {
 
     // set up BGLib event handlers
     ble112.ble_evt_system_boot = my_ble_evt_system_boot;
-	ble112.ble_evt_connection_status = my_ble_evt_connection_status;
-	ble112.ble_evt_connection_disconnected = my_ble_evt_connection_disconnect;
-	ble112.ble_evt_attributes_value = my_ble_evt_attributes_value;
+    ble112.ble_evt_connection_status = my_ble_evt_connection_status;
+    ble112.ble_evt_connection_disconnected = my_ble_evt_connection_disconnect;
+    ble112.ble_evt_attributes_value = my_ble_evt_attributes_value;
 
     // open Arduino USB serial (and wait, if we're using Leonardo)
     // use 38400 since it works at 8MHz as well as 16MHz
@@ -233,13 +233,13 @@ void my_ble_evt_system_boot(const ble_msg_system_boot_evt_t *msg) {
     while (ble112.checkActivity(1000));
 
     // USE THE FOLLOWING TO LET THE BLE STACK HANDLE YOUR ADVERTISEMENT PACKETS
-	// ========================================================================
+    // ========================================================================
     // start advertising general discoverable / undirected connectable
-	//ble112.ble_cmd_gap_set_mode(BGLIB_GAP_GENERAL_DISCOVERABLE, BGLIB_GAP_UNDIRECTED_CONNECTABLE);
-	//while (ble112.checkActivity(1000));
+    //ble112.ble_cmd_gap_set_mode(BGLIB_GAP_GENERAL_DISCOVERABLE, BGLIB_GAP_UNDIRECTED_CONNECTABLE);
+    //while (ble112.checkActivity(1000));
 
-	// USE THE FOLLOWING TO HANDLE YOUR OWN CUSTOM ADVERTISEMENT PACKETS
-	// =================================================================
+    // USE THE FOLLOWING TO HANDLE YOUR OWN CUSTOM ADVERTISEMENT PACKETS
+    // =================================================================
 
     // build custom advertisement data
     // default BLE stack value: 0201061107e4ba94c3c9b7cdb09b487a438ae55a19
@@ -285,8 +285,8 @@ void my_ble_evt_system_boot(const ble_msg_system_boot_evt_t *msg) {
     ble112.ble_cmd_gap_set_mode(BGLIB_GAP_USER_DATA, BGLIB_GAP_UNDIRECTED_CONNECTABLE);
     while (ble112.checkActivity(1000));
 
-	// set state to ADVERTISING
-	ble_state = BLE_STATE_ADVERTISING;
+    // set state to ADVERTISING
+    ble_state = BLE_STATE_ADVERTISING;
 }
 
 void my_ble_evt_connection_status(const ble_msg_connection_status_evt_t *msg) {
@@ -348,16 +348,16 @@ void my_ble_evt_connection_disconnect(const struct ble_msg_connection_disconnect
     //ble_state = BLE_STATE_DISCONNECTED;
     // ^^^ skip above since we're going right back into advertising below
 
-	// after disconnection, resume advertising as discoverable/connectable
-	//ble112.ble_cmd_gap_set_mode(BGLIB_GAP_GENERAL_DISCOVERABLE, BGLIB_GAP_UNDIRECTED_CONNECTABLE);
-	//while (ble112.checkActivity(1000));
+    // after disconnection, resume advertising as discoverable/connectable
+    //ble112.ble_cmd_gap_set_mode(BGLIB_GAP_GENERAL_DISCOVERABLE, BGLIB_GAP_UNDIRECTED_CONNECTABLE);
+    //while (ble112.checkActivity(1000));
 
-	// after disconnection, resume advertising as discoverable/connectable (with user-defined advertisement data)
+    // after disconnection, resume advertising as discoverable/connectable (with user-defined advertisement data)
     ble112.ble_cmd_gap_set_mode(BGLIB_GAP_USER_DATA, BGLIB_GAP_UNDIRECTED_CONNECTABLE);
     while (ble112.checkActivity(1000));
 
-	// set state to ADVERTISING
-	ble_state = BLE_STATE_ADVERTISING;
+    // set state to ADVERTISING
+    ble_state = BLE_STATE_ADVERTISING;
 
     // clear "encrypted" and "bonding" info
     ble_encrypted = 0;
@@ -381,12 +381,12 @@ void my_ble_evt_attributes_value(const struct ble_msg_attributes_value_evt_t *ms
         Serial.println(" }");
     #endif
 
-	// check for data written to "c_rx_data" handle
-	if (msg -> handle == GATT_HANDLE_C_RX_DATA && msg -> value.len > 0) {
-		// set ping 8, 9, and 10 to three lower-most bits of first byte of RX data
-		// (nice for controlling RGB LED or something)
-		digitalWrite(8, msg -> value.data[0] & 0x01);
-		digitalWrite(9, msg -> value.data[0] & 0x02);
-		digitalWrite(10, msg -> value.data[0] & 0x04);
-	}
+    // check for data written to "c_rx_data" handle
+    if (msg -> handle == GATT_HANDLE_C_RX_DATA && msg -> value.len > 0) {
+        // set ping 8, 9, and 10 to three lower-most bits of first byte of RX data
+        // (nice for controlling RGB LED or something)
+        digitalWrite(8, msg -> value.data[0] & 0x01);
+        digitalWrite(9, msg -> value.data[0] & 0x02);
+        digitalWrite(10, msg -> value.data[0] & 0x04);
+    }
 }
