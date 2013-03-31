@@ -1,13 +1,28 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-# ==============================================================================
-# Barebones BLED112 BGAPI scanner script
-# 2013-03-30 - Jeff Rowberg <jeff@rowberg.net>
-#
-# Changelog:
-#   2013-03-30 - Initial release
-#
-# ==============================================================================
+""" Barebones BLED112 BGAPI scanner script
+
+This script is designed to be used with a BGAPI-enabled Bluetooth Smart device
+from Bluegiga, probably a BLED112 but anything that is connected to a serial
+port (real or virual) and can "speak" the BGAPI protocol. It is tuned for
+usable defaults when used on a Raspberry Pi, but can easily be used on other
+platforms, including Windows or OS X.
+
+Note that the command functions do *not* incorporate the extra preceding length
+byte required when using "packet" mode (only available on USART peripheral ports
+on the BLE112/BLE113 module, not applicable to the BLED112). It is built so you
+can simply plug in a BLED112 and go, but other kinds of usage may require small
+modifications.
+
+Changelog:
+    2013-03-30 - Initial release
+
+"""
+
+__author__ = "Jeff Rowberg"
+__license__ = "MIT"
+__version__ = "2013-03-30"
+__email__ = "jeff@rowberg.net"
 
 import sys, optparse, serial, struct, time, datetime, re, signal
 
@@ -113,7 +128,7 @@ Sample Output Explanation:
     'a' (Address type):\t0 (public), 1 (random)
     'b' (Bond status):\t255 (no bond), 0 to 15 if bonded
     'd' (Data payload):\t02010603030918, etc.
-            See BT4.0 Core Spec for details on ad packet format
+            See BT4.0 Core Spec for details about ad packet format
 
 """
     )
@@ -128,7 +143,7 @@ Sample Output Explanation:
     group.add_option('--active', '-a', action="store_true", help="Perform active scan (default passive)\nNOTE: active scans result "
                                                                  "in a 'scan response' request being sent to the slave device, which "
                                                                  "should send a follow-up scan response packet. This will result in "
-                                                                 "increase power consumption on the slave device.")
+                                                                 "increased power consumption on the slave device.")
     p.add_option_group(group)
     group = optparse.OptionGroup(p, "Filter Options")
     group.add_option('--uuid', '-u', type="string", action="append", help="Service UUID(s) to match", metavar="UUID")
