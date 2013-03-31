@@ -167,14 +167,14 @@ Sample Output Explanation:
         if re.search('[^a-fA-F0-9:]', arg):
             p.print_help()
             print "\n================================================================"
-            print "\nInvalid MAC filter argument '%s'\n-->must be in the form AA:BB:CC:DD:EE:FF" % arg
+            print "Invalid MAC filter argument '%s'\n-->must be in the form AA:BB:CC:DD:EE:FF" % arg
             print "================================================================"
             exit(1)
         arg2 = arg.replace(":", "").upper()
         if (len(arg2) % 2) == 1:
             p.print_help()
             print "\n================================================================"
-            print "\nInvalid MAC filter argument '%s'\n--> must be 1-6 full bytes in 0-padded hex form (00:01:02:03:04:05)" % arg
+            print "Invalid MAC filter argument '%s'\n--> must be 1-6 full bytes in 0-padded hex form (00:01:02:03:04:05)" % arg
             print "================================================================"
             exit(1)
         mac = []
@@ -186,14 +186,14 @@ Sample Output Explanation:
         if re.search('[^a-fA-F0-9:]', arg):
             p.print_help()
             print "\n================================================================"
-            print "\nInvalid UUID filter argument '%s'\n-->must be in the form AA:BB:CC:DD:EE:FF" % arg
+            print "Invalid UUID filter argument '%s'\n-->must be in the form AA:BB:CC:DD:EE:FF" % arg
             print "================================================================"
             exit(1)
         arg2 = arg.replace(":", "").upper()
         if len(arg2) != 4 and len(arg2) != 32:
             p.print_help()
             print "\n================================================================"
-            print "\nInvalid UUID filter argument '%s'\n--> must be 2 or 16 full bytes in 0-padded hex form (180B or 0123-456789ab-cdef-0123456789abcdef)" % arg
+            print "Invalid UUID filter argument '%s'\n--> must be 2 or 16 full bytes in 0-padded hex form (180B or 0123456789abcdef0123456789abcdef)" % arg
             print "================================================================"
             exit(1)
         uuid = []
@@ -205,7 +205,7 @@ Sample Output Explanation:
     if filter_rssi > 0 and (filter_rssi < 20 or filter_rssi > 110):
         p.print_help()
         print "\n================================================================"
-        print "\nInvalid RSSI filter argument '%s'\n--> must be between 20 and 110" % arg
+        print "Invalid RSSI filter argument '%s'\n--> must be between 20 and 110" % arg
         print "================================================================"
         exit(1)
 
