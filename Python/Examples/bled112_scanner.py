@@ -15,13 +15,18 @@ can simply plug in a BLED112 and go, but other kinds of usage may require small
 modifications.
 
 Changelog:
+    2013-04-07 - Fixed 128-bit UUID filters
+               - Added more verbose output on startup
+               - Added "friendly mode" output argument
+               - Added "quiet mode" output argument
+               - Improved comments in code
     2013-03-30 - Initial release
 
 """
 
 __author__ = "Jeff Rowberg"
 __license__ = "MIT"
-__version__ = "2013-03-30"
+__version__ = "2013-04-07"
 __email__ = "jeff@rowberg.net"
 
 import sys, optparse, serial, struct, time, datetime, re, signal
@@ -132,11 +137,17 @@ Sample Output Explanation:
 
 """
     )
-    p.set_defaults(port="/dev/ttyACM0", baud=115200, interval=0xC8, window=0xC8, display="trpsabd", uuid=[], mac=[], rssi=0, active=False)
+
+    # set all defaults for options
+    p.set_defaults(port="/dev/ttyACM0", baud=115200, interval=0xC8, window=0xC8, display="trpsabd", uuid=[], mac=[], rssi=0, active=False, quiet=False, friendly=False)
+
+    # create serial port options argument group
     group = optparse.OptionGroup(p, "Serial Port Options")
     group.add_option('--port', '-p', type="string", help="Serial port device name (default /dev/ttyACM0)", metavar="PORT")
     group.add_option('--baud', '-b', type="int", help="Serial port baud rate (default 115200)", metavar="BAUD")
     p.add_option_group(group)
+
+    # create scan options argument group
     group = optparse.OptionGroup(p, "Scan Options")
     group.add_option('--interval', '-i', type="int", help="Scan interval width in units of 0.625ms (default 200)", metavar="INTERVAL")
     group.add_option('--window', '-w', type="int", help="Scan window width in units of 0.625ms (default 200)", metavar="WINDOW")
@@ -145,12 +156,18 @@ Sample Output Explanation:
                                                                  "should send a follow-up scan response packet. This will result in "
                                                                  "increased power consumption on the slave device.")
     p.add_option_group(group)
+
+    # create filter options argument group
     group = optparse.OptionGroup(p, "Filter Options")
     group.add_option('--uuid', '-u', type="string", action="append", help="Service UUID(s) to match", metavar="UUID")
     group.add_option('--mac', '-m', type="string", action="append", help="MAC address(es) to match", metavar="ADDRESS")
     group.add_option('--rssi', '-r', type="int", help="RSSI minimum filter (-110 to -20), omit to disable", metavar="RSSI")
     p.add_option_group(group)
+
+    # create output options argument group
     group = optparse.OptionGroup(p, "Output Options")
+    group.add_option('--quiet', '-q', action="store_true", help="Quiet mode (suppress initial scan parameter display)")
+    group.add_option('--friendly', '-f', action="store_true", help="Friendly mode (output in human-readable format)")
     group.add_option('--display', '-d', type="string", help="Display fields and order (default '%default')\n"
         "  t = Unix time, with milliseconds\n"
         "  r = RSSI measurement (signed integer)\n"
@@ -161,8 +178,10 @@ Sample Output Explanation:
         "  d = Advertisement data payload (hexadecimal)", metavar="FIELDS")
     p.add_option_group(group)
 
+    # actually parse all of the arguments
     options, arguments = p.parse_args()
 
+    # validate any supplied MAC address filters
     for arg in options.mac:
         if re.search('[^a-fA-F0-9:]', arg):
             p.print_help()
@@ -182,11 +201,12 @@ Sample Output Explanation:
             mac.append(int(arg2[i : i + 2], 16))
         filter_mac.append(mac)
 
+    # validate any supplied UUID filters
     for arg in options.uuid:
         if re.search('[^a-fA-F0-9:]', arg):
             p.print_help()
             print "\n================================================================"
-            print "Invalid UUID filter argument '%s'\n-->must be in the form AA:BB:CC:DD:EE:FF" % arg
+            print "Invalid UUID filter argument '%s'\n--> must be 2 or 16 full bytes in 0-padded hex form (180B or 0123456789abcdef0123456789abcdef)" % arg
             print "================================================================"
             exit(1)
         arg2 = arg.replace(":", "").upper()
@@ -201,14 +221,16 @@ Sample Output Explanation:
             uuid.append(int(arg2[i : i + 2], 16))
         filter_uuid.append(uuid)
 
+    # validate RSSI filter argument
     filter_rssi = abs(int(options.rssi))
     if filter_rssi > 0 and (filter_rssi < 20 or filter_rssi > 110):
         p.print_help()
         print "\n================================================================"
-        print "Invalid RSSI filter argument '%s'\n--> must be between 20 and 110" % arg
+        print "Invalid RSSI filter argument '%s'\n--> must be between 20 and 110" % filter_rssi
         print "================================================================"
         exit(1)
 
+    # validate field output options
     options.display = options.display.lower()
     if re.search('[^trpsabd]', options.display):
         p.print_help()
@@ -217,8 +239,40 @@ Sample Output Explanation:
         print "================================================================"
         exit(1)
 
+    # display scan parameter summary, if not in quiet mode
+    if not(options.quiet):
+        print "================================================================"
+        print "BLED112 Scanner for Python v%s" % __version__
+        print "================================================================"
+        #p.set_defaults(port="/dev/ttyACM0", baud=115200, interval=0xC8, window=0xC8, display="trpsabd", uuid=[], mac=[], rssi=0, active=False, quiet=False, friendly=False)
+        print "Serial port:\t%s" % options.port
+        print "Baud rate:\t%s" % options.baud
+        print "Scan interval:\t%d (%.02f ms)" % (options.interval, options.interval * 1.25)
+        print "Scan window:\t%d (%.02f ms)" % (options.window, options.window * 1.25)
+        print "Scan type:\t%s" % ['Passive', 'Active'][options.active]
+        print "UUID filters:\t",
+        if len(filter_uuid) > 0:
+            print "0x%s" % ", 0x".join([''.join(['%02X' % b for b in uuid]) for uuid in filter_uuid])
+        else:
+            print "None"
+        print "MAC filter(s):\t",
+        if len(filter_mac) > 0:
+            print ", ".join([':'.join(['%02X' % b for b in mac]) for mac in filter_mac])
+        else:
+            print "None"
+        print "RSSI filter:\t",
+        if filter_rssi > 0:
+            print "-%d dBm minimum"% filter_rssi
+        else:
+            print "None"
+        print "Display fields:\t-",
+        field_dict = { 't':'Time', 'r':'RSSI', 'p':'Packet type', 's':'Sender MAC', 'a':'Address type', 'b':'Bond status', 'd':'Payload data' }
+        print "\n\t\t- ".join([field_dict[c] for c in options.display])
+        print "Friendly mode:\t%s" % ['Disabled', 'Enabled'][options.friendly]
+        print "----------------------------------------------------------------"
+        print "Starting scan for BLE advertisements..."
+
     # open serial port for BGAPI access
-    #print "Opening serial port..."
     try:
         ser = serial.Serial(port=options.port, baudrate=options.baud, timeout=1)
     except serial.SerialException as e:
