@@ -66,8 +66,14 @@ def my_ble_evt_gap_scan_response(sender, args):
     print ' '.join(disp_list)
 
 def main():
+    # NOTE: CHANGE THESE TO FIT YOUR TEST SYSTEM
+    port_name = "com5"
+    baud_rate = 38400
+    packet_mode = True
+
     # create BGLib object
     ble = bglib.BGLib()
+    ble.packet_mode = packet_mode
 
     # add handler for BGAPI timeout condition (hopefully won't happen)
     ble.on_timeout += my_timeout
@@ -76,7 +82,7 @@ def main():
     ble.ble_evt_gap_scan_response += my_ble_evt_gap_scan_response
 
     # create serial port object and flush buffers
-    ser = serial.Serial(port="com13", baudrate=115200, timeout=1)
+    ser = serial.Serial(port=port_name, baudrate=baud_rate, timeout=1)
     ser.flushInput()
     ser.flushOutput()
 
