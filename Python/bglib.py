@@ -1071,7 +1071,7 @@ class BGLib(object):
                         input, value = struct.unpack('<Bh', self.bgapi_rx_payload[:3])
                         self.ble_evt_hardware_adc_result({ 'input': input, 'value': value })
             elif packet_type & 0x88 == 0x08:
-                # 0x00 = wifi response packet
+                # 0x08 = wifi response packet
                 if packet_class == 0:
                     if packet_command == 0: # wifi_rsp_dfu_reset
                         self.wifi_rsp_dfu_reset({  })
@@ -1249,7 +1249,7 @@ class BGLib(object):
                 self.busy = False
                 self.on_idle()
             else:
-                # 0x80 = wifi event packet
+                # 0x88 = wifi event packet
                 if packet_class == 0:
                     if packet_command == 0: # wifi_evt_dfu_boot
                         version = struct.unpack('<I', self.bgapi_rx_payload[:4])
