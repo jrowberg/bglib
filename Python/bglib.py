@@ -3,13 +3,16 @@
 """ Bluegiga BGAPI/BGLib implementation
 
 Changelog:
+    2013-04-28 - Fixed numerous uint8array/bd_addr command arg errors
+               - Added 'debug' support
+    2013-04-16 - Fixed 'bglib_on_idle' to be 'on_idle'
     2013-04-15 - Added wifi BGAPI support in addition to BLE BGAPI
                - Fixed references to 'this' instead of 'self'
     2013-04-11 - Initial release
 
 ============================================
 Bluegiga BGLib Python interface library
-2013-04-15 by Jeff Rowberg <jeff@rowberg.net>
+2013-04-16 by Jeff Rowberg <jeff@rowberg.net>
 Updates should (hopefully) always be available at https://github.com/jrowberg/bglib
 
 ============================================
@@ -39,7 +42,7 @@ THE SOFTWARE.
 
 __author__ = "Jeff Rowberg"
 __license__ = "MIT"
-__version__ = "2013-04-15"
+__version__ = "2013-04-16"
 __email__ = "jeff@rowberg.net"
 
 import struct
@@ -137,11 +140,11 @@ class BGLib(object):
     def ble_cmd_system_get_info(self):
         return struct.pack('<4B', 0, 0, 0, 8)
     def ble_cmd_system_endpoint_tx(self, endpoint, data):
-        return struct.pack('<4BB' + len(data) + 'B', 0, 2 + len(data), 0, 9, endpoint, data)
+        return struct.pack('<4BBB' + str(len(data)) + 's', 0, 2 + len(data), 0, 9, endpoint, len(data), b''.join(chr(i) for i in data))
     def ble_cmd_system_whitelist_append(self, address, address_type):
-        return struct.pack('<4B6BB', 0, 7, 0, 10, address, address_type)
+        return struct.pack('<4B6sB', 0, 7, 0, 10, b''.join(chr(i) for i in address), address_type)
     def ble_cmd_system_whitelist_remove(self, address, address_type):
-        return struct.pack('<4B6BB', 0, 7, 0, 11, address, address_type)
+        return struct.pack('<4B6sB', 0, 7, 0, 11, b''.join(chr(i) for i in address), address_type)
     def ble_cmd_system_whitelist_clear(self):
         return struct.pack('<4B', 0, 0, 0, 12)
     def ble_cmd_system_endpoint_rx(self, endpoint, size):
@@ -155,7 +158,7 @@ class BGLib(object):
     def ble_cmd_flash_ps_erase_all(self):
         return struct.pack('<4B', 0, 0, 1, 2)
     def ble_cmd_flash_ps_save(self, key, value):
-        return struct.pack('<4BH' + len(value) + 'B', 0, 3 + len(value), 1, 3, key, value)
+        return struct.pack('<4BHB' + str(len(value)) + 's', 0, 3 + len(value), 1, 3, key, len(value), b''.join(chr(i) for i in value))
     def ble_cmd_flash_ps_load(self, key):
         return struct.pack('<4BH', 0, 2, 1, 4, key)
     def ble_cmd_flash_ps_erase(self, key):
@@ -163,15 +166,15 @@ class BGLib(object):
     def ble_cmd_flash_erase_page(self, page):
         return struct.pack('<4BB', 0, 1, 1, 6, page)
     def ble_cmd_flash_write_words(self, address, words):
-        return struct.pack('<4BH' + len(words) + 'B', 0, 3 + len(words), 1, 7, address, words)
+        return struct.pack('<4BHB' + str(len(words)) + 's', 0, 3 + len(words), 1, 7, address, len(words), b''.join(chr(i) for i in words))
     def ble_cmd_attributes_write(self, handle, offset, value):
-        return struct.pack('<4BHB' + len(value) + 'B', 0, 4 + len(value), 2, 0, handle, offset, value)
+        return struct.pack('<4BHBB' + str(len(value)) + 's', 0, 4 + len(value), 2, 0, handle, offset, len(value), b''.join(chr(i) for i in value))
     def ble_cmd_attributes_read(self, handle, offset):
         return struct.pack('<4BHH', 0, 4, 2, 1, handle, offset)
     def ble_cmd_attributes_read_type(self, handle):
         return struct.pack('<4BH', 0, 2, 2, 2, handle)
     def ble_cmd_attributes_user_read_response(self, connection, att_error, value):
-        return struct.pack('<4BBB' + len(value) + 'B', 0, 3 + len(value), 2, 3, connection, att_error, value)
+        return struct.pack('<4BBBB' + str(len(value)) + 's', 0, 3 + len(value), 2, 3, connection, att_error, len(value), b''.join(chr(i) for i in value))
     def ble_cmd_attributes_user_write_response(self, connection, att_error):
         return struct.pack('<4BBB', 0, 2, 2, 4, connection, att_error)
     def ble_cmd_connection_disconnect(self, connection):
@@ -185,37 +188,37 @@ class BGLib(object):
     def ble_cmd_connection_channel_map_get(self, connection):
         return struct.pack('<4BB', 0, 1, 3, 4, connection)
     def ble_cmd_connection_channel_map_set(self, connection, map):
-        return struct.pack('<4BB' + len(map) + 'B', 0, 2 + len(map), 3, 5, connection, map)
+        return struct.pack('<4BBB' + str(len(map)) + 's', 0, 2 + len(map), 3, 5, connection, len(map), b''.join(chr(i) for i in map))
     def ble_cmd_connection_features_get(self, connection):
         return struct.pack('<4BB', 0, 1, 3, 6, connection)
     def ble_cmd_connection_get_status(self, connection):
         return struct.pack('<4BB', 0, 1, 3, 7, connection)
     def ble_cmd_connection_raw_tx(self, connection, data):
-        return struct.pack('<4BB' + len(data) + 'B', 0, 2 + len(data), 3, 8, connection, data)
+        return struct.pack('<4BBB' + str(len(data)) + 's', 0, 2 + len(data), 3, 8, connection, len(data), b''.join(chr(i) for i in data))
     def ble_cmd_attclient_find_by_type_value(self, connection, start, end, uuid, value):
-        return struct.pack('<4BBHHH' + len(value) + 'B', 0, 8 + len(value), 4, 0, connection, start, end, uuid, value)
+        return struct.pack('<4BBHHHB' + str(len(value)) + 's', 0, 8 + len(value), 4, 0, connection, start, end, uuid, len(value), b''.join(chr(i) for i in value))
     def ble_cmd_attclient_read_by_group_type(self, connection, start, end, uuid):
-        return struct.pack('<4BBHH' + len(uuid) + 'B', 0, 6 + len(uuid), 4, 1, connection, start, end, uuid)
+        return struct.pack('<4BBHHB' + str(len(uuid)) + 's', 0, 6 + len(uuid), 4, 1, connection, start, end, len(uuid), b''.join(chr(i) for i in uuid))
     def ble_cmd_attclient_read_by_type(self, connection, start, end, uuid):
-        return struct.pack('<4BBHH' + len(uuid) + 'B', 0, 6 + len(uuid), 4, 2, connection, start, end, uuid)
+        return struct.pack('<4BBHHB' + str(len(uuid)) + 's', 0, 6 + len(uuid), 4, 2, connection, start, end, len(uuid), b''.join(chr(i) for i in uuid))
     def ble_cmd_attclient_find_information(self, connection, start, end):
         return struct.pack('<4BBHH', 0, 5, 4, 3, connection, start, end)
     def ble_cmd_attclient_read_by_handle(self, connection, chrhandle):
         return struct.pack('<4BBH', 0, 3, 4, 4, connection, chrhandle)
     def ble_cmd_attclient_attribute_write(self, connection, atthandle, data):
-        return struct.pack('<4BBH' + len(data) + 'B', 0, 4 + len(data), 4, 5, connection, atthandle, data)
+        return struct.pack('<4BBHB' + str(len(data)) + 's', 0, 4 + len(data), 4, 5, connection, atthandle, len(data), b''.join(chr(i) for i in data))
     def ble_cmd_attclient_write_command(self, connection, atthandle, data):
-        return struct.pack('<4BBH' + len(data) + 'B', 0, 4 + len(data), 4, 6, connection, atthandle, data)
+        return struct.pack('<4BBHB' + str(len(data)) + 's', 0, 4 + len(data), 4, 6, connection, atthandle, len(data), b''.join(chr(i) for i in data))
     def ble_cmd_attclient_indicate_confirm(self, connection):
         return struct.pack('<4BB', 0, 1, 4, 7, connection)
     def ble_cmd_attclient_read_long(self, connection, chrhandle):
         return struct.pack('<4BBH', 0, 3, 4, 8, connection, chrhandle)
     def ble_cmd_attclient_prepare_write(self, connection, atthandle, offset, data):
-        return struct.pack('<4BBHH' + len(data) + 'B', 0, 6 + len(data), 4, 9, connection, atthandle, offset, data)
+        return struct.pack('<4BBHHB' + str(len(data)) + 's', 0, 6 + len(data), 4, 9, connection, atthandle, offset, len(data), b''.join(chr(i) for i in data))
     def ble_cmd_attclient_execute_write(self, connection, commit):
         return struct.pack('<4BBB', 0, 2, 4, 10, connection, commit)
     def ble_cmd_attclient_read_multiple(self, connection, handles):
-        return struct.pack('<4BB' + len(handles) + 'B', 0, 2 + len(handles), 4, 11, connection, handles)
+        return struct.pack('<4BBB' + str(len(handles)) + 's', 0, 2 + len(handles), 4, 11, connection, len(handles), b''.join(chr(i) for i in handles))
     def ble_cmd_sm_encrypt_start(self, handle, bonding):
         return struct.pack('<4BBB', 0, 2, 5, 0, handle, bonding)
     def ble_cmd_sm_set_bondable_mode(self, bondable):
@@ -229,7 +232,7 @@ class BGLib(object):
     def ble_cmd_sm_get_bonds(self):
         return struct.pack('<4B', 0, 0, 5, 5)
     def ble_cmd_sm_set_oob_data(self, oob):
-        return struct.pack('<4B' + len(oob) + 'B', 0, 1 + len(oob), 5, 6, oob)
+        return struct.pack('<4BB' + str(len(oob)) + 's', 0, 1 + len(oob), 5, 6, len(oob), b''.join(chr(i) for i in oob))
     def ble_cmd_gap_set_privacy_flags(self, peripheral_privacy, central_privacy):
         return struct.pack('<4BBB', 0, 2, 6, 0, peripheral_privacy, central_privacy)
     def ble_cmd_gap_set_mode(self, discover, connect):
@@ -237,7 +240,7 @@ class BGLib(object):
     def ble_cmd_gap_discover(self, mode):
         return struct.pack('<4BB', 0, 1, 6, 2, mode)
     def ble_cmd_gap_connect_direct(self, address, addr_type, conn_interval_min, conn_interval_max, timeout, latency):
-        return struct.pack('<4B6BBHHHH', 0, 15, 6, 3, address, addr_type, conn_interval_min, conn_interval_max, timeout, latency)
+        return struct.pack('<4B6sBHHHH', 0, 15, 6, 3, b''.join(chr(i) for i in address), addr_type, conn_interval_min, conn_interval_max, timeout, latency)
     def ble_cmd_gap_end_procedure(self):
         return struct.pack('<4B', 0, 0, 6, 4)
     def ble_cmd_gap_connect_selective(self, conn_interval_min, conn_interval_max, timeout, latency):
@@ -249,9 +252,9 @@ class BGLib(object):
     def ble_cmd_gap_set_adv_parameters(self, adv_interval_min, adv_interval_max, adv_channels):
         return struct.pack('<4BHHB', 0, 5, 6, 8, adv_interval_min, adv_interval_max, adv_channels)
     def ble_cmd_gap_set_adv_data(self, set_scanrsp, adv_data):
-        return struct.pack('<4BB' + len(adv_data) + 'B', 0, 2 + len(adv_data), 6, 9, set_scanrsp, adv_data)
+        return struct.pack('<4BBB' + str(len(adv_data)) + 's', 0, 2 + len(adv_data), 6, 9, set_scanrsp, len(adv_data), b''.join(chr(i) for i in adv_data))
     def ble_cmd_gap_set_directed_connectable_mode(self, address, addr_type):
-        return struct.pack('<4B6BB', 0, 7, 6, 10, address, addr_type)
+        return struct.pack('<4B6sB', 0, 7, 6, 10, b''.join(chr(i) for i in address), addr_type)
     def ble_cmd_hardware_io_port_config_irq(self, port, enable_bits, falling_edge):
         return struct.pack('<4BBBB', 0, 3, 7, 0, port, enable_bits, falling_edge)
     def ble_cmd_hardware_set_soft_timer(self, time, handle, single_shot):
@@ -271,11 +274,11 @@ class BGLib(object):
     def ble_cmd_hardware_spi_config(self, channel, polarity, phase, bit_order, baud_e, baud_m):
         return struct.pack('<4BBBBBBB', 0, 6, 7, 8, channel, polarity, phase, bit_order, baud_e, baud_m)
     def ble_cmd_hardware_spi_transfer(self, channel, data):
-        return struct.pack('<4BB' + len(data) + 'B', 0, 2 + len(data), 7, 9, channel, data)
+        return struct.pack('<4BBB' + str(len(data)) + 's', 0, 2 + len(data), 7, 9, channel, len(data), b''.join(chr(i) for i in data))
     def ble_cmd_hardware_i2c_read(self, address, stop, length):
         return struct.pack('<4BBBB', 0, 3, 7, 10, address, stop, length)
     def ble_cmd_hardware_i2c_write(self, address, stop, data):
-        return struct.pack('<4BBB' + len(data) + 'B', 0, 3 + len(data), 7, 11, address, stop, data)
+        return struct.pack('<4BBBB' + str(len(data)) + 's', 0, 3 + len(data), 7, 11, address, stop, len(data), b''.join(chr(i) for i in data))
     def ble_cmd_hardware_set_txpower(self, power):
         return struct.pack('<4BB', 0, 1, 7, 12, power)
     def ble_cmd_hardware_timer_comparator(self, timer, channel, mode, comparator_value):
@@ -291,7 +294,7 @@ class BGLib(object):
     def ble_cmd_test_get_channel_map(self):
         return struct.pack('<4B', 0, 0, 8, 4)
     def ble_cmd_test_debug(self, input):
-        return struct.pack('<4B' + len(input) + 'B', 0, 1 + len(input), 8, 5, input)
+        return struct.pack('<4BB' + str(len(input)) + 's', 0, 1 + len(input), 8, 5, len(input), b''.join(chr(i) for i in input))
 
     ble_rsp_system_reset = BGAPIEvent()
     ble_rsp_system_hello = BGAPIEvent()
@@ -418,8 +421,8 @@ class BGLib(object):
         return struct.pack('<4BB', 0, 1, 0, 0, dfu)
     def wifi_cmd_dfu_flash_set_address(self, address):
         return struct.pack('<4BI', 0, 4, 0, 1, address)
-    def wifi_cmd_dfu_flash_upload(self, data):
-        return struct.pack('<4B' + len(data) + 'B', 0, 1 + len(data), 0, 2, data)
+    def wifi_cmd_dfu_flash_upload(self):
+        return struct.pack('<4BB' + str(len(data)) + 's', 0, 1 + len(data), 0, 2, data, len(data), b''.join(chr(i) for i in data))
     def wifi_cmd_dfu_flash_upload_finish(self):
         return struct.pack('<4B', 0, 0, 0, 3)
     def wifi_cmd_system_sync(self):
@@ -432,7 +435,7 @@ class BGLib(object):
         return struct.pack('<4BB', 0, 1, 1, 3, state)
     def wifi_cmd_config_get_mac(self, hw_interface):
         return struct.pack('<4BB', 0, 1, 2, 0, hw_interface)
-    def wifi_cmd_config_set_mac(self, hw_interface, mac):
+    def wifi_cmd_config_set_mac(self, hw_interface):
         return struct.pack('<4BB', 0, 1, 2, 1, hw_interface, mac)
     def wifi_cmd_sme_wifi_on(self):
         return struct.pack('<4B', 0, 0, 3, 0)
@@ -440,42 +443,42 @@ class BGLib(object):
         return struct.pack('<4B', 0, 0, 3, 1)
     def wifi_cmd_sme_power_on(self, enable):
         return struct.pack('<4BB', 0, 1, 3, 2, enable)
-    def wifi_cmd_sme_start_scan(self, hw_interface, chList):
-        return struct.pack('<4BB' + len(chList) + 'B', 0, 2 + len(chList), 3, 3, hw_interface, chList)
+    def wifi_cmd_sme_start_scan(self, hw_interface):
+        return struct.pack('<4BBB' + str(len(chList)) + 's', 0, 2 + len(chList), 3, 3, hw_interface, chList, len(chList), b''.join(chr(i) for i in chList))
     def wifi_cmd_sme_stop_scan(self):
         return struct.pack('<4B', 0, 0, 3, 4)
-    def wifi_cmd_sme_set_password(self, password):
-        return struct.pack('<4B' + len(password) + 'B', 0, 1 + len(password), 3, 5, password)
-    def wifi_cmd_sme_connect_bssid(self, bssid):
+    def wifi_cmd_sme_set_password(self):
+        return struct.pack('<4BB' + str(len(password)) + 's', 0, 1 + len(password), 3, 5, password, len(password), b''.join(chr(i) for i in password))
+    def wifi_cmd_sme_connect_bssid(self):
         return struct.pack('<4B', 0, 0, 3, 6, bssid)
-    def wifi_cmd_sme_connect_ssid(self, ssid):
-        return struct.pack('<4B' + len(ssid) + 'B', 0, 1 + len(ssid), 3, 7, ssid)
+    def wifi_cmd_sme_connect_ssid(self):
+        return struct.pack('<4BB' + str(len(ssid)) + 's', 0, 1 + len(ssid), 3, 7, ssid, len(ssid), b''.join(chr(i) for i in ssid))
     def wifi_cmd_sme_disconnect(self):
         return struct.pack('<4B', 0, 0, 3, 8)
-    def wifi_cmd_sme_set_scan_channels(self, hw_interface, chList):
-        return struct.pack('<4BB' + len(chList) + 'B', 0, 2 + len(chList), 3, 9, hw_interface, chList)
+    def wifi_cmd_sme_set_scan_channels(self, hw_interface):
+        return struct.pack('<4BBB' + str(len(chList)) + 's', 0, 2 + len(chList), 3, 9, hw_interface, chList, len(chList), b''.join(chr(i) for i in chList))
     def wifi_cmd_sme_set_operating_mode(self, mode):
         return struct.pack('<4BB', 0, 1, 3, 10, mode)
-    def wifi_cmd_sme_start_ap_mode(self, channel, security, ssid):
-        return struct.pack('<4BBB' + len(ssid) + 'B', 0, 3 + len(ssid), 3, 11, channel, security, ssid)
+    def wifi_cmd_sme_start_ap_mode(self, channel, security):
+        return struct.pack('<4BBBB' + str(len(ssid)) + 's', 0, 3 + len(ssid), 3, 11, channel, security, ssid, len(ssid), b''.join(chr(i) for i in ssid))
     def wifi_cmd_sme_stop_ap_mode(self):
         return struct.pack('<4B', 0, 0, 3, 12)
     def wifi_cmd_tcpip_start_tcp_server(self, port, default_destination):
         return struct.pack('<4BHb', 0, 3, 4, 0, port, default_destination)
-    def wifi_cmd_tcpip_tcp_connect(self, address, port, routing):
+    def wifi_cmd_tcpip_tcp_connect(self, port, routing):
         return struct.pack('<4BHb', 0, 3, 4, 1, address, port, routing)
     def wifi_cmd_tcpip_start_udp_server(self, port, default_destination):
         return struct.pack('<4BHb', 0, 3, 4, 2, port, default_destination)
-    def wifi_cmd_tcpip_udp_connect(self, address, port, routing):
+    def wifi_cmd_tcpip_udp_connect(self, port, routing):
         return struct.pack('<4BHb', 0, 3, 4, 3, address, port, routing)
-    def wifi_cmd_tcpip_configure(self, address, netmask, gateway, use_dhcp):
+    def wifi_cmd_tcpip_configure(self, use_dhcp):
         return struct.pack('<4BB', 0, 1, 4, 4, address, netmask, gateway, use_dhcp)
-    def wifi_cmd_tcpip_dns_configure(self, index, address):
+    def wifi_cmd_tcpip_dns_configure(self, index):
         return struct.pack('<4BB', 0, 1, 4, 5, index, address)
-    def wifi_cmd_tcpip_dns_gethostbyname(self, name):
-        return struct.pack('<4B' + len(name) + 'B', 0, 1 + len(name), 4, 6, name)
-    def wifi_cmd_endpoint_send(self, endpoint, data):
-        return struct.pack('<4BB' + len(data) + 'B', 0, 2 + len(data), 5, 0, endpoint, data)
+    def wifi_cmd_tcpip_dns_gethostbyname(self):
+        return struct.pack('<4BB' + str(len(name)) + 's', 0, 1 + len(name), 4, 6, name, len(name), b''.join(chr(i) for i in name))
+    def wifi_cmd_endpoint_send(self, endpoint):
+        return struct.pack('<4BBB' + str(len(data)) + 's', 0, 2 + len(data), 5, 0, endpoint, data, len(data), b''.join(chr(i) for i in data))
     def wifi_cmd_endpoint_set_streaming(self, endpoint, streaming):
         return struct.pack('<4BBB', 0, 2, 5, 1, endpoint, streaming)
     def wifi_cmd_endpoint_set_active(self, endpoint, active):
@@ -510,8 +513,8 @@ class BGLib(object):
         return struct.pack('<4B', 0, 0, 7, 1)
     def wifi_cmd_flash_ps_erase_all(self):
         return struct.pack('<4B', 0, 0, 7, 2)
-    def wifi_cmd_flash_ps_save(self, key, value):
-        return struct.pack('<4BH' + len(value) + 'B', 0, 3 + len(value), 7, 3, key, value)
+    def wifi_cmd_flash_ps_save(self, key):
+        return struct.pack('<4BHB' + str(len(value)) + 's', 0, 3 + len(value), 7, 3, key, value, len(value), b''.join(chr(i) for i in value))
     def wifi_cmd_flash_ps_load(self, key):
         return struct.pack('<4BH', 0, 2, 7, 4, key)
     def wifi_cmd_flash_ps_erase(self, key):
@@ -627,10 +630,11 @@ class BGLib(object):
     bgapi_rx_expected_length = 0
     busy = False
     packet_mode = False
+    debug = False
 
     def send_command(self, ser, packet):
         if self.packet_mode: packet = chr(len(packet) & 0xFF) + packet
-        #print '=>[ ' + ' '.join(['%02X' % ord(b) for b in packet ]) + ' ]'
+        if self.debug: print '=>[ ' + ' '.join(['%02X' % ord(b) for b in packet ]) + ' ]'
         self.on_before_tx_command()
         self.busy = True
         self.on_busy()
@@ -677,16 +681,17 @@ class BGLib(object):
 
         #print '%02X: %d, %d' % (b, len(self.bgapi_rx_buffer), self.bgapi_rx_expected_length)
         if self.bgapi_rx_expected_length > 0 and len(self.bgapi_rx_buffer) == self.bgapi_rx_expected_length:
-            #print '<=[ ' + ' '.join(['%02X' % b for b in self.bgapi_rx_buffer ]) + ' ]'
+            if self.debug: print '<=[ ' + ' '.join(['%02X' % b for b in self.bgapi_rx_buffer ]) + ' ]'
             packet_type, payload_length, packet_class, packet_command = self.bgapi_rx_buffer[:4]
             self.bgapi_rx_payload = b''.join(chr(i) for i in self.bgapi_rx_buffer[4:])
+            self.bgapi_rx_buffer = []
             if packet_type & 0x88 == 0x00:
                 # 0x00 = BLE response packet
                 if packet_class == 0:
                     if packet_command == 0: # ble_rsp_system_reset
                         self.ble_rsp_system_reset({  })
                         self.busy = False
-                        self.bgapi_on_idle()
+                        self.on_idle()
                     elif packet_command == 1: # ble_rsp_system_hello
                         self.ble_rsp_system_hello({  })
                     elif packet_command == 2: # ble_rsp_system_address_get
@@ -1076,7 +1081,7 @@ class BGLib(object):
                     if packet_command == 0: # wifi_rsp_dfu_reset
                         self.wifi_rsp_dfu_reset({  })
                         self.busy = False
-                        self.bgapi_on_idle()
+                        self.on_idle()
                     elif packet_command == 1: # wifi_rsp_dfu_flash_set_address
                         result = struct.unpack('<H', self.bgapi_rx_payload[:2])
                         self.wifi_rsp_dfu_flash_set_address({ 'result': result })
@@ -1368,8 +1373,6 @@ class BGLib(object):
                         self.wifi_evt_https_on_req({ 'service': service })
                     elif packet_command == 1: # wifi_evt_https_application_data_changed
                         self.wifi_evt_https_application_data_changed({  })
-
-            self.bgapi_rx_buffer = []
 
 # ================================================================
 
