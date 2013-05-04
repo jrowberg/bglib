@@ -3,6 +3,7 @@
 """ Bluegiga BGAPI/BGLib implementation
 
 Changelog:
+    2013-05-04 - Fixed single-item struct.unpack returns (@zwasson on Github)
     2013-04-28 - Fixed numerous uint8array/bd_addr command arg errors
                - Added 'debug' support
     2013-04-16 - Fixed 'bglib_on_idle' to be 'on_idle'
@@ -12,7 +13,7 @@ Changelog:
 
 ============================================
 Bluegiga BGLib Python interface library
-2013-04-16 by Jeff Rowberg <jeff@rowberg.net>
+2013-05-04 by Jeff Rowberg <jeff@rowberg.net>
 Updates should (hopefully) always be available at https://github.com/jrowberg/bglib
 
 ============================================
@@ -42,7 +43,7 @@ THE SOFTWARE.
 
 __author__ = "Jeff Rowberg"
 __license__ = "MIT"
-__version__ = "2013-04-16"
+__version__ = "2013-05-04"
 __email__ = "jeff@rowberg.net"
 
 import struct
@@ -695,11 +696,11 @@ class BGLib(object):
                     elif packet_command == 1: # ble_rsp_system_hello
                         self.ble_rsp_system_hello({  })
                     elif packet_command == 2: # ble_rsp_system_address_get
-                        address = struct.unpack('<6s', self.bgapi_rx_payload[:6])
+                        address = struct.unpack('<6s', self.bgapi_rx_payload[:6])[0]
                         address = [ord(b) for b in address]
                         self.ble_rsp_system_address_get({ 'address': address })
                     elif packet_command == 3: # ble_rsp_system_reg_write
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_system_reg_write({ 'result': result })
                     elif packet_command == 4: # ble_rsp_system_reg_read
                         address, value = struct.unpack('<HB', self.bgapi_rx_payload[:3])
@@ -708,7 +709,7 @@ class BGLib(object):
                         txok, txretry, rxok, rxfail, mbuf = struct.unpack('<BBBBB', self.bgapi_rx_payload[:5])
                         self.ble_rsp_system_get_counters({ 'txok': txok, 'txretry': txretry, 'rxok': rxok, 'rxfail': rxfail, 'mbuf': mbuf })
                     elif packet_command == 6: # ble_rsp_system_get_connections
-                        maxconn = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        maxconn = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         self.ble_rsp_system_get_connections({ 'maxconn': maxconn })
                     elif packet_command == 7: # ble_rsp_system_read_memory
                         address, data_len = struct.unpack('<IB', self.bgapi_rx_payload[:5])
@@ -718,13 +719,13 @@ class BGLib(object):
                         major, minor, patch, build, ll_version, protocol_version, hw = struct.unpack('<HHHHHBB', self.bgapi_rx_payload[:12])
                         self.ble_rsp_system_get_info({ 'major': major, 'minor': minor, 'patch': patch, 'build': build, 'll_version': ll_version, 'protocol_version': protocol_version, 'hw': hw })
                     elif packet_command == 9: # ble_rsp_system_endpoint_tx
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_system_endpoint_tx({ 'result': result })
                     elif packet_command == 10: # ble_rsp_system_whitelist_append
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_system_whitelist_append({ 'result': result })
                     elif packet_command == 11: # ble_rsp_system_whitelist_remove
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_system_whitelist_remove({ 'result': result })
                     elif packet_command == 12: # ble_rsp_system_whitelist_clear
                         self.ble_rsp_system_whitelist_clear({  })
@@ -733,7 +734,7 @@ class BGLib(object):
                         data_data = [ord(b) for b in self.bgapi_rx_payload[3:]]
                         self.ble_rsp_system_endpoint_rx({ 'result': result, 'data': data_data })
                     elif packet_command == 14: # ble_rsp_system_endpoint_set_watermarks
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_system_endpoint_set_watermarks({ 'result': result })
                 elif packet_class == 1:
                     if packet_command == 0: # ble_rsp_flash_ps_defrag
@@ -743,7 +744,7 @@ class BGLib(object):
                     elif packet_command == 2: # ble_rsp_flash_ps_erase_all
                         self.ble_rsp_flash_ps_erase_all({  })
                     elif packet_command == 3: # ble_rsp_flash_ps_save
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_flash_ps_save({ 'result': result })
                     elif packet_command == 4: # ble_rsp_flash_ps_load
                         result, value_len = struct.unpack('<HB', self.bgapi_rx_payload[:3])
@@ -752,13 +753,13 @@ class BGLib(object):
                     elif packet_command == 5: # ble_rsp_flash_ps_erase
                         self.ble_rsp_flash_ps_erase({  })
                     elif packet_command == 6: # ble_rsp_flash_erase_page
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_flash_erase_page({ 'result': result })
                     elif packet_command == 7: # ble_rsp_flash_write_words
                         self.ble_rsp_flash_write_words({  })
                 elif packet_class == 2:
                     if packet_command == 0: # ble_rsp_attributes_write
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_attributes_write({ 'result': result })
                     elif packet_command == 1: # ble_rsp_attributes_read
                         handle, offset, result, value_len = struct.unpack('<HHHB', self.bgapi_rx_payload[:7])
@@ -796,10 +797,10 @@ class BGLib(object):
                         connection, result = struct.unpack('<BH', self.bgapi_rx_payload[:3])
                         self.ble_rsp_connection_features_get({ 'connection': connection, 'result': result })
                     elif packet_command == 7: # ble_rsp_connection_get_status
-                        connection = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        connection = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         self.ble_rsp_connection_get_status({ 'connection': connection })
                     elif packet_command == 8: # ble_rsp_connection_raw_tx
-                        connection = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        connection = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         self.ble_rsp_connection_raw_tx({ 'connection': connection })
                 elif packet_class == 4:
                     if packet_command == 0: # ble_rsp_attclient_find_by_type_value
@@ -824,7 +825,7 @@ class BGLib(object):
                         connection, result = struct.unpack('<BH', self.bgapi_rx_payload[:3])
                         self.ble_rsp_attclient_write_command({ 'connection': connection, 'result': result })
                     elif packet_command == 7: # ble_rsp_attclient_indicate_confirm
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_attclient_indicate_confirm({ 'result': result })
                     elif packet_command == 8: # ble_rsp_attclient_read_long
                         connection, result = struct.unpack('<BH', self.bgapi_rx_payload[:3])
@@ -845,15 +846,15 @@ class BGLib(object):
                     elif packet_command == 1: # ble_rsp_sm_set_bondable_mode
                         self.ble_rsp_sm_set_bondable_mode({  })
                     elif packet_command == 2: # ble_rsp_sm_delete_bonding
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_sm_delete_bonding({ 'result': result })
                     elif packet_command == 3: # ble_rsp_sm_set_parameters
                         self.ble_rsp_sm_set_parameters({  })
                     elif packet_command == 4: # ble_rsp_sm_passkey_entry
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_sm_passkey_entry({ 'result': result })
                     elif packet_command == 5: # ble_rsp_sm_get_bonds
-                        bonds = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        bonds = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         self.ble_rsp_sm_get_bonds({ 'bonds': bonds })
                     elif packet_command == 6: # ble_rsp_sm_set_oob_data
                         self.ble_rsp_sm_set_oob_data({  })
@@ -861,62 +862,62 @@ class BGLib(object):
                     if packet_command == 0: # ble_rsp_gap_set_privacy_flags
                         self.ble_rsp_gap_set_privacy_flags({  })
                     elif packet_command == 1: # ble_rsp_gap_set_mode
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_gap_set_mode({ 'result': result })
                     elif packet_command == 2: # ble_rsp_gap_discover
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_gap_discover({ 'result': result })
                     elif packet_command == 3: # ble_rsp_gap_connect_direct
                         result, connection_handle = struct.unpack('<HB', self.bgapi_rx_payload[:3])
                         self.ble_rsp_gap_connect_direct({ 'result': result, 'connection_handle': connection_handle })
                     elif packet_command == 4: # ble_rsp_gap_end_procedure
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_gap_end_procedure({ 'result': result })
                     elif packet_command == 5: # ble_rsp_gap_connect_selective
                         result, connection_handle = struct.unpack('<HB', self.bgapi_rx_payload[:3])
                         self.ble_rsp_gap_connect_selective({ 'result': result, 'connection_handle': connection_handle })
                     elif packet_command == 6: # ble_rsp_gap_set_filtering
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_gap_set_filtering({ 'result': result })
                     elif packet_command == 7: # ble_rsp_gap_set_scan_parameters
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_gap_set_scan_parameters({ 'result': result })
                     elif packet_command == 8: # ble_rsp_gap_set_adv_parameters
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_gap_set_adv_parameters({ 'result': result })
                     elif packet_command == 9: # ble_rsp_gap_set_adv_data
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_gap_set_adv_data({ 'result': result })
                     elif packet_command == 10: # ble_rsp_gap_set_directed_connectable_mode
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_gap_set_directed_connectable_mode({ 'result': result })
                 elif packet_class == 7:
                     if packet_command == 0: # ble_rsp_hardware_io_port_config_irq
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_hardware_io_port_config_irq({ 'result': result })
                     elif packet_command == 1: # ble_rsp_hardware_set_soft_timer
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_hardware_set_soft_timer({ 'result': result })
                     elif packet_command == 2: # ble_rsp_hardware_adc_read
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_hardware_adc_read({ 'result': result })
                     elif packet_command == 3: # ble_rsp_hardware_io_port_config_direction
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_hardware_io_port_config_direction({ 'result': result })
                     elif packet_command == 4: # ble_rsp_hardware_io_port_config_function
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_hardware_io_port_config_function({ 'result': result })
                     elif packet_command == 5: # ble_rsp_hardware_io_port_config_pull
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_hardware_io_port_config_pull({ 'result': result })
                     elif packet_command == 6: # ble_rsp_hardware_io_port_write
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_hardware_io_port_write({ 'result': result })
                     elif packet_command == 7: # ble_rsp_hardware_io_port_read
                         result, port, data = struct.unpack('<HBB', self.bgapi_rx_payload[:4])
                         self.ble_rsp_hardware_io_port_read({ 'result': result, 'port': port, 'data': data })
                     elif packet_command == 8: # ble_rsp_hardware_spi_config
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_hardware_spi_config({ 'result': result })
                     elif packet_command == 9: # ble_rsp_hardware_spi_transfer
                         result, channel, data_len = struct.unpack('<HBB', self.bgapi_rx_payload[:4])
@@ -927,12 +928,12 @@ class BGLib(object):
                         data_data = [ord(b) for b in self.bgapi_rx_payload[3:]]
                         self.ble_rsp_hardware_i2c_read({ 'result': result, 'data': data_data })
                     elif packet_command == 11: # ble_rsp_hardware_i2c_write
-                        written = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        written = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         self.ble_rsp_hardware_i2c_write({ 'written': written })
                     elif packet_command == 12: # ble_rsp_hardware_set_txpower
                         self.ble_rsp_hardware_set_txpower({  })
                     elif packet_command == 13: # ble_rsp_hardware_timer_comparator
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_hardware_timer_comparator({ 'result': result })
                 elif packet_class == 8:
                     if packet_command == 0: # ble_rsp_test_phy_tx
@@ -940,16 +941,16 @@ class BGLib(object):
                     elif packet_command == 1: # ble_rsp_test_phy_rx
                         self.ble_rsp_test_phy_rx({  })
                     elif packet_command == 2: # ble_rsp_test_phy_end
-                        counter = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        counter = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.ble_rsp_test_phy_end({ 'counter': counter })
                     elif packet_command == 3: # ble_rsp_test_phy_reset
                         self.ble_rsp_test_phy_reset({  })
                     elif packet_command == 4: # ble_rsp_test_get_channel_map
-                        channel_map_len = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        channel_map_len = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         channel_map_data = [ord(b) for b in self.bgapi_rx_payload[1:]]
                         self.ble_rsp_test_get_channel_map({ 'channel_map': channel_map_data })
                     elif packet_command == 5: # ble_rsp_test_debug
-                        output_len = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        output_len = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         output_data = [ord(b) for b in self.bgapi_rx_payload[1:]]
                         self.ble_rsp_test_debug({ 'output': output_data })
                 self.busy = False
@@ -963,7 +964,7 @@ class BGLib(object):
                         self.busy = False
                         self.on_idle()
                     elif packet_command == 1: # ble_evt_system_debug
-                        data_len = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        data_len = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         data_data = [ord(b) for b in self.bgapi_rx_payload[1:]]
                         self.ble_evt_system_debug({ 'data': data_data })
                     elif packet_command == 2: # ble_evt_system_endpoint_watermark_rx
@@ -1051,7 +1052,7 @@ class BGLib(object):
                         handle, passkey = struct.unpack('<BI', self.bgapi_rx_payload[:5])
                         self.ble_evt_sm_passkey_display({ 'handle': handle, 'passkey': passkey })
                     elif packet_command == 3: # ble_evt_sm_passkey_request
-                        handle = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        handle = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         self.ble_evt_sm_passkey_request({ 'handle': handle })
                     elif packet_command == 4: # ble_evt_sm_bond_status
                         bond, keysize, mitm, keys = struct.unpack('<BBBB', self.bgapi_rx_payload[:4])
@@ -1070,7 +1071,7 @@ class BGLib(object):
                         timestamp, port, irq, state = struct.unpack('<IBBB', self.bgapi_rx_payload[:7])
                         self.ble_evt_hardware_io_port_status({ 'timestamp': timestamp, 'port': port, 'irq': irq, 'state': state })
                     elif packet_command == 1: # ble_evt_hardware_soft_timer
-                        handle = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        handle = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         self.ble_evt_hardware_soft_timer({ 'handle': handle })
                     elif packet_command == 2: # ble_evt_hardware_adc_result
                         input, value = struct.unpack('<Bh', self.bgapi_rx_payload[:3])
@@ -1083,13 +1084,13 @@ class BGLib(object):
                         self.busy = False
                         self.on_idle()
                     elif packet_command == 1: # wifi_rsp_dfu_flash_set_address
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_dfu_flash_set_address({ 'result': result })
                     elif packet_command == 2: # wifi_rsp_dfu_flash_upload
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_dfu_flash_upload({ 'result': result })
                     elif packet_command == 3: # wifi_rsp_dfu_flash_upload_finish
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_dfu_flash_upload_finish({ 'result': result })
                 elif packet_class == 1:
                     if packet_command == 0: # wifi_rsp_system_sync
@@ -1099,7 +1100,7 @@ class BGLib(object):
                     elif packet_command == 2: # wifi_rsp_system_hello
                         self.wifi_rsp_system_hello({  })
                     elif packet_command == 3: # wifi_rsp_system_set_max_power_saving_state
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_system_set_max_power_saving_state({ 'result': result })
                 elif packet_class == 2:
                     if packet_command == 0: # wifi_rsp_config_get_mac
@@ -1110,22 +1111,22 @@ class BGLib(object):
                         self.wifi_rsp_config_set_mac({ 'result': result, 'hw_interface': hw_interface })
                 elif packet_class == 3:
                     if packet_command == 0: # wifi_rsp_sme_wifi_on
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_sme_wifi_on({ 'result': result })
                     elif packet_command == 1: # wifi_rsp_sme_wifi_off
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_sme_wifi_off({ 'result': result })
                     elif packet_command == 2: # wifi_rsp_sme_power_on
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_sme_power_on({ 'result': result })
                     elif packet_command == 3: # wifi_rsp_sme_start_scan
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_sme_start_scan({ 'result': result })
                     elif packet_command == 4: # wifi_rsp_sme_stop_scan
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_sme_stop_scan({ 'result': result })
                     elif packet_command == 5: # wifi_rsp_sme_set_password
-                        status = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        status = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         self.wifi_rsp_sme_set_password({ 'status': status })
                     elif packet_command == 6: # wifi_rsp_sme_connect_bssid
                         result, hw_interface = struct.unpack('<HB', self.bgapi_rx_payload[:3])
@@ -1137,10 +1138,10 @@ class BGLib(object):
                         result, hw_interface = struct.unpack('<HB', self.bgapi_rx_payload[:3])
                         self.wifi_rsp_sme_disconnect({ 'result': result, 'hw_interface': hw_interface })
                     elif packet_command == 9: # wifi_rsp_sme_set_scan_channels
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_sme_set_scan_channels({ 'result': result })
                     elif packet_command == 10: # wifi_rsp_sme_set_operating_mode
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_sme_set_operating_mode({ 'result': result })
                     elif packet_command == 11: # wifi_rsp_sme_start_ap_mode
                         result, hw_interface = struct.unpack('<HB', self.bgapi_rx_payload[:3])
@@ -1162,13 +1163,13 @@ class BGLib(object):
                         result, endpoint = struct.unpack('<HB', self.bgapi_rx_payload[:3])
                         self.wifi_rsp_tcpip_udp_connect({ 'result': result, 'endpoint': endpoint })
                     elif packet_command == 4: # wifi_rsp_tcpip_configure
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_tcpip_configure({ 'result': result })
                     elif packet_command == 5: # wifi_rsp_tcpip_dns_configure
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_tcpip_dns_configure({ 'result': result })
                     elif packet_command == 6: # wifi_rsp_tcpip_dns_gethostbyname
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_tcpip_dns_gethostbyname({ 'result': result })
                 elif packet_class == 5:
                     if packet_command == 0: # wifi_rsp_endpoint_send
@@ -1188,68 +1189,68 @@ class BGLib(object):
                         self.wifi_rsp_endpoint_close({ 'result': result, 'endpoint': endpoint })
                 elif packet_class == 6:
                     if packet_command == 0: # wifi_rsp_hardware_set_soft_timer
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_hardware_set_soft_timer({ 'result': result })
                     elif packet_command == 1: # wifi_rsp_hardware_external_interrupt_config
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_hardware_external_interrupt_config({ 'result': result })
                     elif packet_command == 2: # wifi_rsp_hardware_change_notification_config
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_hardware_change_notification_config({ 'result': result })
                     elif packet_command == 3: # wifi_rsp_hardware_change_notification_pullup
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_hardware_change_notification_pullup({ 'result': result })
                     elif packet_command == 4: # wifi_rsp_hardware_io_port_config_direction
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_hardware_io_port_config_direction({ 'result': result })
                     elif packet_command == 5: # wifi_rsp_hardware_io_port_config_open_drain
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_hardware_io_port_config_open_drain({ 'result': result })
                     elif packet_command == 6: # wifi_rsp_hardware_io_port_write
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_hardware_io_port_write({ 'result': result })
                     elif packet_command == 7: # wifi_rsp_hardware_io_port_read
                         result, port, data = struct.unpack('<HBH', self.bgapi_rx_payload[:5])
                         self.wifi_rsp_hardware_io_port_read({ 'result': result, 'port': port, 'data': data })
                     elif packet_command == 8: # wifi_rsp_hardware_output_compare
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_hardware_output_compare({ 'result': result })
                     elif packet_command == 9: # wifi_rsp_hardware_adc_read
                         result, input, value = struct.unpack('<HBH', self.bgapi_rx_payload[:5])
                         self.wifi_rsp_hardware_adc_read({ 'result': result, 'input': input, 'value': value })
                 elif packet_class == 7:
                     if packet_command == 0: # wifi_rsp_flash_ps_defrag
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_flash_ps_defrag({ 'result': result })
                     elif packet_command == 1: # wifi_rsp_flash_ps_dump
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_flash_ps_dump({ 'result': result })
                     elif packet_command == 2: # wifi_rsp_flash_ps_erase_all
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_flash_ps_erase_all({ 'result': result })
                     elif packet_command == 3: # wifi_rsp_flash_ps_save
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_flash_ps_save({ 'result': result })
                     elif packet_command == 4: # wifi_rsp_flash_ps_load
                         result, value_len = struct.unpack('<HB', self.bgapi_rx_payload[:3])
                         value_data = [ord(b) for b in self.bgapi_rx_payload[3:]]
                         self.wifi_rsp_flash_ps_load({ 'result': result, 'value': value_data })
                     elif packet_command == 5: # wifi_rsp_flash_ps_erase
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_flash_ps_erase({ 'result': result })
                 elif packet_class == 8:
                     if packet_command == 0: # wifi_rsp_i2c_start_read
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_i2c_start_read({ 'result': result })
                     elif packet_command == 1: # wifi_rsp_i2c_start_write
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_i2c_start_write({ 'result': result })
                     elif packet_command == 2: # wifi_rsp_i2c_stop
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_i2c_stop({ 'result': result })
                 elif packet_class == 9:
                     if packet_command == 0: # wifi_rsp_https_enable
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_rsp_https_enable({ 'result': result })
                 self.busy = False
                 self.on_idle()
@@ -1257,7 +1258,7 @@ class BGLib(object):
                 # 0x88 = wifi event packet
                 if packet_class == 0:
                     if packet_command == 0: # wifi_evt_dfu_boot
-                        version = struct.unpack('<I', self.bgapi_rx_payload[:4])
+                        version = struct.unpack('<I', self.bgapi_rx_payload[:4])[0]
                         self.wifi_evt_dfu_boot({ 'version': version })
                         self.busy = False
                         self.on_idle()
@@ -1266,24 +1267,24 @@ class BGLib(object):
                         major, minor, patch, build, bootloader_version, tcpip_version, hw = struct.unpack('<HHHHHHH', self.bgapi_rx_payload[:14])
                         self.wifi_evt_system_boot({ 'major': major, 'minor': minor, 'patch': patch, 'build': build, 'bootloader_version': bootloader_version, 'tcpip_version': tcpip_version, 'hw': hw })
                     elif packet_command == 1: # wifi_evt_system_state
-                        state = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        state = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_evt_system_state({ 'state': state })
                     elif packet_command == 2: # wifi_evt_system_sw_exception
                         address, type = struct.unpack('<IB', self.bgapi_rx_payload[:5])
                         self.wifi_evt_system_sw_exception({ 'address': address, 'type': type })
                     elif packet_command == 3: # wifi_evt_system_power_saving_state
-                        state = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        state = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         self.wifi_evt_system_power_saving_state({ 'state': state })
                 elif packet_class == 2:
                     if packet_command == 0: # wifi_evt_config_mac_address
-                        hw_interface = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        hw_interface = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         self.wifi_evt_config_mac_address({ 'hw_interface': hw_interface })
                 elif packet_class == 3:
                     if packet_command == 0: # wifi_evt_sme_wifi_is_on
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_evt_sme_wifi_is_on({ 'result': result })
                     elif packet_command == 1: # wifi_evt_sme_wifi_is_off
-                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])
+                        result = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
                         self.wifi_evt_sme_wifi_is_off({ 'result': result })
                     elif packet_command == 2: # wifi_evt_sme_scan_result
                         channel, rssi, snr, secure, ssid_len = struct.unpack('<bhbBB', self.bgapi_rx_payload[:6])
@@ -1292,7 +1293,7 @@ class BGLib(object):
                     elif packet_command == 3: # wifi_evt_sme_scan_result_drop
                         self.wifi_evt_sme_scan_result_drop({  })
                     elif packet_command == 4: # wifi_evt_sme_scanned
-                        status = struct.unpack('<b', self.bgapi_rx_payload[:1])
+                        status = struct.unpack('<b', self.bgapi_rx_payload[:1])[0]
                         self.wifi_evt_sme_scanned({ 'status': status })
                     elif packet_command == 5: # wifi_evt_sme_connected
                         status, hw_interface = struct.unpack('<bB', self.bgapi_rx_payload[:2])
@@ -1307,29 +1308,29 @@ class BGLib(object):
                         reason, hw_interface = struct.unpack('<HB', self.bgapi_rx_payload[:3])
                         self.wifi_evt_sme_connect_failed({ 'reason': reason, 'hw_interface': hw_interface })
                     elif packet_command == 9: # wifi_evt_sme_connect_retry
-                        hw_interface = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        hw_interface = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         self.wifi_evt_sme_connect_retry({ 'hw_interface': hw_interface })
                     elif packet_command == 10: # wifi_evt_sme_ap_mode_started
-                        hw_interface = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        hw_interface = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         self.wifi_evt_sme_ap_mode_started({ 'hw_interface': hw_interface })
                     elif packet_command == 11: # wifi_evt_sme_ap_mode_stopped
-                        hw_interface = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        hw_interface = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         self.wifi_evt_sme_ap_mode_stopped({ 'hw_interface': hw_interface })
                     elif packet_command == 12: # wifi_evt_sme_ap_mode_failed
                         reason, hw_interface = struct.unpack('<HB', self.bgapi_rx_payload[:3])
                         self.wifi_evt_sme_ap_mode_failed({ 'reason': reason, 'hw_interface': hw_interface })
                     elif packet_command == 13: # wifi_evt_sme_ap_client_joined
-                        hw_interface = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        hw_interface = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         self.wifi_evt_sme_ap_client_joined({ 'hw_interface': hw_interface })
                     elif packet_command == 14: # wifi_evt_sme_ap_client_left
-                        hw_interface = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        hw_interface = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         self.wifi_evt_sme_ap_client_left({ 'hw_interface': hw_interface })
                 elif packet_class == 4:
                     if packet_command == 0: # wifi_evt_tcpip_configuration
-                        use_dhcp = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        use_dhcp = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         self.wifi_evt_tcpip_configuration({ 'use_dhcp': use_dhcp })
                     elif packet_command == 1: # wifi_evt_tcpip_dns_configuration
-                        index = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        index = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         self.wifi_evt_tcpip_dns_configuration({ 'index': index })
                     elif packet_command == 2: # wifi_evt_tcpip_endpoint_status
                         endpoint, local_port, remote_port = struct.unpack('<BHH', self.bgapi_rx_payload[:5])
@@ -1340,7 +1341,7 @@ class BGLib(object):
                         self.wifi_evt_tcpip_dns_gethostbyname_result({ 'result': result, 'name': name_data })
                 elif packet_class == 5:
                     if packet_command == 0: # wifi_evt_endpoint_syntax_error
-                        endpoint = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        endpoint = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         self.wifi_evt_endpoint_syntax_error({ 'endpoint': endpoint })
                     elif packet_command == 1: # wifi_evt_endpoint_data
                         endpoint, data_len = struct.unpack('<BB', self.bgapi_rx_payload[:2])
@@ -1354,10 +1355,10 @@ class BGLib(object):
                         self.wifi_evt_endpoint_closing({ 'reason': reason, 'endpoint': endpoint })
                 elif packet_class == 6:
                     if packet_command == 0: # wifi_evt_hardware_soft_timer
-                        handle = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        handle = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         self.wifi_evt_hardware_soft_timer({ 'handle': handle })
                     elif packet_command == 1: # wifi_evt_hardware_change_notification
-                        timestamp = struct.unpack('<I', self.bgapi_rx_payload[:4])
+                        timestamp = struct.unpack('<I', self.bgapi_rx_payload[:4])[0]
                         self.wifi_evt_hardware_change_notification({ 'timestamp': timestamp })
                     elif packet_command == 2: # wifi_evt_hardware_external_interrupt
                         irq, timestamp = struct.unpack('<BI', self.bgapi_rx_payload[:5])
@@ -1369,7 +1370,7 @@ class BGLib(object):
                         self.wifi_evt_flash_ps_key({ 'key': key, 'value': value_data })
                 elif packet_class == 9:
                     if packet_command == 0: # wifi_evt_https_on_req
-                        service = struct.unpack('<B', self.bgapi_rx_payload[:1])
+                        service = struct.unpack('<B', self.bgapi_rx_payload[:1])[0]
                         self.wifi_evt_https_on_req({ 'service': service })
                     elif packet_command == 1: # wifi_evt_https_application_data_changed
                         self.wifi_evt_https_application_data_changed({  })
