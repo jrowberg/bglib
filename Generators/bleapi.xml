@@ -1,0 +1,1136 @@
+<?xml version="1.0" ?>
+<api device_id="0" device_name="ble">
+    <datatypes>
+        <datatype base="uint8" name="connection"/>
+        <datatype base="uint16" name="errorcode"/>
+        <datatype base="uint16" name="attribute"/>
+        <datatype base="int16" name="int16"/>
+        <datatype base="int8" name="int8"/>
+        <datatype base="bd_addr" name="bd_addr"/>
+        <datatype base="uint16" name="uint16"/>
+        <datatype base="uint32" name="uint32"/>
+        <datatype base="uint8" name="uint8"/>
+        <datatype base="uint8array" name="uint8array"/>
+        <datatype base="int8" name="dbm"/>
+    </datatypes>
+    <class index="0" name="system" singleton="true">
+        <command index="0" name="reset" no_return="true" script="0">
+            <params>
+                <param datatype="uint8" name="boot_in_dfu" type="uint8"/>
+            </params>
+        </command>
+        <command index="1" name="hello" script="1">
+            <params/>
+            <returns/>
+        </command>
+        <command index="2" name="address_get" script="2">
+            <params/>
+            <returns>
+                <param datatype="bd_addr" name="address" type="bd_addr"/>
+            </returns>
+        </command>
+        <command index="3" internal="true" name="reg_write" script="3">
+            <params>
+                <param datatype="uint16" name="address" type="uint16"/>
+                <param datatype="uint8" name="value" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="4" internal="true" name="reg_read" script="4">
+            <params>
+                <param datatype="uint16" name="address" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="uint16" name="address" type="uint16"/>
+                <param datatype="uint8" name="value" type="uint8"/>
+            </returns>
+        </command>
+        <command index="5" name="get_counters" script="5">
+            <params/>
+            <returns>
+                <param datatype="uint8" name="txok" type="uint8"/>
+                <param datatype="uint8" name="txretry" type="uint8"/>
+                <param datatype="uint8" name="rxok" type="uint8"/>
+                <param datatype="uint8" name="rxfail" type="uint8"/>
+                <param datatype="uint8" name="mbuf" type="uint8"/>
+            </returns>
+        </command>
+        <command index="6" name="get_connections" script="6">
+            <params/>
+            <returns>
+                <param datatype="uint8" name="maxconn" type="uint8"/>
+            </returns>
+        </command>
+        <command index="7" internal="true" name="read_memory" script="7">
+            <params>
+                <param datatype="uint32" name="address" type="uint32"/>
+                <param datatype="uint8" name="length" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="uint32" name="address" type="uint32"/>
+                <param datatype="uint8array" name="data" type="uint8array"/>
+            </returns>
+        </command>
+        <command index="8" name="get_info" script="8">
+            <params/>
+            <returns>
+                <param datatype="uint16" name="major" type="uint16"/>
+                <param datatype="uint16" name="minor" type="uint16"/>
+                <param datatype="uint16" name="patch" type="uint16"/>
+                <param datatype="uint16" name="build" type="uint16"/>
+                <param datatype="uint16" name="ll_version" type="uint16"/>
+                <param datatype="uint8" name="protocol_version" type="uint8"/>
+                <param datatype="uint8" name="hw" type="uint8"/>
+            </returns>
+        </command>
+        <command index="9" name="endpoint_tx" script="9">
+            <params>
+                <param datatype="uint8" name="endpoint" type="uint8"/>
+                <param datatype="uint8array" name="data" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="10" name="whitelist_append" script="10">
+            <params>
+                <param datatype="bd_addr" name="address" type="bd_addr"/>
+                <param datatype="uint8" name="address_type" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="11" name="whitelist_remove" script="11">
+            <params>
+                <param datatype="bd_addr" name="address" type="bd_addr"/>
+                <param datatype="uint8" name="address_type" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="12" name="whitelist_clear" script="12">
+            <params/>
+            <returns/>
+        </command>
+        <command index="13" name="endpoint_rx" script="13">
+            <params>
+                <param datatype="uint8" name="endpoint" type="uint8"/>
+                <param datatype="uint8" name="size" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint8array" name="data" type="uint8array"/>
+            </returns>
+        </command>
+        <command index="14" name="endpoint_set_watermarks" script="14">
+            <params>
+                <param datatype="uint8" name="endpoint" type="uint8"/>
+                <param datatype="uint8" name="rx" type="uint8"/>
+                <param datatype="uint8" name="tx" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <event index="0" name="boot" script="0">
+            <params>
+                <param datatype="uint16" name="major" type="uint16"/>
+                <param datatype="uint16" name="minor" type="uint16"/>
+                <param datatype="uint16" name="patch" type="uint16"/>
+                <param datatype="uint16" name="build" type="uint16"/>
+                <param datatype="uint16" name="ll_version" type="uint16"/>
+                <param datatype="uint8" name="protocol_version" type="uint8"/>
+                <param datatype="uint8" name="hw" type="uint8"/>
+            </params>
+        </event>
+        <event index="1" internal="true" name="debug" script="1">
+            <params>
+                <param datatype="uint8array" name="data" type="uint8array"/>
+            </params>
+        </event>
+        <event index="2" name="endpoint_watermark_rx" script="2">
+            <params>
+                <param datatype="uint8" name="endpoint" type="uint8"/>
+                <param datatype="uint8" name="data" type="uint8"/>
+            </params>
+        </event>
+        <event index="3" name="endpoint_watermark_tx" script="3">
+            <params>
+                <param datatype="uint8" name="endpoint" type="uint8"/>
+                <param datatype="uint8" name="data" type="uint8"/>
+            </params>
+        </event>
+        <event index="4" name="script_failure" script="4">
+            <params>
+                <param datatype="uint16" name="address" type="uint16"/>
+                <param datatype="errorcode" name="reason" type="uint16"/>
+            </params>
+        </event>
+        <event index="5" name="no_license_key" script="5">
+            <params/>
+        </event>
+        <enums name="endpoints">
+            <enum name="endpoint_api" value="0"/>
+            <enum name="endpoint_test" value="1"/>
+            <enum name="endpoint_script" value="2"/>
+            <enum name="endpoint_usb" value="3"/>
+            <enum name="endpoint_uart0" value="4"/>
+            <enum name="endpoint_uart1" value="5"/>
+        </enums>
+    </class>
+    <class index="1" name="flash" singleton="true">
+        <command index="0" name="ps_defrag" script="15">
+            <params/>
+            <returns/>
+        </command>
+        <command index="1" name="ps_dump" script="16">
+            <params/>
+            <returns/>
+        </command>
+        <command index="2" name="ps_erase_all" script="17">
+            <params/>
+            <returns/>
+        </command>
+        <command index="3" name="ps_save" script="18">
+            <params>
+                <param datatype="uint16" name="key" type="uint16"/>
+                <param datatype="uint8array" name="value" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="4" name="ps_load" script="19">
+            <params>
+                <param datatype="uint16" name="key" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint8array" name="value" type="uint8array"/>
+            </returns>
+        </command>
+        <command index="5" name="ps_erase" script="20">
+            <params>
+                <param datatype="uint16" name="key" type="uint16"/>
+            </params>
+            <returns/>
+        </command>
+        <command index="6" internal="true" name="erase_page" script="21">
+            <params>
+                <param datatype="uint8" name="page" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="7" internal="true" name="write_words" script="22">
+            <params>
+                <param datatype="uint16" name="address" type="uint16"/>
+                <param datatype="uint8array" name="words" type="uint8array"/>
+            </params>
+            <returns/>
+        </command>
+        <event index="0" name="ps_key" script="6">
+            <params>
+                <param datatype="uint16" name="key" type="uint16"/>
+                <param datatype="uint8array" name="value" type="uint8array"/>
+            </params>
+        </event>
+    </class>
+    <class index="2" name="attributes" singleton="true">
+        <command index="0" name="write" script="23">
+            <params>
+                <param datatype="uint16" name="handle" type="uint16"/>
+                <param datatype="uint8" name="offset" type="uint8"/>
+                <param datatype="uint8array" name="value" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="1" name="read" script="24">
+            <params>
+                <param datatype="uint16" name="handle" type="uint16"/>
+                <param datatype="uint16" name="offset" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="uint16" name="handle" type="uint16"/>
+                <param datatype="uint16" name="offset" type="uint16"/>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint8array" name="value" type="uint8array"/>
+            </returns>
+        </command>
+        <command index="2" name="read_type" script="25">
+            <params>
+                <param datatype="uint16" name="handle" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="uint16" name="handle" type="uint16"/>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint8array" name="value" type="uint8array"/>
+            </returns>
+        </command>
+        <command index="3" name="user_read_response" script="26">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8" name="att_error" type="uint8"/>
+                <param datatype="uint8array" name="value" type="uint8array"/>
+            </params>
+            <returns/>
+        </command>
+        <command index="4" name="user_write_response" script="27">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8" name="att_error" type="uint8"/>
+            </params>
+            <returns/>
+        </command>
+        <event index="0" name="value" script="7">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8" name="reason" type="uint8"/>
+                <param datatype="uint16" name="handle" type="uint16"/>
+                <param datatype="uint16" name="offset" type="uint16"/>
+                <param datatype="uint8array" name="value" type="uint8array"/>
+            </params>
+        </event>
+        <event index="1" name="user_read_request" script="8">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint16" name="handle" type="uint16"/>
+                <param datatype="uint16" name="offset" type="uint16"/>
+                <param datatype="uint8" name="maxsize" type="uint8"/>
+            </params>
+        </event>
+        <event index="2" name="status" script="9">
+            <params>
+                <param datatype="uint16" name="handle" type="uint16"/>
+                <param datatype="uint8" name="flags" type="uint8"/>
+            </params>
+        </event>
+        <enums name="attribute_change_reason">
+            <enum name="attribute_change_reason_write_request" value="0"/>
+            <enum name="attribute_change_reason_write_command" value="1"/>
+            <enum name="attribute_change_reason_write_request_user" value="2"/>
+        </enums>
+        <enums name="attribute_status_flag">
+            <enum name="attribute_status_flag_notify" value="1"/>
+            <enum name="attribute_status_flag_indicate" value="2"/>
+        </enums>
+    </class>
+    <class index="3" name="connection" singleton="true">
+        <command index="0" name="disconnect" script="28">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="1" name="get_rssi" script="29">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="dbm" name="rssi" type="int8"/>
+            </returns>
+        </command>
+        <command index="2" name="update" script="30">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint16" name="interval_min" type="uint16"/>
+                <param datatype="uint16" name="interval_max" type="uint16"/>
+                <param datatype="uint16" name="latency" type="uint16"/>
+                <param datatype="uint16" name="timeout" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="3" name="version_update" script="31">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="4" internal="true" name="channel_map_get" script="32">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8array" name="map" type="uint8array"/>
+            </returns>
+        </command>
+        <command index="5" internal="true" name="channel_map_set" script="33">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8array" name="map" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="6" internal="true" name="features_get" script="34">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="7" name="get_status" script="35">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="connection" name="connection" type="uint8"/>
+            </returns>
+        </command>
+        <command index="8" internal="true" name="raw_tx" script="36">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8array" name="data" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="connection" name="connection" type="uint8"/>
+            </returns>
+        </command>
+        <event index="0" name="status" script="10">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8" name="flags" type="uint8"/>
+                <param datatype="bd_addr" name="address" type="bd_addr"/>
+                <param datatype="uint8" name="address_type" type="uint8"/>
+                <param datatype="uint16" name="conn_interval" type="uint16"/>
+                <param datatype="uint16" name="timeout" type="uint16"/>
+                <param datatype="uint16" name="latency" type="uint16"/>
+                <param datatype="uint8" name="bonding" type="uint8"/>
+            </params>
+        </event>
+        <event index="1" name="version_ind" script="11">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8" name="vers_nr" type="uint8"/>
+                <param datatype="uint16" name="comp_id" type="uint16"/>
+                <param datatype="uint16" name="sub_vers_nr" type="uint16"/>
+            </params>
+        </event>
+        <event index="2" name="feature_ind" script="12">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8array" name="features" type="uint8array"/>
+            </params>
+        </event>
+        <event index="3" internal="true" name="raw_rx" script="13">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8array" name="data" type="uint8array"/>
+            </params>
+        </event>
+        <event index="4" name="disconnected" script="14">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="errorcode" name="reason" type="uint16"/>
+            </params>
+        </event>
+        <enums name="connstatus">
+            <enum name="connected" value="1"/>
+            <enum name="encrypted" value="2"/>
+            <enum name="completed" value="4"/>
+            <enum name="parameters_change" value="8"/>
+        </enums>
+    </class>
+    <class index="4" name="attclient" singleton="true">
+        <command index="0" name="find_by_type_value" script="37">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint16" name="start" type="uint16"/>
+                <param datatype="uint16" name="end" type="uint16"/>
+                <param datatype="uint16" name="uuid" type="uint16"/>
+                <param datatype="uint8array" name="value" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="1" name="read_by_group_type" script="38">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint16" name="start" type="uint16"/>
+                <param datatype="uint16" name="end" type="uint16"/>
+                <param datatype="uint8array" name="uuid" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="2" name="read_by_type" script="39">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint16" name="start" type="uint16"/>
+                <param datatype="uint16" name="end" type="uint16"/>
+                <param datatype="uint8array" name="uuid" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="3" name="find_information" script="40">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint16" name="start" type="uint16"/>
+                <param datatype="uint16" name="end" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="4" name="read_by_handle" script="41">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint16" name="chrhandle" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="5" name="attribute_write" script="42">
+            <params>
+                <param datatype="uint8" name="connection" type="uint8"/>
+                <param datatype="uint16" name="atthandle" type="uint16"/>
+                <param datatype="uint8array" name="data" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="uint8" name="connection" type="uint8"/>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="6" name="write_command" script="43">
+            <params>
+                <param datatype="uint8" name="connection" type="uint8"/>
+                <param datatype="uint16" name="atthandle" type="uint16"/>
+                <param datatype="uint8array" name="data" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="uint8" name="connection" type="uint8"/>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="7" name="indicate_confirm" script="44">
+            <params>
+                <param datatype="uint8" name="connection" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="8" name="read_long" script="45">
+            <params>
+                <param datatype="uint8" name="connection" type="uint8"/>
+                <param datatype="uint16" name="chrhandle" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="uint8" name="connection" type="uint8"/>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="9" name="prepare_write" script="46">
+            <params>
+                <param datatype="uint8" name="connection" type="uint8"/>
+                <param datatype="uint16" name="atthandle" type="uint16"/>
+                <param datatype="uint16" name="offset" type="uint16"/>
+                <param datatype="uint8array" name="data" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="uint8" name="connection" type="uint8"/>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="10" name="execute_write" script="47">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8" name="commit" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="uint8" name="connection" type="uint8"/>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="11" name="read_multiple" script="48">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8array" name="handles" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <event index="0" name="indicated" script="15">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint16" name="attrhandle" type="uint16"/>
+            </params>
+        </event>
+        <event index="1" name="procedure_completed" script="16">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint16" name="chrhandle" type="uint16"/>
+            </params>
+        </event>
+        <event index="2" name="group_found" script="17">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint16" name="start" type="uint16"/>
+                <param datatype="uint16" name="end" type="uint16"/>
+                <param datatype="uint8array" name="uuid" type="uint8array"/>
+            </params>
+        </event>
+        <event index="3" internal="true" name="attribute_found" script="18">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint16" name="chrdecl" type="uint16"/>
+                <param datatype="uint16" name="value" type="uint16"/>
+                <param datatype="uint8" name="properties" type="uint8"/>
+                <param datatype="uint8array" name="uuid" type="uint8array"/>
+            </params>
+        </event>
+        <event index="4" name="find_information_found" script="19">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint16" name="chrhandle" type="uint16"/>
+                <param datatype="uint8array" name="uuid" type="uint8array"/>
+            </params>
+        </event>
+        <event index="5" name="attribute_value" script="20">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint16" name="atthandle" type="uint16"/>
+                <param datatype="uint8" name="type" type="uint8"/>
+                <param datatype="uint8array" name="value" type="uint8array"/>
+            </params>
+        </event>
+        <event index="6" name="read_multiple_response" script="21">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8array" name="handles" type="uint8array"/>
+            </params>
+        </event>
+        <enums name="attribute_value_types">
+            <enum name="attribute_value_type_read" value="0"/>
+            <enum name="attribute_value_type_notify" value="1"/>
+            <enum name="attribute_value_type_indicate" value="2"/>
+            <enum name="attribute_value_type_read_by_type" value="3"/>
+            <enum name="attribute_value_type_read_blob" value="4"/>
+            <enum name="attribute_value_type_indicate_rsp_req" value="5"/>
+        </enums>
+    </class>
+    <class index="5" name="sm" singleton="true">
+        <command index="0" name="encrypt_start" script="49">
+            <params>
+                <param datatype="uint8" name="handle" type="uint8"/>
+                <param datatype="uint8" name="bonding" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="uint8" name="handle" type="uint8"/>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="1" name="set_bondable_mode" script="50">
+            <params>
+                <param datatype="uint8" name="bondable" type="uint8"/>
+            </params>
+            <returns/>
+        </command>
+        <command index="2" name="delete_bonding" script="51">
+            <params>
+                <param datatype="uint8" name="handle" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="3" name="set_parameters" script="52">
+            <params>
+                <param datatype="uint8" name="mitm" type="uint8"/>
+                <param datatype="uint8" name="min_key_size" type="uint8"/>
+                <param datatype="uint8" name="io_capabilities" type="uint8"/>
+            </params>
+            <returns/>
+        </command>
+        <command index="4" name="passkey_entry" script="53">
+            <params>
+                <param datatype="uint8" name="handle" type="uint8"/>
+                <param datatype="uint32" name="passkey" type="uint32"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="5" name="get_bonds" script="54">
+            <params/>
+            <returns>
+                <param datatype="uint8" name="bonds" type="uint8"/>
+            </returns>
+        </command>
+        <command index="6" name="set_oob_data" script="55">
+            <params>
+                <param datatype="uint8array" name="oob" type="uint8array"/>
+            </params>
+            <returns/>
+        </command>
+        <event index="0" internal="true" name="smp_data" script="22">
+            <params>
+                <param datatype="uint8" name="handle" type="uint8"/>
+                <param datatype="uint8" name="packet" type="uint8"/>
+                <param datatype="uint8array" name="data" type="uint8array"/>
+            </params>
+        </event>
+        <event index="1" name="bonding_fail" script="23">
+            <params>
+                <param datatype="uint8" name="handle" type="uint8"/>
+                <param datatype="uint16" name="result" type="uint16"/>
+            </params>
+        </event>
+        <event index="2" name="passkey_display" script="24">
+            <params>
+                <param datatype="uint8" name="handle" type="uint8"/>
+                <param datatype="uint32" name="passkey" type="uint32"/>
+            </params>
+        </event>
+        <event index="3" name="passkey_request" script="25">
+            <params>
+                <param datatype="uint8" name="handle" type="uint8"/>
+            </params>
+        </event>
+        <event index="4" name="bond_status" script="26">
+            <params>
+                <param datatype="uint8" name="bond" type="uint8"/>
+                <param datatype="uint8" name="keysize" type="uint8"/>
+                <param datatype="uint8" name="mitm" type="uint8"/>
+                <param datatype="uint8" name="keys" type="uint8"/>
+            </params>
+        </event>
+        <enums name="bonding_key">
+            <enum name="bonding_key_ltk" value="0x01"/>
+            <enum name="bonding_key_addr_public" value="0x02"/>
+            <enum name="bonding_key_addr_static" value="0x04"/>
+            <enum name="bonding_key_irk" value="0x08"/>
+            <enum name="bonding_key_edivrand" value="0x10"/>
+            <enum name="bonding_key_csrk" value="0x20"/>
+            <enum name="bonding_key_masterid" value="0x40"/>
+        </enums>
+        <enums name="io_capability">
+            <enum name="io_capability_displayonly" value="0"/>
+            <enum name="io_capability_displayyesno" value="1"/>
+            <enum name="io_capability_keyboardonly" value="2"/>
+            <enum name="io_capability_noinputnooutput" value="3"/>
+            <enum name="io_capability_keyboarddisplay" value="4"/>
+        </enums>
+    </class>
+    <class index="6" name="gap" singleton="true">
+        <command index="0" name="set_privacy_flags" script="56">
+            <params>
+                <param datatype="uint8" name="peripheral_privacy" type="uint8"/>
+                <param datatype="uint8" name="central_privacy" type="uint8"/>
+            </params>
+            <returns/>
+        </command>
+        <command index="1" name="set_mode" script="57">
+            <params>
+                <param datatype="uint8" name="discover" type="uint8"/>
+                <param datatype="uint8" name="connect" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="2" name="discover" script="58">
+            <params>
+                <param datatype="uint8" name="mode" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="3" name="connect_direct" script="59">
+            <params>
+                <param datatype="bd_addr" name="address" type="bd_addr"/>
+                <param datatype="uint8" name="addr_type" type="uint8"/>
+                <param datatype="uint16" name="conn_interval_min" type="uint16"/>
+                <param datatype="uint16" name="conn_interval_max" type="uint16"/>
+                <param datatype="uint16" name="timeout" type="uint16"/>
+                <param datatype="uint16" name="latency" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint8" name="connection_handle" type="uint8"/>
+            </returns>
+        </command>
+        <command index="4" name="end_procedure" script="60">
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="5" name="connect_selective" script="61">
+            <params>
+                <param datatype="uint16" name="conn_interval_min" type="uint16"/>
+                <param datatype="uint16" name="conn_interval_max" type="uint16"/>
+                <param datatype="uint16" name="timeout" type="uint16"/>
+                <param datatype="uint16" name="latency" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint8" name="connection_handle" type="uint8"/>
+            </returns>
+        </command>
+        <command index="6" name="set_filtering" script="62">
+            <params>
+                <param datatype="uint8" name="scan_policy" type="uint8"/>
+                <param datatype="uint8" name="adv_policy" type="uint8"/>
+                <param datatype="uint8" name="scan_duplicate_filtering" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="7" name="set_scan_parameters" script="63">
+            <params>
+                <param datatype="uint16" name="scan_interval" type="uint16"/>
+                <param datatype="uint16" name="scan_window" type="uint16"/>
+                <param datatype="uint8" name="active" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="8" name="set_adv_parameters" script="64">
+            <params>
+                <param datatype="uint16" name="adv_interval_min" type="uint16"/>
+                <param datatype="uint16" name="adv_interval_max" type="uint16"/>
+                <param datatype="uint8" name="adv_channels" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="9" name="set_adv_data" script="65">
+            <params>
+                <param datatype="uint8" name="set_scanrsp" type="uint8"/>
+                <param datatype="uint8array" name="adv_data" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="10" name="set_directed_connectable_mode" script="66">
+            <params>
+                <param datatype="bd_addr" name="address" type="bd_addr"/>
+                <param datatype="uint8" name="addr_type" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <event index="0" name="scan_response" script="27">
+            <params>
+                <param datatype="dbm" name="rssi" type="int8"/>
+                <param datatype="uint8" name="packet_type" type="uint8"/>
+                <param datatype="bd_addr" name="sender" type="bd_addr"/>
+                <param datatype="uint8" name="address_type" type="uint8"/>
+                <param datatype="uint8" name="bond" type="uint8"/>
+                <param datatype="uint8array" name="data" type="uint8array"/>
+            </params>
+        </event>
+        <event index="1" internal="true" name="mode_changed" script="28">
+            <params>
+                <param datatype="uint8" name="discover" type="uint8"/>
+                <param datatype="uint8" name="connect" type="uint8"/>
+            </params>
+        </event>
+        <enums name="address_type">
+            <enum name="address_type_public" value="0"/>
+            <enum name="address_type_random" value="1"/>
+        </enums>
+        <enums name="discoverable_mode">
+            <enum name="non_discoverable" value="0"/>
+            <enum name="limited_discoverable" value="1"/>
+            <enum name="general_discoverable" value="2"/>
+            <enum name="broadcast" value="3"/>
+            <enum name="user_data" value="4"/>
+        </enums>
+        <enums name="connectable_mode">
+            <enum name="non_connectable" value="0"/>
+            <enum name="directed_connectable" value="1"/>
+            <enum name="undirected_connectable" value="2"/>
+            <enum name="scannable_connectable" value="3"/>
+        </enums>
+        <enums name="discover_mode">
+            <enum name="discover_limited" value="0"/>
+            <enum name="discover_generic" value="1"/>
+            <enum name="discover_observation" value="2"/>
+        </enums>
+        <enums name="ad_types">
+            <enum name="ad_type_none" value="0"/>
+            <enum name="ad_type_flags" value="1"/>
+            <enum name="ad_type_services_16bit_more" value="2"/>
+            <enum name="ad_type_services_16bit_all" value="3"/>
+            <enum name="ad_type_services_32bit_more" value="4"/>
+            <enum name="ad_type_services_32bit_all" value="5"/>
+            <enum name="ad_type_services_128bit_more" value="6"/>
+            <enum name="ad_type_services_128bit_all" value="7"/>
+            <enum name="ad_type_localname_short" value="8"/>
+            <enum name="ad_type_localname_complete" value="9"/>
+            <enum name="ad_type_txpower" value="10"/>
+        </enums>
+        <enums name="advertising_policy">
+            <enum name="adv_policy_all" value="0"/>
+            <enum name="adv_policy_whitelist_scan" value="1"/>
+            <enum name="adv_policy_whitelist_connect" value="2"/>
+            <enum name="adv_policy_whitelist_all" value="3"/>
+        </enums>
+        <enums name="scan_policy">
+            <enum name="scan_policy_all" value="0"/>
+            <enum name="scan_policy_whitelist" value="1"/>
+        </enums>
+        <defines name="scan_header_flags">
+            <enum name="scan_header_adv_ind" value="0"/>
+            <enum name="scan_header_adv_direct_ind" value="1"/>
+            <enum name="scan_header_adv_nonconn_ind" value="2"/>
+            <enum name="scan_header_scan_req" value="3"/>
+            <enum name="scan_header_scan_rsp" value="4"/>
+            <enum name="scan_header_connect_req" value="5"/>
+            <enum name="scan_header_adv_discover_ind" value="6"/>
+        </defines>
+        <defines name="AD_FLAGS">
+            <enum name="AD_FLAG_LIMITED_DISCOVERABLE" value="0x01"/>
+            <enum name="AD_FLAG_GENERAL_DISCOVERABLE" value="0x02"/>
+            <enum name="AD_FLAG_BREDR_NOT_SUPPORTED" value="0x04"/>
+            <enum name="AD_FLAG_SIMULTANEOUS_LEBREDR_CTRL" value="0x10"/>
+            <enum name="AD_FLAG_SIMULTANEOUS_LEBREDR_HOST" value="0x20"/>
+            <enum name="AD_FLAG_MASK" value="0x1f"/>
+        </defines>
+    </class>
+    <class index="7" name="hardware" singleton="true">
+        <command index="0" name="io_port_config_irq" script="67">
+            <params>
+                <param datatype="uint8" name="port" type="uint8"/>
+                <param datatype="uint8" name="enable_bits" type="uint8"/>
+                <param datatype="uint8" name="falling_edge" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="1" name="set_soft_timer" script="68">
+            <params>
+                <param datatype="uint32" name="time" type="uint32"/>
+                <param datatype="uint8" name="handle" type="uint8"/>
+                <param datatype="uint8" name="single_shot" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="2" name="adc_read" script="69">
+            <params>
+                <param datatype="uint8" name="input" type="uint8"/>
+                <param datatype="uint8" name="decimation" type="uint8"/>
+                <param datatype="uint8" name="reference_selection" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="3" name="io_port_config_direction" script="70">
+            <params>
+                <param datatype="uint8" name="port" type="uint8"/>
+                <param datatype="uint8" name="direction" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="4" name="io_port_config_function" script="71">
+            <params>
+                <param datatype="uint8" name="port" type="uint8"/>
+                <param datatype="uint8" name="function" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="5" name="io_port_config_pull" script="72">
+            <params>
+                <param datatype="uint8" name="port" type="uint8"/>
+                <param datatype="uint8" name="tristate_mask" type="uint8"/>
+                <param datatype="uint8" name="pull_up" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="6" name="io_port_write" script="73">
+            <params>
+                <param datatype="uint8" name="port" type="uint8"/>
+                <param datatype="uint8" name="mask" type="uint8"/>
+                <param datatype="uint8" name="data" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="7" name="io_port_read" script="74">
+            <params>
+                <param datatype="uint8" name="port" type="uint8"/>
+                <param datatype="uint8" name="mask" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint8" name="port" type="uint8"/>
+                <param datatype="uint8" name="data" type="uint8"/>
+            </returns>
+        </command>
+        <command index="8" name="spi_config" script="75">
+            <params>
+                <param datatype="uint8" name="channel" type="uint8"/>
+                <param datatype="uint8" name="polarity" type="uint8"/>
+                <param datatype="uint8" name="phase" type="uint8"/>
+                <param datatype="uint8" name="bit_order" type="uint8"/>
+                <param datatype="uint8" name="baud_e" type="uint8"/>
+                <param datatype="uint8" name="baud_m" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="9" name="spi_transfer" script="76">
+            <params>
+                <param datatype="uint8" name="channel" type="uint8"/>
+                <param datatype="uint8array" name="data" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint8" name="channel" type="uint8"/>
+                <param datatype="uint8array" name="data" type="uint8array"/>
+            </returns>
+        </command>
+        <command index="10" name="i2c_read" script="77">
+            <params>
+                <param datatype="uint8" name="address" type="uint8"/>
+                <param datatype="uint8" name="stop" type="uint8"/>
+                <param datatype="uint8" name="length" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint8array" name="data" type="uint8array"/>
+            </returns>
+        </command>
+        <command index="11" name="i2c_write" script="78">
+            <params>
+                <param datatype="uint8" name="address" type="uint8"/>
+                <param datatype="uint8" name="stop" type="uint8"/>
+                <param datatype="uint8array" name="data" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="uint8" name="written" type="uint8"/>
+            </returns>
+        </command>
+        <command index="12" name="set_txpower" script="79">
+            <params>
+                <param datatype="uint8" name="power" type="uint8"/>
+            </params>
+            <returns/>
+        </command>
+        <command index="13" name="timer_comparator" script="80">
+            <params>
+                <param datatype="uint8" name="timer" type="uint8"/>
+                <param datatype="uint8" name="channel" type="uint8"/>
+                <param datatype="uint8" name="mode" type="uint8"/>
+                <param datatype="uint16" name="comparator_value" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <event index="0" name="io_port_status" script="29">
+            <params>
+                <param datatype="uint32" name="timestamp" type="uint32"/>
+                <param datatype="uint8" name="port" type="uint8"/>
+                <param datatype="uint8" name="irq" type="uint8"/>
+                <param datatype="uint8" name="state" type="uint8"/>
+            </params>
+        </event>
+        <event index="1" name="soft_timer" script="30">
+            <params>
+                <param datatype="uint8" name="handle" type="uint8"/>
+            </params>
+        </event>
+        <event index="2" name="adc_result" script="31">
+            <params>
+                <param datatype="uint8" name="input" type="uint8"/>
+                <param datatype="int16" name="value" type="int16"/>
+            </params>
+        </event>
+    </class>
+    <class index="8" name="test" singleton="true">
+        <command index="0" internal="true" name="phy_tx" script="81">
+            <params>
+                <param datatype="uint8" name="channel" type="uint8"/>
+                <param datatype="uint8" name="length" type="uint8"/>
+                <param datatype="uint8" name="type" type="uint8"/>
+            </params>
+            <returns/>
+        </command>
+        <command index="1" internal="true" name="phy_rx" script="82">
+            <params>
+                <param datatype="uint8" name="channel" type="uint8"/>
+            </params>
+            <returns/>
+        </command>
+        <command index="2" internal="true" name="phy_end" script="83">
+            <params/>
+            <returns>
+                <param datatype="uint16" name="counter" type="uint16"/>
+            </returns>
+        </command>
+        <command index="3" internal="true" name="phy_reset" script="84">
+            <params/>
+            <returns/>
+        </command>
+        <command index="4" internal="true" name="get_channel_map" script="85">
+            <params/>
+            <returns>
+                <param datatype="uint8array" name="channel_map" type="uint8array"/>
+            </returns>
+        </command>
+        <command index="5" internal="true" name="debug" script="86">
+            <params>
+                <param datatype="uint8array" name="input" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="uint8array" name="output" type="uint8array"/>
+            </returns>
+        </command>
+    </class>
+</api>
