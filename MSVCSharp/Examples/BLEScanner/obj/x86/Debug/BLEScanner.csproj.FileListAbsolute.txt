@@ -12,3 +12,10 @@ C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BGLibScanner\BLEScanner\bin\
 C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BGLibScanner\BLEScanner\obj\x86\Debug\BLEScanner.frmMain.resources
 C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BGLibScanner\BLEScanner\obj\x86\Debug\BLEScanner.Properties.Resources.resources
 C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BGLibScanner\BLEScanner\obj\x86\Debug\BLEScanner.csproj.GenerateResource.Cache
+C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEScanner\BLEScanner\obj\x86\Debug\BLEScanner.frmMain.resources
+C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEScanner\BLEScanner\obj\x86\Debug\BLEScanner.Properties.Resources.resources
+C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEScanner\BLEScanner\obj\x86\Debug\BLEScanner.csproj.GenerateResource.Cache
+C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEScanner\BLEScanner\bin\Debug\BGLibScanner.exe
+C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEScanner\BLEScanner\bin\Debug\BGLibScanner.pdb
+C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEScanner\BLEScanner\obj\x86\Debug\BGLibScanner.exe
+C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEScanner\BLEScanner\obj\x86\Debug\BGLibScanner.pdb

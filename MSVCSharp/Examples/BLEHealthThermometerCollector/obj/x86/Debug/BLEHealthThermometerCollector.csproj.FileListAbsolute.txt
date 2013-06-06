@@ -1,0 +1,7 @@
+C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEHealthThermometerCollector\BLEHealthThermometerCollector\bin\Debug\BLEHealthThermometerCollector.exe
+C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEHealthThermometerCollector\BLEHealthThermometerCollector\bin\Debug\BLEHealthThermometerCollector.pdb
+C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEHealthThermometerCollector\BLEHealthThermometerCollector\obj\x86\Debug\BLEHealthThermometerCollector.Form1.resources
+C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEHealthThermometerCollector\BLEHealthThermometerCollector\obj\x86\Debug\BLEHealthThermometerCollector.Properties.Resources.resources
+C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEHealthThermometerCollector\BLEHealthThermometerCollector\obj\x86\Debug\BLEHealthThermometerCollector.csproj.GenerateResource.Cache
+C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEHealthThermometerCollector\BLEHealthThermometerCollector\obj\x86\Debug\BLEHealthThermometerCollector.exe
+C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEHealthThermometerCollector\BLEHealthThermometerCollector\obj\x86\Debug\BLEHealthThermometerCollector.pdb

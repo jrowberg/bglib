@@ -62,11 +62,11 @@
             this.txtLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtLog.Location = new System.Drawing.Point(13, 13);
+            this.txtLog.Location = new System.Drawing.Point(13, 12);
             this.txtLog.Multiline = true;
             this.txtLog.Name = "txtLog";
             this.txtLog.ReadOnly = true;
-            this.txtLog.Size = new System.Drawing.Size(843, 242);
+            this.txtLog.Size = new System.Drawing.Size(843, 243);
             this.txtLog.TabIndex = 3;
             // 
             // frmMain

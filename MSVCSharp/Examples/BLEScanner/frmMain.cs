@@ -42,7 +42,7 @@ namespace BLEScanner
 
         public Bluegiga.BGLib bglib = new Bluegiga.BGLib();
 
-        public void SystemBootEvent(object sender, Bluegiga.BLE.SystemBootEventArgs e)
+        public void SystemBootEvent(object sender, Bluegiga.BLE.Events.System.BootEventArgs e)
         {
             String log = String.Format("ble_evt_system_boot:" + Environment.NewLine + "\tmajor={0}, minor={1}, patch={2}, build={3}, ll_version={4}, protocol_version={5}, hw={6}" + Environment.NewLine,
                 e.major,
@@ -57,12 +57,12 @@ namespace BLEScanner
             ThreadSafeDelegate(delegate { txtLog.AppendText(log); });
         }
 
-        public void GAPScanResponseEvent(object sender, Bluegiga.BLE.GAPScanResponseEventArgs e)
+        public void GAPScanResponseEvent(object sender, Bluegiga.BLE.Events.GAP.ScanResponseEventArgs e)
         {
             String log = String.Format("ble_evt_gap_scan_response:" + Environment.NewLine + "\trssi={0}, packet_type={1}, bd_addr=[ {2}], address_type={3}, bond={4}, data=[ {5}]" + Environment.NewLine,
                 (SByte)e.rssi,
                 (SByte)e.packet_type,
-                ByteArrayToHexString(e.bd_addr),
+                ByteArrayToHexString(e.sender),
                 (SByte)e.address_type,
                 (SByte)e.bond,
                 ByteArrayToHexString(e.data)
@@ -98,8 +98,8 @@ namespace BLEScanner
             serialAPI.Open();
             Console.WriteLine("Port open");
 
-            bglib.SystemBootEvent += new Bluegiga.BLE.SystemBootEventHandler(this.SystemBootEvent);
-            bglib.GAPScanResponseEvent += new Bluegiga.BLE.GAPScanResponseEventHandler(this.GAPScanResponseEvent);
+            bglib.BLEEventSystemBoot += new Bluegiga.BLE.Events.System.BootEventHandler(this.SystemBootEvent);
+            bglib.BLEEventGAPScanResponse += new Bluegiga.BLE.Events.GAP.ScanResponseEventHandler(this.GAPScanResponseEvent);
 
             // send system_hello()
             //serialAPI.Write(new Byte[] { 0, 0, 0, 1 }, 0, 4);
@@ -121,20 +121,22 @@ namespace BLEScanner
             // parse all bytes read through BGLib parser
             for (int i = 0; i < inData.Length; i++)
             {
-                bglib.parse(inData[i]);
+                bglib.Parse(inData[i]);
             }
         }
 
         private void btnStartScan_Click(object sender, EventArgs e)
         {
             // send gap_discover(mode: 1)
-            serialAPI.Write(new Byte[] { 0, 1, 6, 2, 1 }, 0, 5);
+            //serialAPI.Write(new Byte[] { 0, 1, 6, 2, 1 }, 0, 5);
+            bglib.SendCommand(serialAPI, bglib.BLECommandGAPDiscover(1));
         }
 
         private void btnStopScan_Click(object sender, EventArgs e)
         {
             // send gap_end_procedure()
-            serialAPI.Write(new Byte[] { 0, 0, 6, 4 }, 0, 4);
+            //serialAPI.Write(new Byte[] { 0, 0, 6, 4 }, 0, 4);
+            bglib.SendCommand(serialAPI, bglib.BLECommandGAPEndProcedure());
         }
 
         public string ByteArrayToHexString(Byte[] ba)
