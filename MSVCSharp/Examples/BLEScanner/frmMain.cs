@@ -90,7 +90,7 @@ namespace BLEScanner
         {
             serialAPI.Handshake = System.IO.Ports.Handshake.RequestToSend;
             serialAPI.BaudRate = 115200;
-            serialAPI.PortName = "COM13";
+            serialAPI.PortName = "COM12";
             serialAPI.DataBits = 8;
             serialAPI.StopBits = System.IO.Ports.StopBits.One;
             serialAPI.Parity = System.IO.Ports.Parity.None;

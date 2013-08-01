@@ -5,3 +5,4 @@ C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEHealthThermometerCollecto
 C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEHealthThermometerCollector\BLEHealthThermometerCollector\obj\x86\Debug\BLEHealthThermometerCollector.csproj.GenerateResource.Cache
 C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEHealthThermometerCollector\BLEHealthThermometerCollector\obj\x86\Debug\BLEHealthThermometerCollector.exe
 C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEHealthThermometerCollector\BLEHealthThermometerCollector\obj\x86\Debug\BLEHealthThermometerCollector.pdb
+C:\Users\Jeff\documents\visual studio 2010\Projects\BLEHealthThermometerCollector\BLEHealthThermometerCollector\obj\x86\Debug\BLEHealthThermometerCollector.csprojResolveAssemblyReference.cache

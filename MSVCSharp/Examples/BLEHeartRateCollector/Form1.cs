@@ -8,7 +8,7 @@ using System.Text;
 using System.Management;
 using System.Windows.Forms;
 
-namespace BLEHealthThermometerCollector
+namespace BLEHeartRateCollector
 {
     public partial class Form1 : Form
     {
@@ -33,11 +33,11 @@ namespace BLEHealthThermometerCollector
         public Byte connection_handle = 0;              // connection handle (will always be 0 if only one connection happens at a time)
         public UInt16 att_handlesearch_start = 0;       // "start" handle holder during search
         public UInt16 att_handlesearch_end = 0;         // "end" handle holder during search
-        public UInt16 att_handle_measurement = 0;       // temperature measurement attribute handle
-        public UInt16 att_handle_measurement_ccc = 0;   // temperature measurement client characteristic configuration handle (to enable indications)
+        public UInt16 att_handle_measurement = 0;       // heart rate measurement attribute handle
+        public UInt16 att_handle_measurement_ccc = 0;   // heart rate measurement client characteristic configuration handle (to enable notifications)
 
         // for master/scanner devices, the "gap_scan_response" event is a common entry-like point
-        // this filters ad packets to find devices which advertise the Health Thermometer service
+        // this filters ad packets to find devices which advertise the Heart Rate service
         public void GAPScanResponseEvent(object sender, Bluegiga.BLE.Events.GAP.ScanResponseEventArgs e)
         {
             String log = String.Format("ble_evt_gap_scan_response: rssi={0}, packet_type={1}, sender=[ {2}], address_type={3}, bond={4}, data=[ {5}]" + Environment.NewLine,
@@ -89,8 +89,8 @@ namespace BLEHealthThermometerCollector
                 }
             }
 
-            // check for 0x1809 (official health thermometer service UUID)
-            if (ad_services.Any(a => a.SequenceEqual(new Byte[] { 0x18, 0x09 }))) {
+            // check for 0x180D (official heart rate service UUID)
+            if (ad_services.Any(a => a.SequenceEqual(new Byte[] { 0x18, 0x0D }))) {
                 // connect to this device
                 Byte[] cmd = bglib.BLECommandGAPConnectDirect(e.sender, e.address_type, 0x20, 0x30, 0x100, 0); // 125ms interval, 125ms window, active scanning
                 // DEBUG: display bytes written
@@ -146,10 +146,10 @@ namespace BLEHealthThermometerCollector
             Console.Write(log);
             ThreadSafeDelegate(delegate { txtLog.AppendText(log); });
 
-            // found "service" attribute groups (UUID=0x2800), check for thermometer service
-            if (e.uuid.SequenceEqual(new Byte[] { 0x09, 0x18 }))
+            // found "service" attribute groups (UUID=0x2800), check for heart rate measurement service
+            if (e.uuid.SequenceEqual(new Byte[] { 0x0D, 0x18 }))
             {
-                ThreadSafeDelegate(delegate { txtLog.AppendText(String.Format("Found attribute group for service w/UUID=0x1809: start={0}, end=%d", e.start, e.end) + Environment.NewLine); });
+                ThreadSafeDelegate(delegate { txtLog.AppendText(String.Format("Found attribute group for service w/UUID=0x180D: start={0}, end=%d", e.start, e.end) + Environment.NewLine); });
                 att_handlesearch_start = e.start;
                 att_handlesearch_end = e.end;
             }
@@ -165,13 +165,13 @@ namespace BLEHealthThermometerCollector
             Console.Write(log);
             ThreadSafeDelegate(delegate { txtLog.AppendText(log); });
 
-            // check for thermometer measurement characteristic
-            if (e.uuid.SequenceEqual(new Byte[] { 0x1C, 0x2A }))
+            // check for heart rate measurement characteristic (UUID=0x2A37)
+            if (e.uuid.SequenceEqual(new Byte[] { 0x37, 0x2A }))
             {
-                ThreadSafeDelegate(delegate { txtLog.AppendText(String.Format("Found attribute w/UUID=0x2A1C: handle={0}", e.chrhandle) + Environment.NewLine); });
+                ThreadSafeDelegate(delegate { txtLog.AppendText(String.Format("Found attribute w/UUID=0x2A37: handle={0}", e.chrhandle) + Environment.NewLine); });
                 att_handle_measurement = e.chrhandle;
             }
-            // check for subsequent client characteristic configuration
+            // check for subsequent client characteristic configuration (UUID=0x2902)
             else if (e.uuid.SequenceEqual(new Byte[]  { 0x02, 0x29 }) && att_handle_measurement > 0)
             {
                 ThreadSafeDelegate(delegate { txtLog.AppendText(String.Format("Found attribute w/UUID=0x2902: handle={0}", e.chrhandle) + Environment.NewLine); });
@@ -194,9 +194,9 @@ namespace BLEHealthThermometerCollector
             {
                 if (att_handlesearch_end > 0)
                 {
-                    //print "Found 'Health Thermometer' service with UUID 0x1809"
+                    //print "Found 'Heart Rate' service with UUID 0x180D"
 
-                    // found the Health Thermometer service, so now search for the attributes inside
+                    // found the Heart Rate service, so now search for the attributes inside
                     Byte[] cmd = bglib.BLECommandATTClientFindInformation(e.connection, att_handlesearch_start, att_handlesearch_end);
                     // DEBUG: display bytes written
                     ThreadSafeDelegate(delegate { txtLog.AppendText(String.Format("=> TX ({0}) [ {1}]", cmd.Length, ByteArrayToHexString(cmd)) + Environment.NewLine); });
@@ -208,19 +208,19 @@ namespace BLEHealthThermometerCollector
                 }
                 else
                 {
-                    ThreadSafeDelegate(delegate { txtLog.AppendText("Could not find 'Health Thermometer' service with UUID 0x1809" + Environment.NewLine); });
+                    ThreadSafeDelegate(delegate { txtLog.AppendText("Could not find 'Heart Rate' service with UUID 0x180D" + Environment.NewLine); });
                 }
             }
-            // check if we just finished searching for attributes within the thermometer service
+            // check if we just finished searching for attributes within the heart rate service
             else if (app_state == STATE_FINDING_ATTRIBUTES)
             {
                 if (att_handle_measurement_ccc > 0)
                 {
-                    //print "Found 'Health Thermometer' measurement attribute with UUID 0x2A1C"
+                    //print "Found 'Heart Rate' measurement attribute with UUID 0x2A37"
 
-                    // found the measurement + client characteristic configuration, so enable indications
-                    // (this is done by writing 0x02 to the client characteristic configuration attribute)
-                    Byte[] cmd = bglib.BLECommandATTClientAttributeWrite(e.connection, att_handle_measurement_ccc, new Byte[] { 0x02 });
+                    // found the measurement + client characteristic configuration, so enable notifications
+                    // (this is done by writing 0x01 to the client characteristic configuration attribute)
+                    Byte[] cmd = bglib.BLECommandATTClientAttributeWrite(e.connection, att_handle_measurement_ccc, new Byte[] { 0x01 });
                     // DEBUG: display bytes written
                     ThreadSafeDelegate(delegate { txtLog.AppendText(String.Format("=> TX ({0}) [ {1}]", cmd.Length, ByteArrayToHexString(cmd)) + Environment.NewLine); });
                     bglib.SendCommand(serialAPI, cmd);
@@ -231,7 +231,7 @@ namespace BLEHealthThermometerCollector
                 }
                 else
                 {
-                    ThreadSafeDelegate(delegate { txtLog.AppendText("Could not find 'Health Thermometer' measurement attribute with UUID 0x2A1C" + Environment.NewLine); });
+                    ThreadSafeDelegate(delegate { txtLog.AppendText("Could not find 'Heart Rate' measurement attribute with UUID 0x2A37" + Environment.NewLine); });
                 }
             }
         }
@@ -247,27 +247,14 @@ namespace BLEHealthThermometerCollector
             Console.Write(log);
             ThreadSafeDelegate(delegate { txtLog.AppendText(log); });
 
-            // check for a new value from the connected peripheral's temperature measurement attribute
+            // check for a new value from the connected peripheral's heart rate measurement attribute
             if (e.connection == connection_handle && e.atthandle == att_handle_measurement)
             {
-                Byte htm_flags = e.value[0];
-                int htm_exponent = e.value[4];
-                int htm_mantissa = (e.value[3] << 16) | (e.value[2] << 8) | e.value[1];
-                if (htm_exponent > 127)
-                {
-                    // # convert to signed 8-bit int
-                    htm_exponent = htm_exponent - 256;
-                }
-                float htm_measurement = htm_mantissa * (float)Math.Pow(10, htm_exponent);
-                char temp_type = 'C';
-                if ((htm_flags & 0x01) == 0x01)
-                {
-                    // value sent is Fahrenheit, not Celsius
-                    temp_type = 'F';
-                }
+                Byte hr_flags = e.value[0];
+                int hr_measurement = e.value[1];
 
                 // display actual measurement
-                ThreadSafeDelegate(delegate { txtLog.AppendText(String.Format("Temperature: {0}\u00B0 {1}", htm_measurement, temp_type) + Environment.NewLine); });
+                ThreadSafeDelegate(delegate { txtLog.AppendText(String.Format("Heart rate: {0} bpm", hr_measurement) + Environment.NewLine); });
             }
         }
 

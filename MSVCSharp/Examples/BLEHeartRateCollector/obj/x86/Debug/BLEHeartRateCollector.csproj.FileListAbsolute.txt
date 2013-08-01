@@ -1,0 +1,7 @@
+C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEHeartRateCollector\BLEHeartRateCollector\bin\Debug\BLEHeartRateCollector.exe
+C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEHeartRateCollector\BLEHeartRateCollector\bin\Debug\BLEHeartRateCollector.pdb
+C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEHeartRateCollector\BLEHeartRateCollector\obj\x86\Debug\BLEHeartRateCollector.Form1.resources
+C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEHeartRateCollector\BLEHeartRateCollector\obj\x86\Debug\BLEHeartRateCollector.Properties.Resources.resources
+C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEHeartRateCollector\BLEHeartRateCollector\obj\x86\Debug\BLEHeartRateCollector.csproj.GenerateResource.Cache
+C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEHeartRateCollector\BLEHeartRateCollector\obj\x86\Debug\BLEHeartRateCollector.exe
+C:\Users\Jeff\Documents\Visual Studio 2010\Projects\BLEHeartRateCollector\BLEHeartRateCollector\obj\x86\Debug\BLEHeartRateCollector.pdb
