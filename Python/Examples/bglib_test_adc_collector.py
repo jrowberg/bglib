@@ -191,7 +191,7 @@ def my_ble_evt_gap_scan_response(sender, args):
             #print "%s" % ':'.join(['%02X' % b for b in args['sender'][::-1]])
 
             # connect to this device using very fast connection parameters (7.5ms - 15ms range)
-            ble.send_command(ser, ble.ble_cmd_gap_connect_direct(args['sender'], 0, 0x06, 0x0C, 0x100, 0))
+            ble.send_command(ser, ble.ble_cmd_gap_connect_direct(args['sender'], args['address_type'], 0x06, 0x0C, 0x100, 0))
             ble.check_activity(ser, 1)
             state = STATE_CONNECTING
 

@@ -186,7 +186,7 @@ def my_ble_evt_gap_scan_response(sender, args):
             #print "%s" % ':'.join(['%02X' % b for b in args['sender'][::-1]])
 
             # connect to this device
-            ble.send_command(ser, ble.ble_cmd_gap_connect_direct(args['sender'], 0, 0x20, 0x30, 0x100, 0))
+            ble.send_command(ser, ble.ble_cmd_gap_connect_direct(args['sender'], args['address_type'], 0x20, 0x30, 0x100, 0))
             ble.check_activity(ser, 1)
             state = STATE_CONNECTING
 
