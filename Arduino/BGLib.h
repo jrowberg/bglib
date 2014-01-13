@@ -78,19 +78,6 @@
 #define BGLIB_GAP_ADV_POLICY_WHITELIST_ALL                          3
 #define BGLIB_GAP_SCAN_POLICY_ALL                                   0
 #define BGLIB_GAP_SCAN_POLICY_WHITELIST                             1
-#define BGLIB_GAP_SCAN_HEADER_ADV_IND                               0
-#define BGLIB_GAP_SCAN_HEADER_ADV_DIRECT_IND                        1
-#define BGLIB_GAP_SCAN_HEADER_ADV_NONCONN_IND                       2
-#define BGLIB_GAP_SCAN_HEADER_SCAN_REQ                              3
-#define BGLIB_GAP_SCAN_HEADER_SCAN_RSP                              4
-#define BGLIB_GAP_SCAN_HEADER_CONNECT_REQ                           5
-#define BGLIB_GAP_SCAN_HEADER_ADV_DISCOVER_IND                      6
-#define BGLIB_GAP_AD_FLAG_LIMITED_DISCOVERABLE                      0x01
-#define BGLIB_GAP_AD_FLAG_GENERAL_DISCOVERABLE                      0x02
-#define BGLIB_GAP_AD_FLAG_BREDR_NOT_SUPPORTED                       0x04
-#define BGLIB_GAP_AD_FLAG_SIMULTANEOUS_LEBREDR_CTRL                 0x10
-#define BGLIB_GAP_AD_FLAG_SIMULTANEOUS_LEBREDR_HOST                 0x20
-#define BGLIB_GAP_AD_FLAG_MASK                                      0x1f
 
 #define PACKED __attribute__((packed))
 #define ALIGNED __attribute__((aligned(0x4)))
@@ -268,6 +255,11 @@ struct ble_msg_system_script_failure_evt_t {
     uint16 reason;
 } PACKED;
 #endif
+#ifdef BGLIB_ENABLE_EVENT_SYSTEM_PROTOCOL_ERROR
+struct ble_msg_system_protocol_error_evt_t {
+    uint16 reason;
+} PACKED;
+#endif
 #ifdef BGLIB_ENABLE_COMMAND_FLASH_PS_SAVE
 struct ble_msg_flash_ps_save_cmd_t {
     uint16 key;
@@ -300,11 +292,23 @@ struct ble_msg_flash_erase_page_rsp_t {
     uint16 result;
 } PACKED;
 #endif
-#ifdef BGLIB_ENABLE_COMMAND_FLASH_WRITE_WORDS
-struct ble_msg_flash_write_words_cmd_t {
-    uint16 address;
-    uint8 words_len;
-    const uint8 *words_data;
+#ifdef BGLIB_ENABLE_COMMAND_FLASH_WRITE_DATA
+struct ble_msg_flash_write_data_cmd_t {
+    uint32 address;
+    uint8 data_len;
+    const uint8 *data_data;
+} PACKED;
+struct ble_msg_flash_write_data_rsp_t {
+    uint16 result;
+} PACKED;
+#endif
+#ifdef BGLIB_ENABLE_COMMAND_FLASH_READ_DATA
+struct ble_msg_flash_read_data_cmd_t {
+    uint32 address;
+    uint8 length;
+} PACKED;
+struct ble_msg_flash_read_data_rsp_t {
+    uint8array data;
 } PACKED;
 #endif
 #ifdef BGLIB_ENABLE_EVENT_FLASH_PS_KEY
@@ -1089,6 +1093,43 @@ struct ble_msg_test_debug_rsp_t {
     uint8array output;
 } PACKED;
 #endif
+#ifdef BGLIB_ENABLE_COMMAND_TEST_CHANNEL_MODE
+struct ble_msg_test_channel_mode_cmd_t {
+    uint8 mode;
+} PACKED;
+#endif
+#ifdef BGLIB_ENABLE_COMMAND_DFU_RESET
+struct ble_msg_dfu_reset_cmd_t {
+    uint8 dfu;
+} PACKED;
+#endif
+#ifdef BGLIB_ENABLE_COMMAND_DFU_FLASH_SET_ADDRESS
+struct ble_msg_dfu_flash_set_address_cmd_t {
+    uint32 address;
+} PACKED;
+struct ble_msg_dfu_flash_set_address_rsp_t {
+    uint16 result;
+} PACKED;
+#endif
+#ifdef BGLIB_ENABLE_COMMAND_DFU_FLASH_UPLOAD
+struct ble_msg_dfu_flash_upload_cmd_t {
+    uint8 data_len;
+    const uint8 *data_data;
+} PACKED;
+struct ble_msg_dfu_flash_upload_rsp_t {
+    uint16 result;
+} PACKED;
+#endif
+#ifdef BGLIB_ENABLE_COMMAND_DFU_FLASH_UPLOAD_FINISH
+struct ble_msg_dfu_flash_upload_finish_rsp_t {
+    uint16 result;
+} PACKED;
+#endif
+#ifdef BGLIB_ENABLE_EVENT_DFU_BOOT
+struct ble_msg_dfu_boot_evt_t {
+    uint32 version;
+} PACKED;
+#endif
 
 class BGLib {
     public:
@@ -1182,8 +1223,11 @@ class BGLib {
         #ifdef BGLIB_ENABLE_COMMAND_FLASH_ERASE_PAGE
             uint8_t ble_cmd_flash_erase_page(uint8 page);
         #endif
-        #ifdef BGLIB_ENABLE_COMMAND_FLASH_WRITE_WORDS
-            uint8_t ble_cmd_flash_write_words(uint16 address, uint8 words_len, const uint8 *words_data);
+        #ifdef BGLIB_ENABLE_COMMAND_FLASH_WRITE_DATA
+            uint8_t ble_cmd_flash_write_data(uint32 address, uint8 data_len, const uint8 *data_data);
+        #endif
+        #ifdef BGLIB_ENABLE_COMMAND_FLASH_READ_DATA
+            uint8_t ble_cmd_flash_read_data(uint32 address, uint8 length);
         #endif
         #ifdef BGLIB_ENABLE_COMMAND_ATTRIBUTES_WRITE
             uint8_t ble_cmd_attributes_write(uint16 handle, uint8 offset, uint8 value_len, const uint8 *value_data);
@@ -1377,6 +1421,21 @@ class BGLib {
         #ifdef BGLIB_ENABLE_COMMAND_TEST_DEBUG
             uint8_t ble_cmd_test_debug(uint8 input_len, const uint8 *input_data);
         #endif
+        #ifdef BGLIB_ENABLE_COMMAND_TEST_CHANNEL_MODE
+            uint8_t ble_cmd_test_channel_mode(uint8 mode);
+        #endif
+        #ifdef BGLIB_ENABLE_COMMAND_DFU_RESET
+            uint8_t ble_cmd_dfu_reset(uint8 dfu);
+        #endif
+        #ifdef BGLIB_ENABLE_COMMAND_DFU_FLASH_SET_ADDRESS
+            uint8_t ble_cmd_dfu_flash_set_address(uint32 address);
+        #endif
+        #ifdef BGLIB_ENABLE_COMMAND_DFU_FLASH_UPLOAD
+            uint8_t ble_cmd_dfu_flash_upload(uint8 data_len, const uint8 *data_data);
+        #endif
+        #ifdef BGLIB_ENABLE_COMMAND_DFU_FLASH_UPLOAD_FINISH
+            uint8_t ble_cmd_dfu_flash_upload_finish();
+        #endif
 
         #ifdef BGLIB_ENABLE_COMMAND_SYSTEM_RESET
             void (*ble_rsp_system_reset)(const struct ble_msg_system_reset_rsp_t *msg);
@@ -1444,8 +1503,11 @@ class BGLib {
         #ifdef BGLIB_ENABLE_COMMAND_FLASH_ERASE_PAGE
             void (*ble_rsp_flash_erase_page)(const struct ble_msg_flash_erase_page_rsp_t *msg);
         #endif
-        #ifdef BGLIB_ENABLE_COMMAND_FLASH_WRITE_WORDS
-            void (*ble_rsp_flash_write_words)(const struct ble_msg_flash_write_words_rsp_t *msg);
+        #ifdef BGLIB_ENABLE_COMMAND_FLASH_WRITE_DATA
+            void (*ble_rsp_flash_write_data)(const struct ble_msg_flash_write_data_rsp_t *msg);
+        #endif
+        #ifdef BGLIB_ENABLE_COMMAND_FLASH_READ_DATA
+            void (*ble_rsp_flash_read_data)(const struct ble_msg_flash_read_data_rsp_t *msg);
         #endif
         #ifdef BGLIB_ENABLE_COMMAND_ATTRIBUTES_WRITE
             void (*ble_rsp_attributes_write)(const struct ble_msg_attributes_write_rsp_t *msg);
@@ -1639,6 +1701,21 @@ class BGLib {
         #ifdef BGLIB_ENABLE_COMMAND_TEST_DEBUG
             void (*ble_rsp_test_debug)(const struct ble_msg_test_debug_rsp_t *msg);
         #endif
+        #ifdef BGLIB_ENABLE_COMMAND_TEST_CHANNEL_MODE
+            void (*ble_rsp_test_channel_mode)(const struct ble_msg_test_channel_mode_rsp_t *msg);
+        #endif
+        #ifdef BGLIB_ENABLE_COMMAND_DFU_RESET
+            void (*ble_rsp_dfu_reset)(const struct ble_msg_dfu_reset_rsp_t *msg);
+        #endif
+        #ifdef BGLIB_ENABLE_COMMAND_DFU_FLASH_SET_ADDRESS
+            void (*ble_rsp_dfu_flash_set_address)(const struct ble_msg_dfu_flash_set_address_rsp_t *msg);
+        #endif
+        #ifdef BGLIB_ENABLE_COMMAND_DFU_FLASH_UPLOAD
+            void (*ble_rsp_dfu_flash_upload)(const struct ble_msg_dfu_flash_upload_rsp_t *msg);
+        #endif
+        #ifdef BGLIB_ENABLE_COMMAND_DFU_FLASH_UPLOAD_FINISH
+            void (*ble_rsp_dfu_flash_upload_finish)(const struct ble_msg_dfu_flash_upload_finish_rsp_t *msg);
+        #endif
 
         #ifdef BGLIB_ENABLE_EVENT_SYSTEM_BOOT
             void (*ble_evt_system_boot)(const struct ble_msg_system_boot_evt_t *msg);
@@ -1657,6 +1734,9 @@ class BGLib {
         #endif
         #ifdef BGLIB_ENABLE_EVENT_SYSTEM_NO_LICENSE_KEY
             void (*ble_evt_system_no_license_key)(const struct ble_msg_system_no_license_key_evt_t *msg);
+        #endif
+        #ifdef BGLIB_ENABLE_EVENT_SYSTEM_PROTOCOL_ERROR
+            void (*ble_evt_system_protocol_error)(const struct ble_msg_system_protocol_error_evt_t *msg);
         #endif
         #ifdef BGLIB_ENABLE_EVENT_FLASH_PS_KEY
             void (*ble_evt_flash_ps_key)(const struct ble_msg_flash_ps_key_evt_t *msg);
@@ -1735,6 +1815,9 @@ class BGLib {
         #endif
         #ifdef BGLIB_ENABLE_EVENT_HARDWARE_ADC_RESULT
             void (*ble_evt_hardware_adc_result)(const struct ble_msg_hardware_adc_result_evt_t *msg);
+        #endif
+        #ifdef BGLIB_ENABLE_EVENT_DFU_BOOT
+            void (*ble_evt_dfu_boot)(const struct ble_msg_dfu_boot_evt_t *msg);
         #endif
 
     private:

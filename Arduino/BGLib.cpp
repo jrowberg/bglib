@@ -84,8 +84,11 @@ BGLib::BGLib(HardwareSerial *module, HardwareSerial *output, uint8_t pMode) {
     #ifdef BGLIB_ENABLE_COMMAND_FLASH_ERASE_PAGE
         ble_rsp_flash_erase_page = 0;
     #endif
-    #ifdef BGLIB_ENABLE_COMMAND_FLASH_WRITE_WORDS
-        ble_rsp_flash_write_words = 0;
+    #ifdef BGLIB_ENABLE_COMMAND_FLASH_WRITE_DATA
+        ble_rsp_flash_write_data = 0;
+    #endif
+    #ifdef BGLIB_ENABLE_COMMAND_FLASH_READ_DATA
+        ble_rsp_flash_read_data = 0;
     #endif
     #ifdef BGLIB_ENABLE_COMMAND_ATTRIBUTES_WRITE
         ble_rsp_attributes_write = 0;
@@ -279,6 +282,21 @@ BGLib::BGLib(HardwareSerial *module, HardwareSerial *output, uint8_t pMode) {
     #ifdef BGLIB_ENABLE_COMMAND_TEST_DEBUG
         ble_rsp_test_debug = 0;
     #endif
+    #ifdef BGLIB_ENABLE_COMMAND_TEST_CHANNEL_MODE
+        ble_rsp_test_channel_mode = 0;
+    #endif
+    #ifdef BGLIB_ENABLE_COMMAND_DFU_RESET
+        ble_rsp_dfu_reset = 0;
+    #endif
+    #ifdef BGLIB_ENABLE_COMMAND_DFU_FLASH_SET_ADDRESS
+        ble_rsp_dfu_flash_set_address = 0;
+    #endif
+    #ifdef BGLIB_ENABLE_COMMAND_DFU_FLASH_UPLOAD
+        ble_rsp_dfu_flash_upload = 0;
+    #endif
+    #ifdef BGLIB_ENABLE_COMMAND_DFU_FLASH_UPLOAD_FINISH
+        ble_rsp_dfu_flash_upload_finish = 0;
+    #endif
 
     #ifdef BGLIB_ENABLE_EVENT_SYSTEM_BOOT
         ble_evt_system_boot = 0;
@@ -297,6 +315,9 @@ BGLib::BGLib(HardwareSerial *module, HardwareSerial *output, uint8_t pMode) {
     #endif
     #ifdef BGLIB_ENABLE_EVENT_SYSTEM_NO_LICENSE_KEY
         ble_evt_system_no_license_key = 0;
+    #endif
+    #ifdef BGLIB_ENABLE_EVENT_SYSTEM_PROTOCOL_ERROR
+        ble_evt_system_protocol_error = 0;
     #endif
     #ifdef BGLIB_ENABLE_EVENT_FLASH_PS_KEY
         ble_evt_flash_ps_key = 0;
@@ -375,6 +396,9 @@ BGLib::BGLib(HardwareSerial *module, HardwareSerial *output, uint8_t pMode) {
     #endif
     #ifdef BGLIB_ENABLE_EVENT_HARDWARE_ADC_RESULT
         ble_evt_hardware_adc_result = 0;
+    #endif
+    #ifdef BGLIB_ENABLE_EVENT_DFU_BOOT
+        ble_evt_dfu_boot = 0;
     #endif
 }
 
@@ -572,8 +596,11 @@ uint8_t BGLib::parse(uint8_t ch, uint8_t packetMode) {
                     #ifdef BGLIB_ENABLE_COMMAND_FLASH_ERASE_PAGE
                         else if (bgapiRXBuffer[3] == 6) { if (ble_rsp_flash_erase_page) ble_rsp_flash_erase_page((const struct ble_msg_flash_erase_page_rsp_t *)(bgapiRXBuffer + 4)); }
                     #endif
-                    #ifdef BGLIB_ENABLE_COMMAND_FLASH_WRITE_WORDS
-                        else if (bgapiRXBuffer[3] == 7) { if (ble_rsp_flash_write_words) ble_rsp_flash_write_words((const struct ble_msg_flash_write_words_rsp_t *)(bgapiRXBuffer + 4)); }
+                    #ifdef BGLIB_ENABLE_COMMAND_FLASH_WRITE_DATA
+                        else if (bgapiRXBuffer[3] == 7) { if (ble_rsp_flash_write_data) ble_rsp_flash_write_data((const struct ble_msg_flash_write_data_rsp_t *)(bgapiRXBuffer + 4)); }
+                    #endif
+                    #ifdef BGLIB_ENABLE_COMMAND_FLASH_READ_DATA
+                        else if (bgapiRXBuffer[3] == 8) { if (ble_rsp_flash_read_data) ble_rsp_flash_read_data((const struct ble_msg_flash_read_data_rsp_t *)(bgapiRXBuffer + 4)); }
                     #endif
                 }
                 else if (bgapiRXBuffer[2] == 2) {
@@ -788,6 +815,24 @@ uint8_t BGLib::parse(uint8_t ch, uint8_t packetMode) {
                     #ifdef BGLIB_ENABLE_COMMAND_TEST_DEBUG
                         else if (bgapiRXBuffer[3] == 5) { if (ble_rsp_test_debug) ble_rsp_test_debug((const struct ble_msg_test_debug_rsp_t *)(bgapiRXBuffer + 4)); }
                     #endif
+                    #ifdef BGLIB_ENABLE_COMMAND_TEST_CHANNEL_MODE
+                        else if (bgapiRXBuffer[3] == 6) { if (ble_rsp_test_channel_mode) ble_rsp_test_channel_mode((const struct ble_msg_test_channel_mode_rsp_t *)(bgapiRXBuffer + 4)); }
+                    #endif
+                }
+                else if (bgapiRXBuffer[2] == 9) {
+                    if (false) { }
+                    #ifdef BGLIB_ENABLE_COMMAND_DFU_RESET
+                        else if (bgapiRXBuffer[3] == 0) { if (ble_rsp_dfu_reset) ble_rsp_dfu_reset((const struct ble_msg_dfu_reset_rsp_t *)(bgapiRXBuffer + 4)); }
+                    #endif
+                    #ifdef BGLIB_ENABLE_COMMAND_DFU_FLASH_SET_ADDRESS
+                        else if (bgapiRXBuffer[3] == 1) { if (ble_rsp_dfu_flash_set_address) ble_rsp_dfu_flash_set_address((const struct ble_msg_dfu_flash_set_address_rsp_t *)(bgapiRXBuffer + 4)); }
+                    #endif
+                    #ifdef BGLIB_ENABLE_COMMAND_DFU_FLASH_UPLOAD
+                        else if (bgapiRXBuffer[3] == 2) { if (ble_rsp_dfu_flash_upload) ble_rsp_dfu_flash_upload((const struct ble_msg_dfu_flash_upload_rsp_t *)(bgapiRXBuffer + 4)); }
+                    #endif
+                    #ifdef BGLIB_ENABLE_COMMAND_DFU_FLASH_UPLOAD_FINISH
+                        else if (bgapiRXBuffer[3] == 3) { if (ble_rsp_dfu_flash_upload_finish) ble_rsp_dfu_flash_upload_finish((const struct ble_msg_dfu_flash_upload_finish_rsp_t *)(bgapiRXBuffer + 4)); }
+                    #endif
                 }
 
                 setBusy(false);
@@ -817,6 +862,9 @@ uint8_t BGLib::parse(uint8_t ch, uint8_t packetMode) {
                     #endif
                     #ifdef BGLIB_ENABLE_EVENT_SYSTEM_NO_LICENSE_KEY
                         else if (bgapiRXBuffer[3] == 5) { if (ble_evt_system_no_license_key) ble_evt_system_no_license_key((const struct ble_msg_system_no_license_key_evt_t *)(bgapiRXBuffer + 4)); }
+                    #endif
+                    #ifdef BGLIB_ENABLE_EVENT_SYSTEM_PROTOCOL_ERROR
+                        else if (bgapiRXBuffer[3] == 6) { if (ble_evt_system_protocol_error) ble_evt_system_protocol_error((const struct ble_msg_system_protocol_error_evt_t *)(bgapiRXBuffer + 4)); }
                     #endif
                 }
                 else if (bgapiRXBuffer[2] == 1) {
@@ -920,6 +968,12 @@ uint8_t BGLib::parse(uint8_t ch, uint8_t packetMode) {
                 }
                 else if (bgapiRXBuffer[2] == 8) {
                     if (false) { }
+                }
+                else if (bgapiRXBuffer[2] == 9) {
+                    if (false) { }
+                    #ifdef BGLIB_ENABLE_EVENT_DFU_BOOT
+                        else if (bgapiRXBuffer[3] == 0) { if (ble_evt_dfu_boot) ble_evt_dfu_boot((const struct ble_msg_dfu_boot_evt_t *)(bgapiRXBuffer + 4)); }
+                    #endif
                 }
             }
         }
@@ -1130,13 +1184,22 @@ uint8_t BGLib::ble_cmd_flash_erase_page(uint8 page) {
 }
 #endif
 
-#ifdef BGLIB_ENABLE_COMMAND_FLASH_WRITE_WORDS
-uint8_t BGLib::ble_cmd_flash_write_words(uint16 address, uint8 words_len, const uint8 *words_data) {
-    uint8_t d[3 + words_len];
-    memcpy(d + 0, &address, sizeof(uint16));
-    memcpy(d + 2, &words_len, sizeof(uint8));
-    memcpy(d + 3, words_data, words_len);
-    return sendCommand(3 + words_len + words_len, 1, 7, d);
+#ifdef BGLIB_ENABLE_COMMAND_FLASH_WRITE_DATA
+uint8_t BGLib::ble_cmd_flash_write_data(uint32 address, uint8 data_len, const uint8 *data_data) {
+    uint8_t d[5 + data_len];
+    memcpy(d + 0, &address, sizeof(uint32));
+    memcpy(d + 4, &data_len, sizeof(uint8));
+    memcpy(d + 5, data_data, data_len);
+    return sendCommand(5 + data_len + data_len, 1, 7, d);
+}
+#endif
+
+#ifdef BGLIB_ENABLE_COMMAND_FLASH_READ_DATA
+uint8_t BGLib::ble_cmd_flash_read_data(uint32 address, uint8 length) {
+    uint8_t d[5];
+    memcpy(d + 0, &address, sizeof(uint32));
+    memcpy(d + 4, &length, sizeof(uint8));
+    return sendCommand(5, 1, 8, d);
 }
 #endif
 
@@ -1740,5 +1803,44 @@ uint8_t BGLib::ble_cmd_test_debug(uint8 input_len, const uint8 *input_data) {
     memcpy(d + 0, &input_len, sizeof(uint8));
     memcpy(d + 1, input_data, input_len);
     return sendCommand(1 + input_len + input_len, 8, 5, d);
+}
+#endif
+
+#ifdef BGLIB_ENABLE_COMMAND_TEST_CHANNEL_MODE
+uint8_t BGLib::ble_cmd_test_channel_mode(uint8 mode) {
+    uint8_t d[1];
+    memcpy(d + 0, &mode, sizeof(uint8));
+    return sendCommand(1, 8, 6, d);
+}
+#endif
+
+#ifdef BGLIB_ENABLE_COMMAND_DFU_RESET
+uint8_t BGLib::ble_cmd_dfu_reset(uint8 dfu) {
+    uint8_t d[1];
+    memcpy(d + 0, &dfu, sizeof(uint8));
+    return sendCommand(1, 9, 0, d);
+}
+#endif
+
+#ifdef BGLIB_ENABLE_COMMAND_DFU_FLASH_SET_ADDRESS
+uint8_t BGLib::ble_cmd_dfu_flash_set_address(uint32 address) {
+    uint8_t d[4];
+    memcpy(d + 0, &address, sizeof(uint32));
+    return sendCommand(4, 9, 1, d);
+}
+#endif
+
+#ifdef BGLIB_ENABLE_COMMAND_DFU_FLASH_UPLOAD
+uint8_t BGLib::ble_cmd_dfu_flash_upload(uint8 data_len, const uint8 *data_data) {
+    uint8_t d[1 + data_len];
+    memcpy(d + 0, &data_len, sizeof(uint8));
+    memcpy(d + 1, data_data, data_len);
+    return sendCommand(1 + data_len + data_len, 9, 2, d);
+}
+#endif
+
+#ifdef BGLIB_ENABLE_COMMAND_DFU_FLASH_UPLOAD_FINISH
+uint8_t BGLib::ble_cmd_dfu_flash_upload_finish() {
+    return sendCommand(0, 9, 3);
 }
 #endif
