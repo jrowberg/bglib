@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project>
+    <gatt in="gatt.xml" />
+    <hardware in="hardware113.xml" />    
+    <image out="out.hex" />
+    <device type="ble113" />
+    <boot fw="bootuart" />
+</project>

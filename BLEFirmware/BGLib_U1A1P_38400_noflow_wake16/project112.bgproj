@@ -4,4 +4,5 @@
     <hardware in="hardware.xml" />    
     <usb_main in="cdc.xml" />
     <image out="out.hex" />
+    <device type="ble112" />
 </project>
