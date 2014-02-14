@@ -1,8 +1,10 @@
 // Bluegiga BGLib Arduino interface library config file
-// 2014-01-13 by Jeff Rowberg <jeff@rowberg.net>
+// 2014-02-12 by Jeff Rowberg <jeff@rowberg.net>
 // Updates should (hopefully) always be available at https://github.com/jrowberg/bglib
 
 // Changelog:
+//      2014-02-12 - Update to match SDK build 98
+//                 - Fix major issue with uint8array commands
 //      2014-01-13 - Update to match SDK build 94
 //      2013-03-14 - Add support for packet mode
 //                   Add support for BLE wake-up
@@ -213,6 +215,8 @@ THE SOFTWARE.
     #define BGLIB_ENABLE_COMMAND_HARDWARE_I2C_WRITE
     #define BGLIB_ENABLE_COMMAND_HARDWARE_SET_TXPOWER
     #define BGLIB_ENABLE_COMMAND_HARDWARE_TIMER_COMPARATOR
+    #define BGLIB_ENABLE_COMMAND_HARDWARE_IO_PORT_IRQ_ENABLE
+    #define BGLIB_ENABLE_COMMAND_HARDWARE_IO_PORT_IRQ_DIRECTION
 #endif
 
 #ifdef BGLIB_ENABLE_EVENT_CLASS_HARDWARE

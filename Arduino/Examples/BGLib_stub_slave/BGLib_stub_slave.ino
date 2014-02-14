@@ -1,13 +1,30 @@
 // Bluegiga BGLib Arduino interface library slave device stub sketch
-// 2013-03-17 by Jeff Rowberg <jeff@rowberg.net>
+// 2014-02-12 by Jeff Rowberg <jeff@rowberg.net>
 // Updates should (hopefully) always be available at https://github.com/jrowberg/bglib
 
 // Changelog:
+//      2014-02-12 - Fixed compile problem from missing constants
 //      2013-03-17 - Initial release
 
 /* ============================================
+   !!!!!!!!!!!!!!!!!
+   !!! IMPORTANT !!!
+   !!!!!!!!!!!!!!!!!
+
+   THIS SCRIPT WILL NOT COMMUNICATE PROPERLY IF YOU DO NOT ENSURE ONE OF THE
+   FOLLOWING IS TRUE:
+
+   1. You enable the <wakeup_pin> functionality in your firmware
+
+   2. You COMMENT OUT the two lines 128 and 129 below which depend on wake-up
+      funcitonality to work properly (they will BLOCK otherwise):
+
+          ble112.onBeforeTXCommand = onBeforeTXCommand;
+          ble112.onTXCommandComplete = onTXCommandComplete;
+
+/* ============================================
 BGLib Arduino interface library code is placed under the MIT license
-Copyright (c) 2013 Jeff Rowberg
+Copyright (c) 2014 Jeff Rowberg
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +50,7 @@ THE SOFTWARE.
 #include "BGLib.h"
 
 // uncomment the following line for debug serial output
-#define DEBUG
+//#define DEBUG
 
 // ================================================================
 // BLE STATE TRACKING (UNIVERSAL TO JUST ABOUT ANY BLE PROJECT)
@@ -135,7 +152,7 @@ void setup() {
 void loop() {
     // keep polling for new data from BLE
     ble112.checkActivity();
-    
+
     // blink Arduino LED based on state:
     //  - solid = STANDBY
     //  - 1 pulse per second = ADVERTISING
@@ -246,7 +263,7 @@ void my_ble_evt_system_boot(const ble_msg_system_boot_evt_t *msg) {
     uint8 adv_data[] = {
         0x02, // field length
         BGLIB_GAP_AD_TYPE_FLAGS, // field type (0x01)
-        BGLIB_GAP_AD_FLAG_GENERAL_DISCOVERABLE | BGLIB_GAP_AD_FLAG_BREDR_NOT_SUPPORTED, // data (0x02 | 0x04 = 0x06)
+        0x06, // data (0x02 | 0x04 = 0x06, general discoverable + BLE only, no BR+EDR)
         0x11, // field length
         BGLIB_GAP_AD_TYPE_SERVICES_128BIT_ALL, // field type (0x07)
         0xe4, 0xba, 0x94, 0xc3, 0xc9, 0xb7, 0xcd, 0xb0, 0x9b, 0x48, 0x7a, 0x43, 0x8a, 0xe5, 0x5a, 0x19

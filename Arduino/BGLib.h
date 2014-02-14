@@ -1,8 +1,10 @@
-// Bluegiga BGLib Arduino interface library code header file
-// 2014-01-13 by Jeff Rowberg <jeff@rowberg.net>
+// Bluegiga BGLib Arduino interface library header file
+// 2014-02-12 by Jeff Rowberg <jeff@rowberg.net>
 // Updates should (hopefully) always be available at https://github.com/jrowberg/bglib
 
 // Changelog:
+//      2014-02-12 - Update to match SDK build 98
+//                 - Fix major issue with uint8array commands
 //      2014-01-13 - Update to match SDK build 94
 //      2013-03-14 - Add support for packet mode
 //                   Add support for BLE wake-up
@@ -1076,6 +1078,24 @@ struct ble_msg_hardware_timer_comparator_rsp_t {
     uint16 result;
 } PACKED;
 #endif
+#ifdef BGLIB_ENABLE_COMMAND_HARDWARE_IO_PORT_IRQ_ENABLE
+struct ble_msg_hardware_io_port_irq_enable_cmd_t {
+    uint8 port;
+    uint8 enable_bits;
+} PACKED;
+struct ble_msg_hardware_io_port_irq_enable_rsp_t {
+    uint16 result;
+} PACKED;
+#endif
+#ifdef BGLIB_ENABLE_COMMAND_HARDWARE_IO_PORT_IRQ_DIRECTION
+struct ble_msg_hardware_io_port_irq_direction_cmd_t {
+    uint8 port;
+    uint8 falling_edge;
+} PACKED;
+struct ble_msg_hardware_io_port_irq_direction_rsp_t {
+    uint16 result;
+} PACKED;
+#endif
 #ifdef BGLIB_ENABLE_EVENT_HARDWARE_IO_PORT_STATUS
 struct ble_msg_hardware_io_port_status_evt_t {
     uint32 timestamp;
@@ -1436,6 +1456,12 @@ class BGLib {
         #ifdef BGLIB_ENABLE_COMMAND_HARDWARE_TIMER_COMPARATOR
             uint8_t ble_cmd_hardware_timer_comparator(uint8 timer, uint8 channel, uint8 mode, uint16 comparator_value);
         #endif
+        #ifdef BGLIB_ENABLE_COMMAND_HARDWARE_IO_PORT_IRQ_ENABLE
+            uint8_t ble_cmd_hardware_io_port_irq_enable(uint8 port, uint8 enable_bits);
+        #endif
+        #ifdef BGLIB_ENABLE_COMMAND_HARDWARE_IO_PORT_IRQ_DIRECTION
+            uint8_t ble_cmd_hardware_io_port_irq_direction(uint8 port, uint8 falling_edge);
+        #endif
         #ifdef BGLIB_ENABLE_COMMAND_TEST_PHY_TX
             uint8_t ble_cmd_test_phy_tx(uint8 channel, uint8 length, uint8 type);
         #endif
@@ -1715,6 +1741,12 @@ class BGLib {
         #endif
         #ifdef BGLIB_ENABLE_COMMAND_HARDWARE_TIMER_COMPARATOR
             void (*ble_rsp_hardware_timer_comparator)(const struct ble_msg_hardware_timer_comparator_rsp_t *msg);
+        #endif
+        #ifdef BGLIB_ENABLE_COMMAND_HARDWARE_IO_PORT_IRQ_ENABLE
+            void (*ble_rsp_hardware_io_port_irq_enable)(const struct ble_msg_hardware_io_port_irq_enable_rsp_t *msg);
+        #endif
+        #ifdef BGLIB_ENABLE_COMMAND_HARDWARE_IO_PORT_IRQ_DIRECTION
+            void (*ble_rsp_hardware_io_port_irq_direction)(const struct ble_msg_hardware_io_port_irq_direction_rsp_t *msg);
         #endif
         #ifdef BGLIB_ENABLE_COMMAND_TEST_PHY_TX
             void (*ble_rsp_test_phy_tx)(const struct ble_msg_test_phy_tx_rsp_t *msg);
