@@ -3,18 +3,19 @@
 """ Bluegiga BGAPI/BGLib demo: health thermometer collector
 
 Changelog:
+    2014-07-05 - Fix indication subscription to use 2-byte value
     2013-06-07 - Fix "address_type" to support Random (e.g. iPhone as peripheral)
     2013-05-15 - Added comments, script arguments
     2013-04-28 - Initial release
 
 ============================================
 Bluegiga BGLib Python interface library test health thermometer collector app
-2013-05-15 by Jeff Rowberg <jeff@rowberg.net>
+2013-07-05 by Jeff Rowberg <jeff@rowberg.net>
 Updates should (hopefully) always be available at https://github.com/jrowberg/bglib
 
 ============================================
 BGLib Python interface library code is placed under the MIT license
-Copyright (c) 2013 Jeff Rowberg
+Copyright (c) 2014 Jeff Rowberg
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +40,7 @@ THE SOFTWARE.
 
 __author__ = "Jeff Rowberg"
 __license__ = "MIT"
-__version__ = "2013-05-15"
+__version__ = "2014-07-05"
 __email__ = "jeff@rowberg.net"
 
 """
@@ -250,9 +251,9 @@ def my_ble_evt_attclient_procedure_completed(sender, args):
             print "Found 'Health Thermometer' measurement attribute with UUID 0x2A1C"
 
             # found the measurement + client characteristic configuration, so enable indications
-            # (this is done by writing 0x02 to the client characteristic configuration attribute)
+            # (this is done by writing 0x0002 to the client characteristic configuration attribute)
             state = STATE_LISTENING_MEASUREMENTS
-            ble.send_command(ser, ble.ble_cmd_attclient_attribute_write(connection_handle, att_handle_measurement_ccc, [0x02]))
+            ble.send_command(ser, ble.ble_cmd_attclient_attribute_write(connection_handle, att_handle_measurement_ccc, [0x02, 0x00]))
             ble.check_activity(ser, 1)
         else:
             print "Could not find 'Health Thermometer' measurement attribute with UUID 0x2A1C"

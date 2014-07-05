@@ -219,8 +219,8 @@ namespace BLEHeartRateCollector
                     //print "Found 'Heart Rate' measurement attribute with UUID 0x2A37"
 
                     // found the measurement + client characteristic configuration, so enable notifications
-                    // (this is done by writing 0x01 to the client characteristic configuration attribute)
-                    Byte[] cmd = bglib.BLECommandATTClientAttributeWrite(e.connection, att_handle_measurement_ccc, new Byte[] { 0x01 });
+                    // (this is done by writing 0x0001 to the client characteristic configuration attribute)
+                    Byte[] cmd = bglib.BLECommandATTClientAttributeWrite(e.connection, att_handle_measurement_ccc, new Byte[] { 0x01, 0x00 });
                     // DEBUG: display bytes written
                     ThreadSafeDelegate(delegate { txtLog.AppendText(String.Format("=> TX ({0}) [ {1}]", cmd.Length, ByteArrayToHexString(cmd)) + Environment.NewLine); });
                     bglib.SendCommand(serialAPI, cmd);

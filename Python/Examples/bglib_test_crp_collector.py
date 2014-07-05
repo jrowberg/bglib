@@ -3,16 +3,17 @@
 """ Bluegiga BGAPI/BGLib demo: Bluegiga "Cable Replacement Profile" collector
 
 Changelog:
+    2014-07-05 - Fix indication subscription to use 2-byte value
     2013-07-22 - Initial release
 
 ============================================
 Bluegiga BGLib Python interface library test cable replacement collector app
-2013-07-22 by Jeff Rowberg <jeff@rowberg.net>
+2014-07-05 by Jeff Rowberg <jeff@rowberg.net>
 Updates should (hopefully) always be available at https://github.com/jrowberg/bglib
 
 ============================================
 BGLib Python interface library code is placed under the MIT license
-Copyright (c) 2013 Jeff Rowberg
+Copyright (c) 2014 Jeff Rowberg
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +38,7 @@ THE SOFTWARE.
 
 __author__ = "Jeff Rowberg"
 __license__ = "MIT"
-__version__ = "2013-07-22"
+__version__ = "2014-07-05"
 __email__ = "jeff@rowberg.net"
 
 """
@@ -160,7 +161,7 @@ def my_timeout(sender, args):
     # wouldn't work at this point if it's already timed out:
     #ble.send_command(ser, ble.ble_cmd_system_reset(0))
     #ble.check_activity(ser, 1)
-    print "BGAPI parser timed out. Make sure the BLE device is in a known/idle state."
+    print("BGAPI parser timed out. Make sure the BLE device is in a known/idle state.")
 
 # gap_scan_response handler
 def my_ble_evt_gap_scan_response(sender, args):
@@ -205,7 +206,7 @@ def my_ble_evt_connection_status(sender, args):
 
     if (args['flags'] & 0x05) == 0x05:
         # connected, now perform service discovery
-        print "Connected to %s" % ':'.join(['%02X' % b for b in args['address'][::-1]])
+        print("Connected to %s" % ':'.join(['%02X' % b for b in args['address'][::-1]]))
         connection_handle = args['connection']
         ble.send_command(ser, ble.ble_cmd_attclient_read_by_group_type(args['connection'], 0x0001, 0xFFFF, list(reversed(uuid_service))))
         ble.check_activity(ser, 1)
@@ -217,7 +218,7 @@ def my_ble_evt_attclient_group_found(sender, args):
 
     # found "service" attribute groups (UUID=0x2800), check for CRP service
     if args['uuid'] == list(reversed(uuid_crp_service)):
-        print "Found attribute group for CRP service: start=%d, end=%d" % (args['start'], args['end'])
+        print("Found attribute group for CRP service: start=%d, end=%d" % (args['start'], args['end']))
         att_handle_start = args['start']
         att_handle_end = args['end']
 
@@ -227,12 +228,12 @@ def my_ble_evt_attclient_find_information_found(sender, args):
 
     # check for CRP data characteristic
     if args['uuid'] == list(reversed(uuid_crp_characteristic)):
-        print "Found CRP data attribute: handle=%d" % args['chrhandle']
+        print("Found CRP data attribute: handle=%d" % args['chrhandle'])
         att_handle_data = args['chrhandle']
 
     # check for subsequent client characteristic configuration
     elif args['uuid'] == list(reversed(uuid_client_characteristic_configuration)) and att_handle_data > 0:
-        print "Found CRP client characteristic config attribute w/UUID=0x2902: handle=%d" % args['chrhandle']
+        print("Found CRP client characteristic config attribute w/UUID=0x2902: handle=%d" % args['chrhandle'])
         att_handle_data_ccc = args['chrhandle']
 
 # attclient_procedure_completed handler
@@ -242,31 +243,31 @@ def my_ble_evt_attclient_procedure_completed(sender, args):
     # check if we just finished searching for services
     if state == STATE_FINDING_SERVICES:
         if att_handle_end > 0:
-            print "Found CRP service"
+            print("Found CRP service")
 
             # found the Cable Replacement service, so now search for the attributes inside
             state = STATE_FINDING_ATTRIBUTES
             ble.send_command(ser, ble.ble_cmd_attclient_find_information(connection_handle, att_handle_start, att_handle_end))
             ble.check_activity(ser, 1)
         else:
-            print "Could not find CRP service"
+            print("Could not find CRP service")
 
     # check if we just finished searching for attributes within the CRP service
     elif state == STATE_FINDING_ATTRIBUTES:
         if att_handle_data_ccc > 0:
-            print "Found CRP data attribute"
+            print("Found CRP data attribute")
 
             # found the data + client characteristic configuration, so enable indications
-            # (this is done by writing 0x02 to the client characteristic configuration attribute)
+            # (this is done by writing 0x0002 to the client characteristic configuration attribute)
             state = STATE_LISTENING_DATA
-            ble.send_command(ser, ble.ble_cmd_attclient_attribute_write(connection_handle, att_handle_data_ccc, [0x02]))
+            ble.send_command(ser, ble.ble_cmd_attclient_attribute_write(connection_handle, att_handle_data_ccc, [0x02, 0x00]))
             ble.check_activity(ser, 1)
-            
+
             # note that the link is ready
             crp_link_ready = True
         else:
-            print "Could not find CRP data attribute"
-            
+            print("Could not find CRP data attribute")
+
     # check for "write" acknowledgement if we just sent data
     elif state == STATE_LISTENING_DATA and args['chrhandle'] == att_handle_data:
         # clear "write" pending flag so we can send more data
@@ -320,9 +321,9 @@ def main():
     try:
         ser = serial.Serial(port=options.port, baudrate=options.baud, timeout=1, writeTimeout=1)
     except serial.SerialException as e:
-        print "\n================================================================"
-        print "Port error (name='%s', baud='%ld'): %s" % (options.port, options.baud, e)
-        print "================================================================"
+        print("\n================================================================")
+        print("Port error (name='%s', baud='%ld'): %s" % (options.port, options.baud, e))
+        print("================================================================")
         exit(2)
 
     # flush buffers
@@ -346,7 +347,7 @@ def main():
     ble.check_activity(ser, 1)
 
     # start scanning now
-    print "Scanning for BLE peripherals..."
+    print("Scanning for BLE peripherals...")
     ble.send_command(ser, ble.ble_cmd_gap_discover(1))
     ble.check_activity(ser, 1)
 
@@ -366,13 +367,13 @@ def main():
             # if we're connected and we have data, then send it
             if len(in_buf) > 0:
                 ble.send_command(ser, ble.ble_cmd_attclient_attribute_write(connection_handle, att_handle_data, in_buf))
-                
+
                 # mark that we're waiting for the "write" confirmation
                 pending_write = True;
 
 # gracefully exit without a big exception message if possible
 def ctrl_c_handler(signal, frame):
-    print 'Goodbye!'
+    print('Goodbye!')
     exit(0)
 
 signal.signal(signal.SIGINT, ctrl_c_handler)

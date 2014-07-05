@@ -219,8 +219,8 @@ namespace BLEHealthThermometerCollector
                     //print "Found 'Health Thermometer' measurement attribute with UUID 0x2A1C"
 
                     // found the measurement + client characteristic configuration, so enable indications
-                    // (this is done by writing 0x02 to the client characteristic configuration attribute)
-                    Byte[] cmd = bglib.BLECommandATTClientAttributeWrite(e.connection, att_handle_measurement_ccc, new Byte[] { 0x02 });
+                    // (this is done by writing 0x0002 to the client characteristic configuration attribute)
+                    Byte[] cmd = bglib.BLECommandATTClientAttributeWrite(e.connection, att_handle_measurement_ccc, new Byte[] { 0x02, 0x00 });
                     // DEBUG: display bytes written
                     ThreadSafeDelegate(delegate { txtLog.AppendText(String.Format("=> TX ({0}) [ {1}]", cmd.Length, ByteArrayToHexString(cmd)) + Environment.NewLine); });
                     bglib.SendCommand(serialAPI, cmd);
