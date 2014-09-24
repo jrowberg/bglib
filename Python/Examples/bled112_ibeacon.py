@@ -287,18 +287,21 @@ Scan request output example with public address 00:07:80:81:44:94 and RSSI -57:
     # set advertisement (min/max interval + all three ad channels)
     ble_cmd_gap_set_adv_parameters(ser, int(adv_min * 0.625), int(adv_max * 0.625), 7)
     response = ser.read(6) # 6-byte response
+    #for b in response: print '%02X' % ord(b),
     
     # set beacon data (advertisement packet)
     ble_cmd_gap_set_adv_data(ser, 0, ibeacon_adv)
     response = ser.read(6) # 6-byte response
+    #for b in response: print '%02X' % ord(b),
     
     # set local name (scan response packet)
     ble_cmd_gap_set_adv_data(ser, 1, [ 0x09, 0x09, 0x50, 0x69, 0x42, 0x65, 0x61, 0x63, 0x6f, 0x6e ])
     response = ser.read(6) # 6-byte response
+    #for b in response: print '%02X' % ord(b),
 
     # start advertising as non-connectable with userdata and enhanced broadcasting
     #print "Entering advertisement mode..."
-    ble_cmd_gap_set_mode(ser, 0x84, 0x02)
+    ble_cmd_gap_set_mode(ser, 0x84, 0x03)
     response = ser.read(6) # 6-byte response
     #for b in response: print '%02X' % ord(b),
 
