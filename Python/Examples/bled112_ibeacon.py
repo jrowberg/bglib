@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-""" Barebones BGAPI scanner script for Bluegiga BLE modules
+""" Barebones BGAPI iBeacon script for Bluegiga BLE modules
 
 This script is designed to be used with a BGAPI-enabled Bluetooth Smart device
 from Bluegiga, probably a BLED112 but anything that is connected to a serial
@@ -15,29 +15,21 @@ can simply plug in a BLED112 and go, but other kinds of usage may require small
 modifications.
 
 Changelog:
-    2013-04-07 - Fixed 128-bit UUID filters
-               - Added more verbose output on startup
-               - Added "friendly mode" output argument
-               - Added "quiet mode" output argument
-               - Improved comments in code
-    2013-03-30 - Initial release
+    2014-09-24 - Initial release
 
 """
 
 __author__ = "Jeff Rowberg"
 __license__ = "MIT"
-__version__ = "2013-04-07"
+__version__ = "2014-09-24"
 __email__ = "jeff@rowberg.net"
 
 import sys, optparse, serial, struct, time, datetime, re, signal
 
 options = []
-filter_uuid = []
-filter_mac = []
-filter_rssi = 0
 
 def main():
-    global options, filter_uuid, filter_mac, filter_rssi
+    global options
 
     class IndentedHelpFormatterWithNL(optparse.IndentedHelpFormatter):
       def format_description(self, description):
@@ -101,45 +93,35 @@ def main():
             return "".join(result[:-1])
 
     # process script arguments
-    p = MyParser(description='Bluetooth Smart Scanner script for Bluegiga BLED112 v2013-03-30', epilog=
-"""Examples:
+    p = MyParser(description='Bluetooth Smart iBeacon script for Bluegiga BLED112 v2014-09-24', epilog=
+"""
+Examples:
 
-    bled112_scanner.py
+    bled112_ibeacon.py
 
-\tDefault options, passive scan, display all devices
+\tDefault options (AirLocate UUID, 1/1 major/minor, 100ms interval)
 
-    bled112_scanner.py -p /dev/ttyUSB0 -d sd
+    bled112_ibeacon.py -p /dev/ttyUSB0 -s -i 1000
 
-\tUse ttyUSB0, display only sender MAC address and ad data payload
+\tUse ttyUSB0, display scan requests, 1 second interval
 
-    bled112_scanner.py -u 1809 -u 180D
+    bled112_ibeacon.py -u f1b41cde-dbf5-4acf-8679-ecb8b4dca700 -j 5 -n 2
 
-\tDisplay only devices advertising Health Thermometer service (0x1809)
-\tor the Heart Rate service (0x180D)
+\tUse custom UUID, major value of 5, minor value of 2
 
-    bled112_scanner.py -m 00:07:80 -m 08:57:82:bb:27:37
+Scan request output format:
 
-\tDisplay only devices with a Bluetooth address (MAC) starting with the
-\tBluegiga OUI (00:07:80), or exactly matching 08:57:82:bb:27:37
+    <timestamp> <rssi> <address> <address_type>
+    
+Scan request output example with public address 00:07:80:81:44:94 and RSSI -57:
 
-Sample Output Explanation:
-
-    1364699494.574 -57 0 000780814494 0 255 02010603030918
-
-    't' (Unix time):\t1364699464.574, 1364699591.128, etc.
-    'r' (RSSI value):\t-57, -80, -92, etc.
-    'p' (Packet type):\t0 (advertisement), 4 (scan response)
-    's' (Sender MAC):\t000780535BB4, 000780814494, etc.
-    'a' (Address type):\t0 (public), 1 (random)
-    'b' (Bond status):\t255 (no bond), 0 to 15 if bonded
-    'd' (Data payload):\t02010603030918, etc.
-            See BT4.0 Core Spec for details about ad packet format
+    1364699494.574 -57 000780814494 0
 
 """
     )
 
     # set all defaults for options
-    p.set_defaults(port="/dev/ttyACM0", baud=115200, interval=0xC8, window=0xC8, display="trpsabd", uuid=[], mac=[], rssi=0, active=False, quiet=False, friendly=False)
+    p.set_defaults(port="/dev/ttyACM0", baud=115200, interval=100, uuid="", major="0001", minor="0001", quiet=False, scanreq=False)
 
     # create serial port options argument group
     group = optparse.OptionGroup(p, "Serial Port Options")
@@ -147,130 +129,113 @@ Sample Output Explanation:
     group.add_option('--baud', '-b', type="int", help="Serial port baud rate (default 115200)", metavar="BAUD")
     p.add_option_group(group)
 
-    # create scan options argument group
-    group = optparse.OptionGroup(p, "Scan Options")
-    group.add_option('--interval', '-i', type="int", help="Scan interval width in units of 0.625ms (default 200)", metavar="INTERVAL")
-    group.add_option('--window', '-w', type="int", help="Scan window width in units of 0.625ms (default 200)", metavar="WINDOW")
-    group.add_option('--active', '-a', action="store_true", help="Perform active scan (default passive)\nNOTE: active scans result "
-                                                                 "in a 'scan response' request being sent to the slave device, which "
-                                                                 "should send a follow-up scan response packet. This will result in "
-                                                                 "increased power consumption on the slave device.")
-    p.add_option_group(group)
-
-    # create filter options argument group
-    group = optparse.OptionGroup(p, "Filter Options")
-    group.add_option('--uuid', '-u', type="string", action="append", help="Service UUID(s) to match", metavar="UUID")
-    group.add_option('--mac', '-m', type="string", action="append", help="MAC address(es) to match", metavar="ADDRESS")
-    group.add_option('--rssi', '-r', type="int", help="RSSI minimum filter (-110 to -20), omit to disable", metavar="RSSI")
+    # create iBeacon options argument group
+    group = optparse.OptionGroup(p, "iBeacon Options")
+    group.add_option('--uuid', '-u', type="string", help="iBeacon UUID (default AirLocate)", metavar="UUID")
+    group.add_option('--major', '-j', type="string", help="iBeacon Major (default 0001)", metavar="MAJOR")
+    group.add_option('--minor', '-n', type="string", help="iBeacon Minor (default 0001)", metavar="MINOR")
+    group.add_option('--interval', '-i', type="int", help="Advertisement interval in ms (default 100, min 30, max 10230)", metavar="INTERVAL")
+    group.add_option('--end', '-e', action="store_true", help="End beaconing advertisements", metavar="STOP")
     p.add_option_group(group)
 
     # create output options argument group
     group = optparse.OptionGroup(p, "Output Options")
-    group.add_option('--quiet', '-q', action="store_true", help="Quiet mode (suppress initial scan parameter display)")
-    group.add_option('--friendly', '-f', action="store_true", help="Friendly mode (output in human-readable format)")
-    group.add_option('--display', '-d', type="string", help="Display fields and order (default '%default')\n"
-        "  t = Unix time, with milliseconds\n"
-        "  r = RSSI measurement (signed integer)\n"
-        "  p = Packet type (0 = normal, 4 = scan response)\n"
-        "  s = Sender MAC address (hexadecimal)\n"
-        "  a = Address type (0 = public, 1 = random)\n"
-        "  b = Bonding status (255 = no bond, else bond handle)\n"
-        "  d = Advertisement data payload (hexadecimal)", metavar="FIELDS")
+    group.add_option('--scanreq', '-s', action="store_true", help="Display scan requests (Bluegiga enhanced broadcasting)", metavar="SCANREQ")
+    group.add_option('--quiet', '-q', action="store_true", help="Quiet mode (suppress initial parameter display)")
     p.add_option_group(group)
+    
+    uuid = [ 0xe2, 0xc5, 0x6d, 0xb5, 0xdf, 0xfb, 0x48, 0xd2, 0xb0, 0x60, 0xd0, 0xf5, 0xa7, 0x10, 0x96, 0xe0 ]
+    major = 0x0001
+    minor = 0x0001
+    adv_min = 90
+    adv_max = 110
 
     # actually parse all of the arguments
     options, arguments = p.parse_args()
 
-    # validate any supplied MAC address filters
-    for arg in options.mac:
-        if re.search('[^a-fA-F0-9:]', arg):
+    # validate UUID if specified
+    if len(options.uuid):
+        if re.search('[^a-fA-F0-9:\\-]', options.uuid):
             p.print_help()
             print "\n================================================================"
-            print "Invalid MAC filter argument '%s'\n-->must be in the form AA:BB:CC:DD:EE:FF" % arg
+            print "Invalid UUID characters, must be 16 bytes in 0-padded hex form:"
+            print "\t-u 0123456789abcdef0123456789abcdef"
             print "================================================================"
             exit(1)
-        arg2 = arg.replace(":", "").upper()
-        if (len(arg2) % 2) == 1:
+        arg2 = options.uuid.replace(":", "").replace("-", "").upper()
+        if len(arg2) != 32:
             p.print_help()
             print "\n================================================================"
-            print "Invalid MAC filter argument '%s'\n--> must be 1-6 full bytes in 0-padded hex form (00:01:02:03:04:05)" % arg
-            print "================================================================"
-            exit(1)
-        mac = []
-        for i in range(0, len(arg2), 2):
-            mac.append(int(arg2[i : i + 2], 16))
-        filter_mac.append(mac)
-
-    # validate any supplied UUID filters
-    for arg in options.uuid:
-        if re.search('[^a-fA-F0-9:]', arg):
-            p.print_help()
-            print "\n================================================================"
-            print "Invalid UUID filter argument '%s'\n--> must be 2 or 16 full bytes in 0-padded hex form (180B or 0123456789abcdef0123456789abcdef)" % arg
-            print "================================================================"
-            exit(1)
-        arg2 = arg.replace(":", "").upper()
-        if len(arg2) != 4 and len(arg2) != 32:
-            p.print_help()
-            print "\n================================================================"
-            print "Invalid UUID filter argument '%s'\n--> must be 2 or 16 full bytes in 0-padded hex form (180B or 0123456789abcdef0123456789abcdef)" % arg
+            print "Invalid UUID length, must be 16 bytes in 0-padded hex form:"
+            print "\t-u 0123456789abcdef0123456789abcdef"
             print "================================================================"
             exit(1)
         uuid = []
         for i in range(0, len(arg2), 2):
             uuid.append(int(arg2[i : i + 2], 16))
-        filter_uuid.append(uuid)
 
-    # validate RSSI filter argument
-    filter_rssi = abs(int(options.rssi))
-    if filter_rssi > 0 and (filter_rssi < 20 or filter_rssi > 110):
+    # validate major value if specified
+    if len(options.major):
+        if re.search('[^a-fA-F0-9:\\-]', options.major):
+            p.print_help()
+            print "\n================================================================"
+            print "Invalid major characters, must be 2 bytes in 0-padded hex form:"
+            print "\t-j 01cf"
+            print "================================================================"
+            exit(1)
+        arg2 = options.major.replace(":", "").replace("-", "").upper()
+        if len(arg2) != 4:
+            p.print_help()
+            print "\n================================================================"
+            print "Invalid major length, must be 2 bytes in 0-padded hex form:"
+            print "\t-j 01cf"
+            print "================================================================"
+            exit(1)
+        major = int(arg2[0:4], 16)
+            
+    # validate minor value if specified
+    if len(options.minor):
+        if re.search('[^a-fA-F0-9:\\-]', options.minor):
+            p.print_help()
+            print "\n================================================================"
+            print "Invalid minor characters, must be 2 bytes in 0-padded hex form:"
+            print "\t-n 01cf"
+            print "================================================================"
+            exit(1)
+        arg2 = options.minor.replace(":", "").replace("-", "").upper()
+        if len(arg2) != 4:
+            p.print_help()
+            print "\n================================================================"
+            print "Invalid minor length, must be 2 bytes in 0-padded hex form:"
+            print "\t-n 01cf"
+            print "================================================================"
+            exit(1)
+        minor = int(arg2[0:4], 16)
+        
+    # validate interval
+    if options.interval < 30 or options.interval > 10230:
         p.print_help()
         print "\n================================================================"
-        print "Invalid RSSI filter argument '%s'\n--> must be between 20 and 110" % filter_rssi
+        print "Invalid advertisement interval, must be between 30 and 10230"
         print "================================================================"
         exit(1)
-
-    # validate field output options
-    options.display = options.display.lower()
-    if re.search('[^trpsabd]', options.display):
-        p.print_help()
-        print "\n================================================================"
-        print "Invalid display options '%s'\n--> must be some combination of 't', 'r', 'p', 's', 'a', 'b', 'd'" % options.display
-        print "================================================================"
-        exit(1)
-
-    # display scan parameter summary, if not in quiet mode
+    else:
+        adv_min = options.interval - 10
+        adv_max = adv_min + 20
+            
+    # display  parameter summary, if not in quiet mode
     if not(options.quiet):
         print "================================================================"
-        print "BLED112 Scanner for Python v%s" % __version__
+        print "BLED112 iBeacon for Python v%s" % __version__
         print "================================================================"
-        #p.set_defaults(port="/dev/ttyACM0", baud=115200, interval=0xC8, window=0xC8, display="trpsabd", uuid=[], mac=[], rssi=0, active=False, quiet=False, friendly=False)
         print "Serial port:\t%s" % options.port
         print "Baud rate:\t%s" % options.baud
-        print "Scan interval:\t%d (%.02f ms)" % (options.interval, options.interval * 1.25)
-        print "Scan window:\t%d (%.02f ms)" % (options.window, options.window * 1.25)
-        print "Scan type:\t%s" % ['Passive', 'Active'][options.active]
-        print "UUID filters:\t",
-        if len(filter_uuid) > 0:
-            print "0x%s" % ", 0x".join([''.join(['%02X' % b for b in uuid]) for uuid in filter_uuid])
-        else:
-            print "None"
-        print "MAC filter(s):\t",
-        if len(filter_mac) > 0:
-            print ", ".join([':'.join(['%02X' % b for b in mac]) for mac in filter_mac])
-        else:
-            print "None"
-        print "RSSI filter:\t",
-        if filter_rssi > 0:
-            print "-%d dBm minimum"% filter_rssi
-        else:
-            print "None"
-        print "Display fields:\t-",
-        field_dict = { 't':'Time', 'r':'RSSI', 'p':'Packet type', 's':'Sender MAC', 'a':'Address type', 'b':'Bond status', 'd':'Payload data' }
-        print "\n\t\t- ".join([field_dict[c] for c in options.display])
-        print "Friendly mode:\t%s" % ['Disabled', 'Enabled'][options.friendly]
+        print "Beacon UUID:\t%s" % ''.join(['%02X' % b for b in uuid])
+        print "Beacon Major:\t%04X" % major
+        print "Beacon Minor:\t%04X" % minor
+        print "Adv. interval:\t%d ms" % options.interval
+        print "Scan requests:\t%s" % ['Disabled', 'Enabled'][options.scanreq]
         print "----------------------------------------------------------------"
-        print "Starting scan for BLE advertisements..."
 
     # open serial port for BGAPI access
     try:
@@ -303,23 +268,50 @@ Sample Output Explanation:
     ble_cmd_gap_end_procedure(ser)
     response = ser.read(6) # 6-byte response
     #for b in response: print '%02X' % ord(b),
+    
+    if options.end:
+        if not options.quiet:
+            print "iBeacon advertisements ended"
+        exit(0)
 
-    # set scan parameters
-    #print "Setting scanning parameters..."
-    ble_cmd_gap_set_scan_parameters(ser, options.interval, options.window, options.active)
+    # build main ad packet
+    ibeacon_adv = [ 0x02, 0x01, 0x06, 0x1a, 0xff, 0x4c, 0x00, 0x02, 0x15,
+                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                    major & 0xFF, major >> 8,
+                    minor & 0xFF, minor >> 8,
+                    0xC6 ]
+                    
+    # set UUID specifically
+    ibeacon_adv[9:25] = uuid[0:16]
+
+    # set advertisement (min/max interval + all three ad channels)
+    ble_cmd_gap_set_adv_parameters(ser, int(adv_min * 0.625), int(adv_max * 0.625), 7)
+    response = ser.read(6) # 6-byte response
+    
+    # set beacon data (advertisement packet)
+    ble_cmd_gap_set_adv_data(ser, 0, ibeacon_adv)
+    response = ser.read(6) # 6-byte response
+    
+    # set local name (scan response packet)
+    ble_cmd_gap_set_adv_data(ser, 1, [ 0x09, 0x09, 0x50, 0x69, 0x42, 0x65, 0x61, 0x63, 0x6f, 0x6e ])
+    response = ser.read(6) # 6-byte response
+
+    # start advertising as non-connectable with userdata and enhanced broadcasting
+    #print "Entering advertisement mode..."
+    ble_cmd_gap_set_mode(ser, 0x84, 0x02)
     response = ser.read(6) # 6-byte response
     #for b in response: print '%02X' % ord(b),
 
-    # start scanning now
-    #print "Entering scanning mode for general discoverable..."
-    ble_cmd_gap_discover(ser, 1)
+    if not options.quiet:
+        print "iBeacon advertisements started"
 
-    while (1):
-        # catch all incoming data
-        while (ser.inWaiting()): bgapi_parse(ord(ser.read()));
+    if options.scanreq:
+        while (1):
+            # catch all incoming data
+            while (ser.inWaiting()): bgapi_parse(ord(ser.read()));
 
-        # don't burden the CPU
-        time.sleep(0.01)
+            # don't burden the CPU
+            time.sleep(0.01)
 
 # define API commands we might use for this script
 def ble_cmd_system_reset(p, boot_in_dfu):
@@ -330,16 +322,16 @@ def ble_cmd_gap_set_mode(p, discover, connect):
     p.write(struct.pack('6B', 0, 2, 6, 1, discover, connect))
 def ble_cmd_gap_end_procedure(p):
     p.write(struct.pack('4B', 0, 0, 6, 4))
-def ble_cmd_gap_set_scan_parameters(p, scan_interval, scan_window, active):
-    p.write(struct.pack('<4BHHB', 0, 5, 6, 7, scan_interval, scan_window, active))
-def ble_cmd_gap_discover(p, mode):
-    p.write(struct.pack('5B', 0, 1, 6, 2, mode))
+def ble_cmd_gap_set_adv_parameters(p, adv_interval_min, adv_interval_max, adv_channels):
+    p.write(struct.pack('<4BHHB', 0, 5, 6, 8, adv_interval_min, adv_interval_max, adv_channels))
+def ble_cmd_gap_set_adv_data(p, set_scanrsp, adv_data):
+    p.write(struct.pack('<4BBB' + str(len(adv_data)) + 's', 0, 2 + len(adv_data), 6, 9, set_scanrsp, len(adv_data), b''.join(chr(i) for i in adv_data)))
 
 # define basic BGAPI parser
 bgapi_rx_buffer = []
 bgapi_rx_expected_length = 0
 def bgapi_parse(b):
-    global bgapi_rx_buffer, bgapi_rx_expected_length
+    global bgapi_rx_buffer, bgapi_rx_expected_length, options
     if len(bgapi_rx_buffer) == 0 and (b == 0x00 or b == 0x80):
         bgapi_rx_buffer.append(b)
     elif len(bgapi_rx_buffer) == 1:
@@ -403,44 +395,17 @@ def bgapi_parse(b):
                                 if this_field[0] == 0xFF: # manufactuerer specific data
                                     ad_manufacturer.append(this_field[1:])
 
-                    if len(filter_mac) > 0:
-                        match = 0
-                        for mac in filter_mac:
-                            if mac == sender[:-len(mac) - 1:-1]:
-                                match = 1
-                                break
+                    #print "gap_scan_response: rssi: %d, packet_type: %d, sender: %s, address_type: %d, bond: %d, data_len: %d" % \
+                    #    (rssi, packet_type, ':'.join(['%02X' % ord(b) for b in sender[::-1]]), address_type, bond, data_len)
+                    t = datetime.datetime.now()
 
-                        if match == 0: display = 0
+                    disp_list = []
+                    disp_list.append("%ld.%03ld" % (time.mktime(t.timetuple()), t.microsecond/1000))
+                    disp_list.append("%d" % rssi)
+                    disp_list.append("%s" % ''.join(['%02X' % b for b in sender[::-1]]))
+                    disp_list.append("%d" % address_type)
 
-                    if display and len(filter_uuid) > 0:
-                        if not [i for i in filter_uuid if i in ad_services]: display = 0
-
-                    if display and filter_rssi > 0:
-                        if -filter_rssi > rssi: display = 0
-
-                    if display:
-                        #print "gap_scan_response: rssi: %d, packet_type: %d, sender: %s, address_type: %d, bond: %d, data_len: %d" % \
-                        #    (rssi, packet_type, ':'.join(['%02X' % ord(b) for b in sender[::-1]]), address_type, bond, data_len)
-                        t = datetime.datetime.now()
-
-                        disp_list = []
-                        for c in options.display:
-                            if c == 't':
-                                disp_list.append("%ld.%03ld" % (time.mktime(t.timetuple()), t.microsecond/1000))
-                            elif c == 'r':
-                                disp_list.append("%d" % rssi)
-                            elif c == 'p':
-                                disp_list.append("%d" % packet_type)
-                            elif c == 's':
-                                disp_list.append("%s" % ''.join(['%02X' % b for b in sender[::-1]]))
-                            elif c == 'a':
-                                disp_list.append("%d" % address_type)
-                            elif c == 'b':
-                                disp_list.append("%d" % bond)
-                            elif c == 'd':
-                                disp_list.append("%s" % ''.join(['%02X' % b for b in data_data]))
-
-                        print ' '.join(disp_list)
+                    print ' '.join(disp_list)
 
         bgapi_rx_buffer = []
 
