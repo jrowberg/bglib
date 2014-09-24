@@ -14,6 +14,8 @@ on the BLE112/BLE113 module, not applicable to the BLED112). It is built so you
 can simply plug in a BLED112 and go, but other kinds of usage may require small
 modifications.
 
+Seriously, just download, plug in the dongle, and run. Voila!
+
 Changelog:
     2014-09-24 - Initial release
 
