@@ -3,6 +3,7 @@
 """ Bluegiga BGAPI/BGLib demo: health thermometer collector
 
 Changelog:
+    2014-10-15 - Add logfile output mode
     2014-07-05 - Fix indication subscription to use 2-byte value
     2013-06-07 - Fix "address_type" to support Random (e.g. iPhone as peripheral)
     2013-05-15 - Added comments, script arguments
@@ -40,7 +41,7 @@ THE SOFTWARE.
 
 __author__ = "Jeff Rowberg"
 __license__ = "MIT"
-__version__ = "2014-07-05"
+__version__ = "2014-10-15"
 __email__ = "jeff@rowberg.net"
 
 """
@@ -129,11 +130,14 @@ import bglib, serial, time, datetime, optparse, signal
 ble = 0
 ser = 0
 peripheral_list = []
+connection_mac = []
 connection_handle = 0
 att_handle_start = 0
 att_handle_end = 0
 att_handle_measurement = 0
 att_handle_measurement_ccc = 0
+
+logmode = False
 
 uuid_service = [0x28, 0x00] # 0x2800
 uuid_client_characteristic_configuration = [0x29, 0x02] # 0x2902
@@ -154,7 +158,8 @@ def my_timeout(sender, args):
     # wouldn't work at this point if it's already timed out:
     #ble.send_command(ser, ble.ble_cmd_system_reset(0))
     #ble.check_activity(ser, 1)
-    print "BGAPI parser timed out. Make sure the BLE device is in a known/idle state."
+    if not logmode:
+        print "BGAPI parser timed out. Make sure the BLE device is in a known/idle state."
 
 # gap_scan_response handler
 def my_ble_evt_gap_scan_response(sender, args):
@@ -195,11 +200,13 @@ def my_ble_evt_gap_scan_response(sender, args):
 
 # connection_status handler
 def my_ble_evt_connection_status(sender, args):
-    global state, ble, ser, connection_handle
+    global state, ble, ser, connection_mac, connection_handle
 
     if (args['flags'] & 0x05) == 0x05:
         # connected, now perform service discovery
-        print "Connected to %s" % ':'.join(['%02X' % b for b in args['address'][::-1]])
+        if not logmode:
+            print "Connected to %s" % ':'.join(['%02X' % b for b in args['address'][::-1]])
+        connection_mac = args['address']
         connection_handle = args['connection']
         ble.send_command(ser, ble.ble_cmd_attclient_read_by_group_type(args['connection'], 0x0001, 0xFFFF, list(reversed(uuid_service))))
         ble.check_activity(ser, 1)
@@ -211,7 +218,8 @@ def my_ble_evt_attclient_group_found(sender, args):
 
     # found "service" attribute groups (UUID=0x2800), check for thermometer service
     if args['uuid'] == list(reversed(uuid_htm_service)):
-        print "Found attribute group for service w/UUID=0x1809: start=%d, end=%d" % (args['start'], args['end'])
+        if not logmode:
+            print "Found attribute group for service w/UUID=0x1809: start=%d, end=%d" % (args['start'], args['end'])
         att_handle_start = args['start']
         att_handle_end = args['end']
 
@@ -221,12 +229,14 @@ def my_ble_evt_attclient_find_information_found(sender, args):
 
     # check for thermometer measurement characteristic
     if args['uuid'] == list(reversed(uuid_htm_characteristic)):
-        print "Found attribute w/UUID=0x2A1C: handle=%d" % args['chrhandle']
+        if not logmode:
+            print "Found attribute w/UUID=0x2A1C: handle=%d" % args['chrhandle']
         att_handle_measurement = args['chrhandle']
 
     # check for subsequent client characteristic configuration
     elif args['uuid'] == list(reversed(uuid_client_characteristic_configuration)) and att_handle_measurement > 0:
-        print "Found attribute w/UUID=0x2902: handle=%d" % args['chrhandle']
+        if not logmode:
+            print "Found attribute w/UUID=0x2902: handle=%d" % args['chrhandle']
         att_handle_measurement_ccc = args['chrhandle']
 
 # attclient_procedure_completed handler
@@ -236,19 +246,22 @@ def my_ble_evt_attclient_procedure_completed(sender, args):
     # check if we just finished searching for services
     if state == STATE_FINDING_SERVICES:
         if att_handle_end > 0:
-            print "Found 'Health Thermometer' service with UUID 0x1809"
+            if not logmode:
+                print "Found 'Health Thermometer' service with UUID 0x1809"
 
             # found the Health Thermometer service, so now search for the attributes inside
             state = STATE_FINDING_ATTRIBUTES
             ble.send_command(ser, ble.ble_cmd_attclient_find_information(connection_handle, att_handle_start, att_handle_end))
             ble.check_activity(ser, 1)
         else:
-            print "Could not find 'Health Thermometer' service with UUID 0x1809"
+            if not logmode:
+                print "Could not find 'Health Thermometer' service with UUID 0x1809"
 
     # check if we just finished searching for attributes within the thermometer service
     elif state == STATE_FINDING_ATTRIBUTES:
         if att_handle_measurement_ccc > 0:
-            print "Found 'Health Thermometer' measurement attribute with UUID 0x2A1C"
+            if not logmode:
+                print "Found 'Health Thermometer' measurement attribute with UUID 0x2A1C"
 
             # found the measurement + client characteristic configuration, so enable indications
             # (this is done by writing 0x0002 to the client characteristic configuration attribute)
@@ -256,11 +269,12 @@ def my_ble_evt_attclient_procedure_completed(sender, args):
             ble.send_command(ser, ble.ble_cmd_attclient_attribute_write(connection_handle, att_handle_measurement_ccc, [0x02, 0x00]))
             ble.check_activity(ser, 1)
         else:
-            print "Could not find 'Health Thermometer' measurement attribute with UUID 0x2A1C"
+            if not logmode:
+                print "Could not find 'Health Thermometer' measurement attribute with UUID 0x2A1C"
 
 # attclient_attribute_value handler
 def my_ble_evt_attclient_attribute_value(sender, args):
-    global state, ble, ser, connection_handle, att_handle_measurement
+    global state, ble, ser, connection_mac, connection_handle, att_handle_measurement
 
     # check for a new value from the connected peripheral's temperature measurement attribute
     if args['connection'] == connection_handle and args['atthandle'] == att_handle_measurement:
@@ -273,11 +287,15 @@ def my_ble_evt_attclient_attribute_value(sender, args):
         temp_type = 'C'
         if htm_flags & 0x01: # value sent is Fahrenheit, not Celsius
             temp_type = 'F'
-        print "Temperature: %.1f%c %c" % (htm_measurement, chr(248), temp_type)
+        if not logmode:
+            print "Temperature: %.1f%c %c" % (htm_measurement, chr(248), temp_type)
+        else:
+            t = datetime.datetime.now()
+            print "%ld.%03ld %s %.1f %c" % (time.mktime(t.timetuple()), t.microsecond/1000, ':'.join(['%02X' % b for b in connection_mac[::-1]]), htm_measurement, temp_type)
 
 
 def main():
-    global ble, ser
+    global ble, ser, logmode
 
     # create option parser
     p = optparse.OptionParser(description='BGLib Demo: Health Thermometer Collector v' + __version__)
@@ -291,6 +309,7 @@ def main():
     group.add_option('--baud', '-b', type="int", help="Serial port baud rate (default 115200)", metavar="BAUD")
     group.add_option('--packet', '-k', action="store_true", help="Packet mode (prefix API packets with <length> byte)")
     group.add_option('--debug', '-d', action="store_true", help="Debug mode (show raw RX/TX API packets)")
+    group.add_option('--log', '-l', action="store_true", help="Logfile output mode (use to send stdout into log file)")
     p.add_option_group(group)
 
     # actually parse all of the arguments
@@ -300,6 +319,7 @@ def main():
     ble = bglib.BGLib()
     ble.packet_mode = options.packet
     ble.debug = options.debug
+    logmode = options.log
 
     # add handler for BGAPI timeout condition (hopefully won't happen)
     ble.on_timeout += my_timeout
@@ -342,7 +362,8 @@ def main():
     ble.check_activity(ser, 1)
 
     # start scanning now
-    print "Scanning for BLE peripherals..."
+    if not logmode:
+        print "Scanning for BLE peripherals..."
     ble.send_command(ser, ble.ble_cmd_gap_discover(1))
     ble.check_activity(ser, 1)
 
@@ -355,7 +376,8 @@ def main():
 
 # gracefully exit without a big exception message if possible
 def ctrl_c_handler(signal, frame):
-    print 'Goodbye!'
+    if not logmode:
+        print 'Goodbye!'
     exit(0)
 
 signal.signal(signal.SIGINT, ctrl_c_handler)
