@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <hardware>
     <sleeposc enable="true" ppm="30" />
-    <usb enable="true" endpoint="api" />
+    <sleep enable="false" />
     <txpower power="15" bias="5" />
     <usart mode="packet" channel="1" alternate="1" baud="38400" endpoint="api" flow="false" />
     <!--
@@ -16,6 +16,4 @@
         +=========+===========+======+======+======+======+
     -->
     <port index="0" pull="down" tristatemask="0" />
-    <port index="1" pull="down" tristatemask="0" />
-    <port index="2" pull="down" tristatemask="0" />
 </hardware>

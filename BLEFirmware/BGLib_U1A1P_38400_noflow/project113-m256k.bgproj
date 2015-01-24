@@ -2,7 +2,7 @@
 <project>
     <gatt in="gatt.xml" />
     <hardware in="hardware_nousb.xml" />    
-    <image out="out-ble113.hex" />
-    <device type="ble113" />
+    <image out="out-ble113-m256k.hex" />
+    <device type="ble113-m256k" />
     <boot fw="bootuart" />
 </project>
