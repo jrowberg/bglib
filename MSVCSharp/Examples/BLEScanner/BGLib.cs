@@ -1,10 +1,10 @@
 // Bluegiga BGLib C# interface library
-// 2013-05-20 by Jeff Rowberg <jeff@rowberg.net
+// 2015-03-19 by Jeff Rowberg <jeff@rowberg.net
 // Updates should (hopefully) always be available at https://github.com/jrowberg/bglib
 
 /* ============================================
 BGLib C# interface library code is placed under the MIT license
-Copyright (c) 2013 Jeff Rowberg
+Copyright (c) 2015 Jeff Rowberg
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -39,10 +39,7 @@ namespace Bluegiga {
             namespace System {
                 public delegate void ResetEventHandler(object sender, Bluegiga.BLE.Responses.System.ResetEventArgs e);
                 public class ResetEventArgs : EventArgs {
-                    public readonly Byte boot_in_dfu;
-                    public ResetEventArgs(Byte boot_in_dfu) {
-                        this.boot_in_dfu = boot_in_dfu;
-                    }
+                    public ResetEventArgs() { }
                 }
             
                 public delegate void HelloEventHandler(object sender, Bluegiga.BLE.Responses.System.HelloEventArgs e);
@@ -52,79 +49,105 @@ namespace Bluegiga {
             
                 public delegate void AddressGetEventHandler(object sender, Bluegiga.BLE.Responses.System.AddressGetEventArgs e);
                 public class AddressGetEventArgs : EventArgs {
-                    public AddressGetEventArgs() { }
+                    public readonly Byte[] address;
+                    public AddressGetEventArgs(Byte[] address) {
+                        this.address = address;
+                    }
                 }
             
                 public delegate void RegWriteEventHandler(object sender, Bluegiga.BLE.Responses.System.RegWriteEventArgs e);
                 public class RegWriteEventArgs : EventArgs {
-                    public readonly UInt16 address;
-                    public readonly Byte value;
-                    public RegWriteEventArgs(UInt16 address, Byte value) {
-                        this.address = address;
-                        this.value = value;
+                    public readonly UInt16 result;
+                    public RegWriteEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
                 public delegate void RegReadEventHandler(object sender, Bluegiga.BLE.Responses.System.RegReadEventArgs e);
                 public class RegReadEventArgs : EventArgs {
                     public readonly UInt16 address;
-                    public RegReadEventArgs(UInt16 address) {
+                    public readonly Byte value;
+                    public RegReadEventArgs(UInt16 address, Byte value) {
                         this.address = address;
+                        this.value = value;
                     }
                 }
             
                 public delegate void GetCountersEventHandler(object sender, Bluegiga.BLE.Responses.System.GetCountersEventArgs e);
                 public class GetCountersEventArgs : EventArgs {
-                    public GetCountersEventArgs() { }
+                    public readonly Byte txok;
+                    public readonly Byte txretry;
+                    public readonly Byte rxok;
+                    public readonly Byte rxfail;
+                    public readonly Byte mbuf;
+                    public GetCountersEventArgs(Byte txok, Byte txretry, Byte rxok, Byte rxfail, Byte mbuf) {
+                        this.txok = txok;
+                        this.txretry = txretry;
+                        this.rxok = rxok;
+                        this.rxfail = rxfail;
+                        this.mbuf = mbuf;
+                    }
                 }
             
                 public delegate void GetConnectionsEventHandler(object sender, Bluegiga.BLE.Responses.System.GetConnectionsEventArgs e);
                 public class GetConnectionsEventArgs : EventArgs {
-                    public GetConnectionsEventArgs() { }
+                    public readonly Byte maxconn;
+                    public GetConnectionsEventArgs(Byte maxconn) {
+                        this.maxconn = maxconn;
+                    }
                 }
             
                 public delegate void ReadMemoryEventHandler(object sender, Bluegiga.BLE.Responses.System.ReadMemoryEventArgs e);
                 public class ReadMemoryEventArgs : EventArgs {
                     public readonly UInt32 address;
-                    public readonly Byte length;
-                    public ReadMemoryEventArgs(UInt32 address, Byte length) {
+                    public readonly Byte[] data;
+                    public ReadMemoryEventArgs(UInt32 address, Byte[] data) {
                         this.address = address;
-                        this.length = length;
+                        this.data = data;
                     }
                 }
             
                 public delegate void GetInfoEventHandler(object sender, Bluegiga.BLE.Responses.System.GetInfoEventArgs e);
                 public class GetInfoEventArgs : EventArgs {
-                    public GetInfoEventArgs() { }
+                    public readonly UInt16 major;
+                    public readonly UInt16 minor;
+                    public readonly UInt16 patch;
+                    public readonly UInt16 build;
+                    public readonly UInt16 ll_version;
+                    public readonly Byte protocol_version;
+                    public readonly Byte hw;
+                    public GetInfoEventArgs(UInt16 major, UInt16 minor, UInt16 patch, UInt16 build, UInt16 ll_version, Byte protocol_version, Byte hw) {
+                        this.major = major;
+                        this.minor = minor;
+                        this.patch = patch;
+                        this.build = build;
+                        this.ll_version = ll_version;
+                        this.protocol_version = protocol_version;
+                        this.hw = hw;
+                    }
                 }
             
                 public delegate void EndpointTXEventHandler(object sender, Bluegiga.BLE.Responses.System.EndpointTXEventArgs e);
                 public class EndpointTXEventArgs : EventArgs {
-                    public readonly Byte endpoint;
-                    public readonly Byte[] data;
-                    public EndpointTXEventArgs(Byte endpoint, Byte[] data) {
-                        this.endpoint = endpoint;
-                        this.data = data;
+                    public readonly UInt16 result;
+                    public EndpointTXEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
                 public delegate void WhitelistAppendEventHandler(object sender, Bluegiga.BLE.Responses.System.WhitelistAppendEventArgs e);
                 public class WhitelistAppendEventArgs : EventArgs {
-                    public readonly Byte[] address;
-                    public readonly Byte address_type;
-                    public WhitelistAppendEventArgs(Byte[] address, Byte address_type) {
-                        this.address = address;
-                        this.address_type = address_type;
+                    public readonly UInt16 result;
+                    public WhitelistAppendEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
                 public delegate void WhitelistRemoveEventHandler(object sender, Bluegiga.BLE.Responses.System.WhitelistRemoveEventArgs e);
                 public class WhitelistRemoveEventArgs : EventArgs {
-                    public readonly Byte[] address;
-                    public readonly Byte address_type;
-                    public WhitelistRemoveEventArgs(Byte[] address, Byte address_type) {
-                        this.address = address;
-                        this.address_type = address_type;
+                    public readonly UInt16 result;
+                    public WhitelistRemoveEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
@@ -135,23 +158,40 @@ namespace Bluegiga {
             
                 public delegate void EndpointRXEventHandler(object sender, Bluegiga.BLE.Responses.System.EndpointRXEventArgs e);
                 public class EndpointRXEventArgs : EventArgs {
-                    public readonly Byte endpoint;
-                    public readonly Byte size;
-                    public EndpointRXEventArgs(Byte endpoint, Byte size) {
-                        this.endpoint = endpoint;
-                        this.size = size;
+                    public readonly UInt16 result;
+                    public readonly Byte[] data;
+                    public EndpointRXEventArgs(UInt16 result, Byte[] data) {
+                        this.result = result;
+                        this.data = data;
                     }
                 }
             
                 public delegate void EndpointSetWatermarksEventHandler(object sender, Bluegiga.BLE.Responses.System.EndpointSetWatermarksEventArgs e);
                 public class EndpointSetWatermarksEventArgs : EventArgs {
-                    public readonly Byte endpoint;
-                    public readonly Byte rx;
-                    public readonly Byte tx;
-                    public EndpointSetWatermarksEventArgs(Byte endpoint, Byte rx, Byte tx) {
-                        this.endpoint = endpoint;
-                        this.rx = rx;
-                        this.tx = tx;
+                    public readonly UInt16 result;
+                    public EndpointSetWatermarksEventArgs(UInt16 result) {
+                        this.result = result;
+                    }
+                }
+            
+                public delegate void AesSetkeyEventHandler(object sender, Bluegiga.BLE.Responses.System.AesSetkeyEventArgs e);
+                public class AesSetkeyEventArgs : EventArgs {
+                    public AesSetkeyEventArgs() { }
+                }
+            
+                public delegate void AesEncryptEventHandler(object sender, Bluegiga.BLE.Responses.System.AesEncryptEventArgs e);
+                public class AesEncryptEventArgs : EventArgs {
+                    public readonly Byte[] data;
+                    public AesEncryptEventArgs(Byte[] data) {
+                        this.data = data;
+                    }
+                }
+            
+                public delegate void AesDecryptEventHandler(object sender, Bluegiga.BLE.Responses.System.AesDecryptEventArgs e);
+                public class AesDecryptEventArgs : EventArgs {
+                    public readonly Byte[] data;
+                    public AesDecryptEventArgs(Byte[] data) {
+                        this.data = data;
                     }
                 }
             
@@ -174,45 +214,48 @@ namespace Bluegiga {
             
                 public delegate void PSSaveEventHandler(object sender, Bluegiga.BLE.Responses.Flash.PSSaveEventArgs e);
                 public class PSSaveEventArgs : EventArgs {
-                    public readonly UInt16 key;
-                    public readonly Byte[] value;
-                    public PSSaveEventArgs(UInt16 key, Byte[] value) {
-                        this.key = key;
-                        this.value = value;
+                    public readonly UInt16 result;
+                    public PSSaveEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
                 public delegate void PSLoadEventHandler(object sender, Bluegiga.BLE.Responses.Flash.PSLoadEventArgs e);
                 public class PSLoadEventArgs : EventArgs {
-                    public readonly UInt16 key;
-                    public PSLoadEventArgs(UInt16 key) {
-                        this.key = key;
+                    public readonly UInt16 result;
+                    public readonly Byte[] value;
+                    public PSLoadEventArgs(UInt16 result, Byte[] value) {
+                        this.result = result;
+                        this.value = value;
                     }
                 }
             
                 public delegate void PSEraseEventHandler(object sender, Bluegiga.BLE.Responses.Flash.PSEraseEventArgs e);
                 public class PSEraseEventArgs : EventArgs {
-                    public readonly UInt16 key;
-                    public PSEraseEventArgs(UInt16 key) {
-                        this.key = key;
-                    }
+                    public PSEraseEventArgs() { }
                 }
             
                 public delegate void ErasePageEventHandler(object sender, Bluegiga.BLE.Responses.Flash.ErasePageEventArgs e);
                 public class ErasePageEventArgs : EventArgs {
-                    public readonly Byte page;
-                    public ErasePageEventArgs(Byte page) {
-                        this.page = page;
+                    public readonly UInt16 result;
+                    public ErasePageEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
-                public delegate void WriteWordsEventHandler(object sender, Bluegiga.BLE.Responses.Flash.WriteWordsEventArgs e);
-                public class WriteWordsEventArgs : EventArgs {
-                    public readonly UInt16 address;
-                    public readonly Byte[] words;
-                    public WriteWordsEventArgs(UInt16 address, Byte[] words) {
-                        this.address = address;
-                        this.words = words;
+                public delegate void WriteDataEventHandler(object sender, Bluegiga.BLE.Responses.Flash.WriteDataEventArgs e);
+                public class WriteDataEventArgs : EventArgs {
+                    public readonly UInt16 result;
+                    public WriteDataEventArgs(UInt16 result) {
+                        this.result = result;
+                    }
+                }
+            
+                public delegate void ReadDataEventHandler(object sender, Bluegiga.BLE.Responses.Flash.ReadDataEventArgs e);
+                public class ReadDataEventArgs : EventArgs {
+                    public readonly Byte[] data;
+                    public ReadDataEventArgs(Byte[] data) {
+                        this.data = data;
                     }
                 }
             
@@ -220,13 +263,9 @@ namespace Bluegiga {
             namespace Attributes {
                 public delegate void WriteEventHandler(object sender, Bluegiga.BLE.Responses.Attributes.WriteEventArgs e);
                 public class WriteEventArgs : EventArgs {
-                    public readonly UInt16 handle;
-                    public readonly Byte offset;
-                    public readonly Byte[] value;
-                    public WriteEventArgs(UInt16 handle, Byte offset, Byte[] value) {
-                        this.handle = handle;
-                        this.offset = offset;
-                        this.value = value;
+                    public readonly UInt16 result;
+                    public WriteEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
@@ -234,39 +273,43 @@ namespace Bluegiga {
                 public class ReadEventArgs : EventArgs {
                     public readonly UInt16 handle;
                     public readonly UInt16 offset;
-                    public ReadEventArgs(UInt16 handle, UInt16 offset) {
+                    public readonly UInt16 result;
+                    public readonly Byte[] value;
+                    public ReadEventArgs(UInt16 handle, UInt16 offset, UInt16 result, Byte[] value) {
                         this.handle = handle;
                         this.offset = offset;
+                        this.result = result;
+                        this.value = value;
                     }
                 }
             
                 public delegate void ReadTypeEventHandler(object sender, Bluegiga.BLE.Responses.Attributes.ReadTypeEventArgs e);
                 public class ReadTypeEventArgs : EventArgs {
                     public readonly UInt16 handle;
-                    public ReadTypeEventArgs(UInt16 handle) {
+                    public readonly UInt16 result;
+                    public readonly Byte[] value;
+                    public ReadTypeEventArgs(UInt16 handle, UInt16 result, Byte[] value) {
                         this.handle = handle;
+                        this.result = result;
+                        this.value = value;
                     }
                 }
             
                 public delegate void UserReadResponseEventHandler(object sender, Bluegiga.BLE.Responses.Attributes.UserReadResponseEventArgs e);
                 public class UserReadResponseEventArgs : EventArgs {
-                    public readonly Byte connection;
-                    public readonly Byte att_error;
-                    public readonly Byte[] value;
-                    public UserReadResponseEventArgs(Byte connection, Byte att_error, Byte[] value) {
-                        this.connection = connection;
-                        this.att_error = att_error;
-                        this.value = value;
-                    }
+                    public UserReadResponseEventArgs() { }
                 }
             
                 public delegate void UserWriteResponseEventHandler(object sender, Bluegiga.BLE.Responses.Attributes.UserWriteResponseEventArgs e);
                 public class UserWriteResponseEventArgs : EventArgs {
-                    public readonly Byte connection;
-                    public readonly Byte att_error;
-                    public UserWriteResponseEventArgs(Byte connection, Byte att_error) {
-                        this.connection = connection;
-                        this.att_error = att_error;
+                    public UserWriteResponseEventArgs() { }
+                }
+            
+                public delegate void SendEventHandler(object sender, Bluegiga.BLE.Responses.Attributes.SendEventArgs e);
+                public class SendEventArgs : EventArgs {
+                    public readonly UInt16 result;
+                    public SendEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
@@ -275,66 +318,70 @@ namespace Bluegiga {
                 public delegate void DisconnectEventHandler(object sender, Bluegiga.BLE.Responses.Connection.DisconnectEventArgs e);
                 public class DisconnectEventArgs : EventArgs {
                     public readonly Byte connection;
-                    public DisconnectEventArgs(Byte connection) {
+                    public readonly UInt16 result;
+                    public DisconnectEventArgs(Byte connection, UInt16 result) {
                         this.connection = connection;
+                        this.result = result;
                     }
                 }
             
                 public delegate void GetRssiEventHandler(object sender, Bluegiga.BLE.Responses.Connection.GetRssiEventArgs e);
                 public class GetRssiEventArgs : EventArgs {
                     public readonly Byte connection;
-                    public GetRssiEventArgs(Byte connection) {
+                    public readonly SByte rssi;
+                    public GetRssiEventArgs(Byte connection, SByte rssi) {
                         this.connection = connection;
+                        this.rssi = rssi;
                     }
                 }
             
                 public delegate void UpdateEventHandler(object sender, Bluegiga.BLE.Responses.Connection.UpdateEventArgs e);
                 public class UpdateEventArgs : EventArgs {
                     public readonly Byte connection;
-                    public readonly UInt16 interval_min;
-                    public readonly UInt16 interval_max;
-                    public readonly UInt16 latency;
-                    public readonly UInt16 timeout;
-                    public UpdateEventArgs(Byte connection, UInt16 interval_min, UInt16 interval_max, UInt16 latency, UInt16 timeout) {
+                    public readonly UInt16 result;
+                    public UpdateEventArgs(Byte connection, UInt16 result) {
                         this.connection = connection;
-                        this.interval_min = interval_min;
-                        this.interval_max = interval_max;
-                        this.latency = latency;
-                        this.timeout = timeout;
+                        this.result = result;
                     }
                 }
             
                 public delegate void VersionUpdateEventHandler(object sender, Bluegiga.BLE.Responses.Connection.VersionUpdateEventArgs e);
                 public class VersionUpdateEventArgs : EventArgs {
                     public readonly Byte connection;
-                    public VersionUpdateEventArgs(Byte connection) {
+                    public readonly UInt16 result;
+                    public VersionUpdateEventArgs(Byte connection, UInt16 result) {
                         this.connection = connection;
+                        this.result = result;
                     }
                 }
             
                 public delegate void ChannelMapGetEventHandler(object sender, Bluegiga.BLE.Responses.Connection.ChannelMapGetEventArgs e);
                 public class ChannelMapGetEventArgs : EventArgs {
                     public readonly Byte connection;
-                    public ChannelMapGetEventArgs(Byte connection) {
+                    public readonly Byte[] map;
+                    public ChannelMapGetEventArgs(Byte connection, Byte[] map) {
                         this.connection = connection;
+                        this.map = map;
                     }
                 }
             
                 public delegate void ChannelMapSetEventHandler(object sender, Bluegiga.BLE.Responses.Connection.ChannelMapSetEventArgs e);
                 public class ChannelMapSetEventArgs : EventArgs {
                     public readonly Byte connection;
-                    public readonly Byte[] map;
-                    public ChannelMapSetEventArgs(Byte connection, Byte[] map) {
+                    public readonly UInt16 result;
+                    public ChannelMapSetEventArgs(Byte connection, UInt16 result) {
                         this.connection = connection;
-                        this.map = map;
+                        this.result = result;
                     }
                 }
             
                 public delegate void FeaturesGetEventHandler(object sender, Bluegiga.BLE.Responses.Connection.FeaturesGetEventArgs e);
                 public class FeaturesGetEventArgs : EventArgs {
                     public readonly Byte connection;
-                    public FeaturesGetEventArgs(Byte connection) {
+                    public readonly UInt16 result;
+                    public FeaturesGetEventArgs(Byte connection, UInt16 result) {
                         this.connection = connection;
+                        this.result = result;
                     }
                 }
             
@@ -349,10 +396,8 @@ namespace Bluegiga {
                 public delegate void RawTXEventHandler(object sender, Bluegiga.BLE.Responses.Connection.RawTXEventArgs e);
                 public class RawTXEventArgs : EventArgs {
                     public readonly Byte connection;
-                    public readonly Byte[] data;
-                    public RawTXEventArgs(Byte connection, Byte[] data) {
+                    public RawTXEventArgs(Byte connection) {
                         this.connection = connection;
-                        this.data = data;
                     }
                 }
             
@@ -361,142 +406,118 @@ namespace Bluegiga {
                 public delegate void FindByTypeValueEventHandler(object sender, Bluegiga.BLE.Responses.ATTClient.FindByTypeValueEventArgs e);
                 public class FindByTypeValueEventArgs : EventArgs {
                     public readonly Byte connection;
-                    public readonly UInt16 start;
-                    public readonly UInt16 end;
-                    public readonly UInt16 uuid;
-                    public readonly Byte[] value;
-                    public FindByTypeValueEventArgs(Byte connection, UInt16 start, UInt16 end, UInt16 uuid, Byte[] value) {
+                    public readonly UInt16 result;
+                    public FindByTypeValueEventArgs(Byte connection, UInt16 result) {
                         this.connection = connection;
-                        this.start = start;
-                        this.end = end;
-                        this.uuid = uuid;
-                        this.value = value;
+                        this.result = result;
                     }
                 }
             
                 public delegate void ReadByGroupTypeEventHandler(object sender, Bluegiga.BLE.Responses.ATTClient.ReadByGroupTypeEventArgs e);
                 public class ReadByGroupTypeEventArgs : EventArgs {
                     public readonly Byte connection;
-                    public readonly UInt16 start;
-                    public readonly UInt16 end;
-                    public readonly Byte[] uuid;
-                    public ReadByGroupTypeEventArgs(Byte connection, UInt16 start, UInt16 end, Byte[] uuid) {
+                    public readonly UInt16 result;
+                    public ReadByGroupTypeEventArgs(Byte connection, UInt16 result) {
                         this.connection = connection;
-                        this.start = start;
-                        this.end = end;
-                        this.uuid = uuid;
+                        this.result = result;
                     }
                 }
             
                 public delegate void ReadByTypeEventHandler(object sender, Bluegiga.BLE.Responses.ATTClient.ReadByTypeEventArgs e);
                 public class ReadByTypeEventArgs : EventArgs {
                     public readonly Byte connection;
-                    public readonly UInt16 start;
-                    public readonly UInt16 end;
-                    public readonly Byte[] uuid;
-                    public ReadByTypeEventArgs(Byte connection, UInt16 start, UInt16 end, Byte[] uuid) {
+                    public readonly UInt16 result;
+                    public ReadByTypeEventArgs(Byte connection, UInt16 result) {
                         this.connection = connection;
-                        this.start = start;
-                        this.end = end;
-                        this.uuid = uuid;
+                        this.result = result;
                     }
                 }
             
                 public delegate void FindInformationEventHandler(object sender, Bluegiga.BLE.Responses.ATTClient.FindInformationEventArgs e);
                 public class FindInformationEventArgs : EventArgs {
                     public readonly Byte connection;
-                    public readonly UInt16 start;
-                    public readonly UInt16 end;
-                    public FindInformationEventArgs(Byte connection, UInt16 start, UInt16 end) {
+                    public readonly UInt16 result;
+                    public FindInformationEventArgs(Byte connection, UInt16 result) {
                         this.connection = connection;
-                        this.start = start;
-                        this.end = end;
+                        this.result = result;
                     }
                 }
             
                 public delegate void ReadByHandleEventHandler(object sender, Bluegiga.BLE.Responses.ATTClient.ReadByHandleEventArgs e);
                 public class ReadByHandleEventArgs : EventArgs {
                     public readonly Byte connection;
-                    public readonly UInt16 chrhandle;
-                    public ReadByHandleEventArgs(Byte connection, UInt16 chrhandle) {
+                    public readonly UInt16 result;
+                    public ReadByHandleEventArgs(Byte connection, UInt16 result) {
                         this.connection = connection;
-                        this.chrhandle = chrhandle;
+                        this.result = result;
                     }
                 }
             
                 public delegate void AttributeWriteEventHandler(object sender, Bluegiga.BLE.Responses.ATTClient.AttributeWriteEventArgs e);
                 public class AttributeWriteEventArgs : EventArgs {
                     public readonly Byte connection;
-                    public readonly UInt16 atthandle;
-                    public readonly Byte[] data;
-                    public AttributeWriteEventArgs(Byte connection, UInt16 atthandle, Byte[] data) {
+                    public readonly UInt16 result;
+                    public AttributeWriteEventArgs(Byte connection, UInt16 result) {
                         this.connection = connection;
-                        this.atthandle = atthandle;
-                        this.data = data;
+                        this.result = result;
                     }
                 }
             
                 public delegate void WriteCommandEventHandler(object sender, Bluegiga.BLE.Responses.ATTClient.WriteCommandEventArgs e);
                 public class WriteCommandEventArgs : EventArgs {
                     public readonly Byte connection;
-                    public readonly UInt16 atthandle;
-                    public readonly Byte[] data;
-                    public WriteCommandEventArgs(Byte connection, UInt16 atthandle, Byte[] data) {
+                    public readonly UInt16 result;
+                    public WriteCommandEventArgs(Byte connection, UInt16 result) {
                         this.connection = connection;
-                        this.atthandle = atthandle;
-                        this.data = data;
+                        this.result = result;
                     }
                 }
             
                 public delegate void IndicateConfirmEventHandler(object sender, Bluegiga.BLE.Responses.ATTClient.IndicateConfirmEventArgs e);
                 public class IndicateConfirmEventArgs : EventArgs {
-                    public readonly Byte connection;
-                    public IndicateConfirmEventArgs(Byte connection) {
-                        this.connection = connection;
+                    public readonly UInt16 result;
+                    public IndicateConfirmEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
                 public delegate void ReadLongEventHandler(object sender, Bluegiga.BLE.Responses.ATTClient.ReadLongEventArgs e);
                 public class ReadLongEventArgs : EventArgs {
                     public readonly Byte connection;
-                    public readonly UInt16 chrhandle;
-                    public ReadLongEventArgs(Byte connection, UInt16 chrhandle) {
+                    public readonly UInt16 result;
+                    public ReadLongEventArgs(Byte connection, UInt16 result) {
                         this.connection = connection;
-                        this.chrhandle = chrhandle;
+                        this.result = result;
                     }
                 }
             
                 public delegate void PrepareWriteEventHandler(object sender, Bluegiga.BLE.Responses.ATTClient.PrepareWriteEventArgs e);
                 public class PrepareWriteEventArgs : EventArgs {
                     public readonly Byte connection;
-                    public readonly UInt16 atthandle;
-                    public readonly UInt16 offset;
-                    public readonly Byte[] data;
-                    public PrepareWriteEventArgs(Byte connection, UInt16 atthandle, UInt16 offset, Byte[] data) {
+                    public readonly UInt16 result;
+                    public PrepareWriteEventArgs(Byte connection, UInt16 result) {
                         this.connection = connection;
-                        this.atthandle = atthandle;
-                        this.offset = offset;
-                        this.data = data;
+                        this.result = result;
                     }
                 }
             
                 public delegate void ExecuteWriteEventHandler(object sender, Bluegiga.BLE.Responses.ATTClient.ExecuteWriteEventArgs e);
                 public class ExecuteWriteEventArgs : EventArgs {
                     public readonly Byte connection;
-                    public readonly Byte commit;
-                    public ExecuteWriteEventArgs(Byte connection, Byte commit) {
+                    public readonly UInt16 result;
+                    public ExecuteWriteEventArgs(Byte connection, UInt16 result) {
                         this.connection = connection;
-                        this.commit = commit;
+                        this.result = result;
                     }
                 }
             
                 public delegate void ReadMultipleEventHandler(object sender, Bluegiga.BLE.Responses.ATTClient.ReadMultipleEventArgs e);
                 public class ReadMultipleEventArgs : EventArgs {
                     public readonly Byte connection;
-                    public readonly Byte[] handles;
-                    public ReadMultipleEventArgs(Byte connection, Byte[] handles) {
+                    public readonly UInt16 result;
+                    public ReadMultipleEventArgs(Byte connection, UInt16 result) {
                         this.connection = connection;
-                        this.handles = handles;
+                        this.result = result;
                     }
                 }
             
@@ -505,61 +526,59 @@ namespace Bluegiga {
                 public delegate void EncryptStartEventHandler(object sender, Bluegiga.BLE.Responses.SM.EncryptStartEventArgs e);
                 public class EncryptStartEventArgs : EventArgs {
                     public readonly Byte handle;
-                    public readonly Byte bonding;
-                    public EncryptStartEventArgs(Byte handle, Byte bonding) {
+                    public readonly UInt16 result;
+                    public EncryptStartEventArgs(Byte handle, UInt16 result) {
                         this.handle = handle;
-                        this.bonding = bonding;
+                        this.result = result;
                     }
                 }
             
                 public delegate void SetBondableModeEventHandler(object sender, Bluegiga.BLE.Responses.SM.SetBondableModeEventArgs e);
                 public class SetBondableModeEventArgs : EventArgs {
-                    public readonly Byte bondable;
-                    public SetBondableModeEventArgs(Byte bondable) {
-                        this.bondable = bondable;
-                    }
+                    public SetBondableModeEventArgs() { }
                 }
             
                 public delegate void DeleteBondingEventHandler(object sender, Bluegiga.BLE.Responses.SM.DeleteBondingEventArgs e);
                 public class DeleteBondingEventArgs : EventArgs {
-                    public readonly Byte handle;
-                    public DeleteBondingEventArgs(Byte handle) {
-                        this.handle = handle;
+                    public readonly UInt16 result;
+                    public DeleteBondingEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
                 public delegate void SetParametersEventHandler(object sender, Bluegiga.BLE.Responses.SM.SetParametersEventArgs e);
                 public class SetParametersEventArgs : EventArgs {
-                    public readonly Byte mitm;
-                    public readonly Byte min_key_size;
-                    public readonly Byte io_capabilities;
-                    public SetParametersEventArgs(Byte mitm, Byte min_key_size, Byte io_capabilities) {
-                        this.mitm = mitm;
-                        this.min_key_size = min_key_size;
-                        this.io_capabilities = io_capabilities;
-                    }
+                    public SetParametersEventArgs() { }
                 }
             
                 public delegate void PasskeyEntryEventHandler(object sender, Bluegiga.BLE.Responses.SM.PasskeyEntryEventArgs e);
                 public class PasskeyEntryEventArgs : EventArgs {
-                    public readonly Byte handle;
-                    public readonly UInt32 passkey;
-                    public PasskeyEntryEventArgs(Byte handle, UInt32 passkey) {
-                        this.handle = handle;
-                        this.passkey = passkey;
+                    public readonly UInt16 result;
+                    public PasskeyEntryEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
                 public delegate void GetBondsEventHandler(object sender, Bluegiga.BLE.Responses.SM.GetBondsEventArgs e);
                 public class GetBondsEventArgs : EventArgs {
-                    public GetBondsEventArgs() { }
+                    public readonly Byte bonds;
+                    public GetBondsEventArgs(Byte bonds) {
+                        this.bonds = bonds;
+                    }
                 }
             
                 public delegate void SetOobDataEventHandler(object sender, Bluegiga.BLE.Responses.SM.SetOobDataEventArgs e);
                 public class SetOobDataEventArgs : EventArgs {
-                    public readonly Byte[] oob;
-                    public SetOobDataEventArgs(Byte[] oob) {
-                        this.oob = oob;
+                    public SetOobDataEventArgs() { }
+                }
+            
+                public delegate void WhitelistBondsEventHandler(object sender, Bluegiga.BLE.Responses.SM.WhitelistBondsEventArgs e);
+                public class WhitelistBondsEventArgs : EventArgs {
+                    public readonly UInt16 result;
+                    public readonly Byte count;
+                    public WhitelistBondsEventArgs(UInt16 result, Byte count) {
+                        this.result = result;
+                        this.count = count;
                     }
                 }
             
@@ -567,122 +586,90 @@ namespace Bluegiga {
             namespace GAP {
                 public delegate void SetPrivacyFlagsEventHandler(object sender, Bluegiga.BLE.Responses.GAP.SetPrivacyFlagsEventArgs e);
                 public class SetPrivacyFlagsEventArgs : EventArgs {
-                    public readonly Byte peripheral_privacy;
-                    public readonly Byte central_privacy;
-                    public SetPrivacyFlagsEventArgs(Byte peripheral_privacy, Byte central_privacy) {
-                        this.peripheral_privacy = peripheral_privacy;
-                        this.central_privacy = central_privacy;
-                    }
+                    public SetPrivacyFlagsEventArgs() { }
                 }
             
                 public delegate void SetModeEventHandler(object sender, Bluegiga.BLE.Responses.GAP.SetModeEventArgs e);
                 public class SetModeEventArgs : EventArgs {
-                    public readonly Byte discover;
-                    public readonly Byte connect;
-                    public SetModeEventArgs(Byte discover, Byte connect) {
-                        this.discover = discover;
-                        this.connect = connect;
+                    public readonly UInt16 result;
+                    public SetModeEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
                 public delegate void DiscoverEventHandler(object sender, Bluegiga.BLE.Responses.GAP.DiscoverEventArgs e);
                 public class DiscoverEventArgs : EventArgs {
-                    public readonly Byte mode;
-                    public DiscoverEventArgs(Byte mode) {
-                        this.mode = mode;
+                    public readonly UInt16 result;
+                    public DiscoverEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
                 public delegate void ConnectDirectEventHandler(object sender, Bluegiga.BLE.Responses.GAP.ConnectDirectEventArgs e);
                 public class ConnectDirectEventArgs : EventArgs {
-                    public readonly Byte[] address;
-                    public readonly Byte addr_type;
-                    public readonly UInt16 conn_interval_min;
-                    public readonly UInt16 conn_interval_max;
-                    public readonly UInt16 timeout;
-                    public readonly UInt16 latency;
-                    public ConnectDirectEventArgs(Byte[] address, Byte addr_type, UInt16 conn_interval_min, UInt16 conn_interval_max, UInt16 timeout, UInt16 latency) {
-                        this.address = address;
-                        this.addr_type = addr_type;
-                        this.conn_interval_min = conn_interval_min;
-                        this.conn_interval_max = conn_interval_max;
-                        this.timeout = timeout;
-                        this.latency = latency;
+                    public readonly UInt16 result;
+                    public readonly Byte connection_handle;
+                    public ConnectDirectEventArgs(UInt16 result, Byte connection_handle) {
+                        this.result = result;
+                        this.connection_handle = connection_handle;
                     }
                 }
             
                 public delegate void EndProcedureEventHandler(object sender, Bluegiga.BLE.Responses.GAP.EndProcedureEventArgs e);
                 public class EndProcedureEventArgs : EventArgs {
-                    public EndProcedureEventArgs() { }
+                    public readonly UInt16 result;
+                    public EndProcedureEventArgs(UInt16 result) {
+                        this.result = result;
+                    }
                 }
             
                 public delegate void ConnectSelectiveEventHandler(object sender, Bluegiga.BLE.Responses.GAP.ConnectSelectiveEventArgs e);
                 public class ConnectSelectiveEventArgs : EventArgs {
-                    public readonly UInt16 conn_interval_min;
-                    public readonly UInt16 conn_interval_max;
-                    public readonly UInt16 timeout;
-                    public readonly UInt16 latency;
-                    public ConnectSelectiveEventArgs(UInt16 conn_interval_min, UInt16 conn_interval_max, UInt16 timeout, UInt16 latency) {
-                        this.conn_interval_min = conn_interval_min;
-                        this.conn_interval_max = conn_interval_max;
-                        this.timeout = timeout;
-                        this.latency = latency;
+                    public readonly UInt16 result;
+                    public readonly Byte connection_handle;
+                    public ConnectSelectiveEventArgs(UInt16 result, Byte connection_handle) {
+                        this.result = result;
+                        this.connection_handle = connection_handle;
                     }
                 }
             
                 public delegate void SetFilteringEventHandler(object sender, Bluegiga.BLE.Responses.GAP.SetFilteringEventArgs e);
                 public class SetFilteringEventArgs : EventArgs {
-                    public readonly Byte scan_policy;
-                    public readonly Byte adv_policy;
-                    public readonly Byte scan_duplicate_filtering;
-                    public SetFilteringEventArgs(Byte scan_policy, Byte adv_policy, Byte scan_duplicate_filtering) {
-                        this.scan_policy = scan_policy;
-                        this.adv_policy = adv_policy;
-                        this.scan_duplicate_filtering = scan_duplicate_filtering;
+                    public readonly UInt16 result;
+                    public SetFilteringEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
                 public delegate void SetScanParametersEventHandler(object sender, Bluegiga.BLE.Responses.GAP.SetScanParametersEventArgs e);
                 public class SetScanParametersEventArgs : EventArgs {
-                    public readonly UInt16 scan_interval;
-                    public readonly UInt16 scan_window;
-                    public readonly Byte active;
-                    public SetScanParametersEventArgs(UInt16 scan_interval, UInt16 scan_window, Byte active) {
-                        this.scan_interval = scan_interval;
-                        this.scan_window = scan_window;
-                        this.active = active;
+                    public readonly UInt16 result;
+                    public SetScanParametersEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
                 public delegate void SetAdvParametersEventHandler(object sender, Bluegiga.BLE.Responses.GAP.SetAdvParametersEventArgs e);
                 public class SetAdvParametersEventArgs : EventArgs {
-                    public readonly UInt16 adv_interval_min;
-                    public readonly UInt16 adv_interval_max;
-                    public readonly Byte adv_channels;
-                    public SetAdvParametersEventArgs(UInt16 adv_interval_min, UInt16 adv_interval_max, Byte adv_channels) {
-                        this.adv_interval_min = adv_interval_min;
-                        this.adv_interval_max = adv_interval_max;
-                        this.adv_channels = adv_channels;
+                    public readonly UInt16 result;
+                    public SetAdvParametersEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
                 public delegate void SetAdvDataEventHandler(object sender, Bluegiga.BLE.Responses.GAP.SetAdvDataEventArgs e);
                 public class SetAdvDataEventArgs : EventArgs {
-                    public readonly Byte set_scanrsp;
-                    public readonly Byte[] adv_data;
-                    public SetAdvDataEventArgs(Byte set_scanrsp, Byte[] adv_data) {
-                        this.set_scanrsp = set_scanrsp;
-                        this.adv_data = adv_data;
+                    public readonly UInt16 result;
+                    public SetAdvDataEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
                 public delegate void SetDirectedConnectableModeEventHandler(object sender, Bluegiga.BLE.Responses.GAP.SetDirectedConnectableModeEventArgs e);
                 public class SetDirectedConnectableModeEventArgs : EventArgs {
-                    public readonly Byte[] address;
-                    public readonly Byte addr_type;
-                    public SetDirectedConnectableModeEventArgs(Byte[] address, Byte addr_type) {
-                        this.address = address;
-                        this.addr_type = addr_type;
+                    public readonly UInt16 result;
+                    public SetDirectedConnectableModeEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
@@ -690,117 +677,87 @@ namespace Bluegiga {
             namespace Hardware {
                 public delegate void IOPortConfigIrqEventHandler(object sender, Bluegiga.BLE.Responses.Hardware.IOPortConfigIrqEventArgs e);
                 public class IOPortConfigIrqEventArgs : EventArgs {
-                    public readonly Byte port;
-                    public readonly Byte enable_bits;
-                    public readonly Byte falling_edge;
-                    public IOPortConfigIrqEventArgs(Byte port, Byte enable_bits, Byte falling_edge) {
-                        this.port = port;
-                        this.enable_bits = enable_bits;
-                        this.falling_edge = falling_edge;
+                    public readonly UInt16 result;
+                    public IOPortConfigIrqEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
                 public delegate void SetSoftTimerEventHandler(object sender, Bluegiga.BLE.Responses.Hardware.SetSoftTimerEventArgs e);
                 public class SetSoftTimerEventArgs : EventArgs {
-                    public readonly UInt32 time;
-                    public readonly Byte handle;
-                    public readonly Byte single_shot;
-                    public SetSoftTimerEventArgs(UInt32 time, Byte handle, Byte single_shot) {
-                        this.time = time;
-                        this.handle = handle;
-                        this.single_shot = single_shot;
+                    public readonly UInt16 result;
+                    public SetSoftTimerEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
                 public delegate void ADCReadEventHandler(object sender, Bluegiga.BLE.Responses.Hardware.ADCReadEventArgs e);
                 public class ADCReadEventArgs : EventArgs {
-                    public readonly Byte input;
-                    public readonly Byte decimation;
-                    public readonly Byte reference_selection;
-                    public ADCReadEventArgs(Byte input, Byte decimation, Byte reference_selection) {
-                        this.input = input;
-                        this.decimation = decimation;
-                        this.reference_selection = reference_selection;
+                    public readonly UInt16 result;
+                    public ADCReadEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
                 public delegate void IOPortConfigDirectionEventHandler(object sender, Bluegiga.BLE.Responses.Hardware.IOPortConfigDirectionEventArgs e);
                 public class IOPortConfigDirectionEventArgs : EventArgs {
-                    public readonly Byte port;
-                    public readonly Byte direction;
-                    public IOPortConfigDirectionEventArgs(Byte port, Byte direction) {
-                        this.port = port;
-                        this.direction = direction;
+                    public readonly UInt16 result;
+                    public IOPortConfigDirectionEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
                 public delegate void IOPortConfigFunctionEventHandler(object sender, Bluegiga.BLE.Responses.Hardware.IOPortConfigFunctionEventArgs e);
                 public class IOPortConfigFunctionEventArgs : EventArgs {
-                    public readonly Byte port;
-                    public readonly Byte function;
-                    public IOPortConfigFunctionEventArgs(Byte port, Byte function) {
-                        this.port = port;
-                        this.function = function;
+                    public readonly UInt16 result;
+                    public IOPortConfigFunctionEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
                 public delegate void IOPortConfigPullEventHandler(object sender, Bluegiga.BLE.Responses.Hardware.IOPortConfigPullEventArgs e);
                 public class IOPortConfigPullEventArgs : EventArgs {
-                    public readonly Byte port;
-                    public readonly Byte tristate_mask;
-                    public readonly Byte pull_up;
-                    public IOPortConfigPullEventArgs(Byte port, Byte tristate_mask, Byte pull_up) {
-                        this.port = port;
-                        this.tristate_mask = tristate_mask;
-                        this.pull_up = pull_up;
+                    public readonly UInt16 result;
+                    public IOPortConfigPullEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
                 public delegate void IOPortWriteEventHandler(object sender, Bluegiga.BLE.Responses.Hardware.IOPortWriteEventArgs e);
                 public class IOPortWriteEventArgs : EventArgs {
-                    public readonly Byte port;
-                    public readonly Byte mask;
-                    public readonly Byte data;
-                    public IOPortWriteEventArgs(Byte port, Byte mask, Byte data) {
-                        this.port = port;
-                        this.mask = mask;
-                        this.data = data;
+                    public readonly UInt16 result;
+                    public IOPortWriteEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
                 public delegate void IOPortReadEventHandler(object sender, Bluegiga.BLE.Responses.Hardware.IOPortReadEventArgs e);
                 public class IOPortReadEventArgs : EventArgs {
+                    public readonly UInt16 result;
                     public readonly Byte port;
-                    public readonly Byte mask;
-                    public IOPortReadEventArgs(Byte port, Byte mask) {
+                    public readonly Byte data;
+                    public IOPortReadEventArgs(UInt16 result, Byte port, Byte data) {
+                        this.result = result;
                         this.port = port;
-                        this.mask = mask;
+                        this.data = data;
                     }
                 }
             
                 public delegate void SPIConfigEventHandler(object sender, Bluegiga.BLE.Responses.Hardware.SPIConfigEventArgs e);
                 public class SPIConfigEventArgs : EventArgs {
-                    public readonly Byte channel;
-                    public readonly Byte polarity;
-                    public readonly Byte phase;
-                    public readonly Byte bit_order;
-                    public readonly Byte baud_e;
-                    public readonly Byte baud_m;
-                    public SPIConfigEventArgs(Byte channel, Byte polarity, Byte phase, Byte bit_order, Byte baud_e, Byte baud_m) {
-                        this.channel = channel;
-                        this.polarity = polarity;
-                        this.phase = phase;
-                        this.bit_order = bit_order;
-                        this.baud_e = baud_e;
-                        this.baud_m = baud_m;
+                    public readonly UInt16 result;
+                    public SPIConfigEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
                 public delegate void SPITransferEventHandler(object sender, Bluegiga.BLE.Responses.Hardware.SPITransferEventArgs e);
                 public class SPITransferEventArgs : EventArgs {
+                    public readonly UInt16 result;
                     public readonly Byte channel;
                     public readonly Byte[] data;
-                    public SPITransferEventArgs(Byte channel, Byte[] data) {
+                    public SPITransferEventArgs(UInt16 result, Byte channel, Byte[] data) {
+                        this.result = result;
                         this.channel = channel;
                         this.data = data;
                     }
@@ -808,47 +765,84 @@ namespace Bluegiga {
             
                 public delegate void I2CReadEventHandler(object sender, Bluegiga.BLE.Responses.Hardware.I2CReadEventArgs e);
                 public class I2CReadEventArgs : EventArgs {
-                    public readonly Byte address;
-                    public readonly Byte stop;
-                    public readonly Byte length;
-                    public I2CReadEventArgs(Byte address, Byte stop, Byte length) {
-                        this.address = address;
-                        this.stop = stop;
-                        this.length = length;
+                    public readonly UInt16 result;
+                    public readonly Byte[] data;
+                    public I2CReadEventArgs(UInt16 result, Byte[] data) {
+                        this.result = result;
+                        this.data = data;
                     }
                 }
             
                 public delegate void I2CWriteEventHandler(object sender, Bluegiga.BLE.Responses.Hardware.I2CWriteEventArgs e);
                 public class I2CWriteEventArgs : EventArgs {
-                    public readonly Byte address;
-                    public readonly Byte stop;
-                    public readonly Byte[] data;
-                    public I2CWriteEventArgs(Byte address, Byte stop, Byte[] data) {
-                        this.address = address;
-                        this.stop = stop;
-                        this.data = data;
+                    public readonly Byte written;
+                    public I2CWriteEventArgs(Byte written) {
+                        this.written = written;
                     }
                 }
             
                 public delegate void SetTxpowerEventHandler(object sender, Bluegiga.BLE.Responses.Hardware.SetTxpowerEventArgs e);
                 public class SetTxpowerEventArgs : EventArgs {
-                    public readonly Byte power;
-                    public SetTxpowerEventArgs(Byte power) {
-                        this.power = power;
-                    }
+                    public SetTxpowerEventArgs() { }
                 }
             
                 public delegate void TimerComparatorEventHandler(object sender, Bluegiga.BLE.Responses.Hardware.TimerComparatorEventArgs e);
                 public class TimerComparatorEventArgs : EventArgs {
-                    public readonly Byte timer;
-                    public readonly Byte channel;
-                    public readonly Byte mode;
-                    public readonly UInt16 comparator_value;
-                    public TimerComparatorEventArgs(Byte timer, Byte channel, Byte mode, UInt16 comparator_value) {
-                        this.timer = timer;
-                        this.channel = channel;
-                        this.mode = mode;
-                        this.comparator_value = comparator_value;
+                    public readonly UInt16 result;
+                    public TimerComparatorEventArgs(UInt16 result) {
+                        this.result = result;
+                    }
+                }
+            
+                public delegate void IOPortIrqEnableEventHandler(object sender, Bluegiga.BLE.Responses.Hardware.IOPortIrqEnableEventArgs e);
+                public class IOPortIrqEnableEventArgs : EventArgs {
+                    public readonly UInt16 result;
+                    public IOPortIrqEnableEventArgs(UInt16 result) {
+                        this.result = result;
+                    }
+                }
+            
+                public delegate void IOPortIrqDirectionEventHandler(object sender, Bluegiga.BLE.Responses.Hardware.IOPortIrqDirectionEventArgs e);
+                public class IOPortIrqDirectionEventArgs : EventArgs {
+                    public readonly UInt16 result;
+                    public IOPortIrqDirectionEventArgs(UInt16 result) {
+                        this.result = result;
+                    }
+                }
+            
+                public delegate void AnalogComparatorEnableEventHandler(object sender, Bluegiga.BLE.Responses.Hardware.AnalogComparatorEnableEventArgs e);
+                public class AnalogComparatorEnableEventArgs : EventArgs {
+                    public AnalogComparatorEnableEventArgs() { }
+                }
+            
+                public delegate void AnalogComparatorReadEventHandler(object sender, Bluegiga.BLE.Responses.Hardware.AnalogComparatorReadEventArgs e);
+                public class AnalogComparatorReadEventArgs : EventArgs {
+                    public readonly UInt16 result;
+                    public readonly Byte output;
+                    public AnalogComparatorReadEventArgs(UInt16 result, Byte output) {
+                        this.result = result;
+                        this.output = output;
+                    }
+                }
+            
+                public delegate void AnalogComparatorConfigIrqEventHandler(object sender, Bluegiga.BLE.Responses.Hardware.AnalogComparatorConfigIrqEventArgs e);
+                public class AnalogComparatorConfigIrqEventArgs : EventArgs {
+                    public readonly UInt16 result;
+                    public AnalogComparatorConfigIrqEventArgs(UInt16 result) {
+                        this.result = result;
+                    }
+                }
+            
+                public delegate void SetRxgainEventHandler(object sender, Bluegiga.BLE.Responses.Hardware.SetRxgainEventArgs e);
+                public class SetRxgainEventArgs : EventArgs {
+                    public SetRxgainEventArgs() { }
+                }
+            
+                public delegate void UsbEnableEventHandler(object sender, Bluegiga.BLE.Responses.Hardware.UsbEnableEventArgs e);
+                public class UsbEnableEventArgs : EventArgs {
+                    public readonly UInt16 result;
+                    public UsbEnableEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
@@ -856,27 +850,20 @@ namespace Bluegiga {
             namespace Test {
                 public delegate void PHYTXEventHandler(object sender, Bluegiga.BLE.Responses.Test.PHYTXEventArgs e);
                 public class PHYTXEventArgs : EventArgs {
-                    public readonly Byte channel;
-                    public readonly Byte length;
-                    public readonly Byte type;
-                    public PHYTXEventArgs(Byte channel, Byte length, Byte type) {
-                        this.channel = channel;
-                        this.length = length;
-                        this.type = type;
-                    }
+                    public PHYTXEventArgs() { }
                 }
             
                 public delegate void PHYRXEventHandler(object sender, Bluegiga.BLE.Responses.Test.PHYRXEventArgs e);
                 public class PHYRXEventArgs : EventArgs {
-                    public readonly Byte channel;
-                    public PHYRXEventArgs(Byte channel) {
-                        this.channel = channel;
-                    }
+                    public PHYRXEventArgs() { }
                 }
             
                 public delegate void PHYEndEventHandler(object sender, Bluegiga.BLE.Responses.Test.PHYEndEventArgs e);
                 public class PHYEndEventArgs : EventArgs {
-                    public PHYEndEventArgs() { }
+                    public readonly UInt16 counter;
+                    public PHYEndEventArgs(UInt16 counter) {
+                        this.counter = counter;
+                    }
                 }
             
                 public delegate void PHYResetEventHandler(object sender, Bluegiga.BLE.Responses.Test.PHYResetEventArgs e);
@@ -886,14 +873,53 @@ namespace Bluegiga {
             
                 public delegate void GetChannelMapEventHandler(object sender, Bluegiga.BLE.Responses.Test.GetChannelMapEventArgs e);
                 public class GetChannelMapEventArgs : EventArgs {
-                    public GetChannelMapEventArgs() { }
+                    public readonly Byte[] channel_map;
+                    public GetChannelMapEventArgs(Byte[] channel_map) {
+                        this.channel_map = channel_map;
+                    }
                 }
             
                 public delegate void DebugEventHandler(object sender, Bluegiga.BLE.Responses.Test.DebugEventArgs e);
                 public class DebugEventArgs : EventArgs {
-                    public readonly Byte[] input;
-                    public DebugEventArgs(Byte[] input) {
-                        this.input = input;
+                    public readonly Byte[] output;
+                    public DebugEventArgs(Byte[] output) {
+                        this.output = output;
+                    }
+                }
+            
+                public delegate void ChannelModeEventHandler(object sender, Bluegiga.BLE.Responses.Test.ChannelModeEventArgs e);
+                public class ChannelModeEventArgs : EventArgs {
+                    public ChannelModeEventArgs() { }
+                }
+            
+            }
+            namespace DFU {
+                public delegate void ResetEventHandler(object sender, Bluegiga.BLE.Responses.DFU.ResetEventArgs e);
+                public class ResetEventArgs : EventArgs {
+                    public ResetEventArgs() { }
+                }
+            
+                public delegate void FlashSetAddressEventHandler(object sender, Bluegiga.BLE.Responses.DFU.FlashSetAddressEventArgs e);
+                public class FlashSetAddressEventArgs : EventArgs {
+                    public readonly UInt16 result;
+                    public FlashSetAddressEventArgs(UInt16 result) {
+                        this.result = result;
+                    }
+                }
+            
+                public delegate void FlashUploadEventHandler(object sender, Bluegiga.BLE.Responses.DFU.FlashUploadEventArgs e);
+                public class FlashUploadEventArgs : EventArgs {
+                    public readonly UInt16 result;
+                    public FlashUploadEventArgs(UInt16 result) {
+                        this.result = result;
+                    }
+                }
+            
+                public delegate void FlashUploadFinishEventHandler(object sender, Bluegiga.BLE.Responses.DFU.FlashUploadFinishEventArgs e);
+                public class FlashUploadFinishEventArgs : EventArgs {
+                    public readonly UInt16 result;
+                    public FlashUploadFinishEventArgs(UInt16 result) {
+                        this.result = result;
                     }
                 }
             
@@ -963,6 +989,14 @@ namespace Bluegiga {
                 public delegate void NoLicenseKeyEventHandler(object sender, Bluegiga.BLE.Events.System.NoLicenseKeyEventArgs e);
                 public class NoLicenseKeyEventArgs : EventArgs {
                     public NoLicenseKeyEventArgs() { }
+                }
+            
+                public delegate void ProtocolErrorEventHandler(object sender, Bluegiga.BLE.Events.System.ProtocolErrorEventArgs e);
+                public class ProtocolErrorEventArgs : EventArgs {
+                    public readonly UInt16 reason;
+                    public ProtocolErrorEventArgs(UInt16 reason) {
+                        this.reason = reason;
+                    }
                 }
             
             }
@@ -1297,6 +1331,26 @@ namespace Bluegiga {
                     }
                 }
             
+                public delegate void AnalogComparatorStatusEventHandler(object sender, Bluegiga.BLE.Events.Hardware.AnalogComparatorStatusEventArgs e);
+                public class AnalogComparatorStatusEventArgs : EventArgs {
+                    public readonly UInt32 timestamp;
+                    public readonly Byte output;
+                    public AnalogComparatorStatusEventArgs(UInt32 timestamp, Byte output) {
+                        this.timestamp = timestamp;
+                        this.output = output;
+                    }
+                }
+            
+            }
+            namespace DFU {
+                public delegate void BootEventHandler(object sender, Bluegiga.BLE.Events.DFU.BootEventArgs e);
+                public class BootEventArgs : EventArgs {
+                    public readonly UInt32 version;
+                    public BootEventArgs(UInt32 version) {
+                        this.version = version;
+                    }
+                }
+            
             }
         }
 
@@ -1359,6 +1413,24 @@ namespace Bluegiga {
         public Byte[] BLECommandSystemEndpointSetWatermarks(Byte endpoint, Byte rx, Byte tx) {
             return new Byte[] { 0, 3, 0, 14, endpoint, rx, tx };
         }
+        public Byte[] BLECommandSystemAesSetkey(Byte[] key) {
+            Byte[] cmd = new Byte[5 + key.Length];
+            Array.Copy(new Byte[] { 0, (Byte)(1 + key.Length), 0, 15, (Byte)key.Length }, 0, cmd, 0, 5);
+            Array.Copy(key, 0, cmd, 5, key.Length);
+            return cmd;
+        }
+        public Byte[] BLECommandSystemAesEncrypt(Byte[] data) {
+            Byte[] cmd = new Byte[5 + data.Length];
+            Array.Copy(new Byte[] { 0, (Byte)(1 + data.Length), 0, 16, (Byte)data.Length }, 0, cmd, 0, 5);
+            Array.Copy(data, 0, cmd, 5, data.Length);
+            return cmd;
+        }
+        public Byte[] BLECommandSystemAesDecrypt(Byte[] data) {
+            Byte[] cmd = new Byte[5 + data.Length];
+            Array.Copy(new Byte[] { 0, (Byte)(1 + data.Length), 0, 17, (Byte)data.Length }, 0, cmd, 0, 5);
+            Array.Copy(data, 0, cmd, 5, data.Length);
+            return cmd;
+        }
         public Byte[] BLECommandFlashPSDefrag() {
             return new Byte[] { 0, 0, 1, 0 };
         }
@@ -1383,11 +1455,14 @@ namespace Bluegiga {
         public Byte[] BLECommandFlashErasePage(Byte page) {
             return new Byte[] { 0, 1, 1, 6, page };
         }
-        public Byte[] BLECommandFlashWriteWords(UInt16 address, Byte[] words) {
-            Byte[] cmd = new Byte[7 + words.Length];
-            Array.Copy(new Byte[] { 0, (Byte)(3 + words.Length), 1, 7, (Byte)(address), (Byte)(address >> 8), (Byte)words.Length }, 0, cmd, 0, 7);
-            Array.Copy(words, 0, cmd, 7, words.Length);
+        public Byte[] BLECommandFlashWriteData(UInt32 address, Byte[] data) {
+            Byte[] cmd = new Byte[9 + data.Length];
+            Array.Copy(new Byte[] { 0, (Byte)(5 + data.Length), 1, 7, (Byte)(address), (Byte)(address >> 8), (Byte)(address >> 16), (Byte)(address >> 24), (Byte)data.Length }, 0, cmd, 0, 9);
+            Array.Copy(data, 0, cmd, 9, data.Length);
             return cmd;
+        }
+        public Byte[] BLECommandFlashReadData(UInt32 address, Byte length) {
+            return new Byte[] { 0, 5, 1, 8, (Byte)(address), (Byte)(address >> 8), (Byte)(address >> 16), (Byte)(address >> 24), length };
         }
         public Byte[] BLECommandAttributesWrite(UInt16 handle, Byte offset, Byte[] value) {
             Byte[] cmd = new Byte[8 + value.Length];
@@ -1409,6 +1484,12 @@ namespace Bluegiga {
         }
         public Byte[] BLECommandAttributesUserWriteResponse(Byte connection, Byte att_error) {
             return new Byte[] { 0, 2, 2, 4, connection, att_error };
+        }
+        public Byte[] BLECommandAttributesSend(Byte connection, UInt16 handle, Byte[] value) {
+            Byte[] cmd = new Byte[8 + value.Length];
+            Array.Copy(new Byte[] { 0, (Byte)(4 + value.Length), 2, 5, connection, (Byte)(handle), (Byte)(handle >> 8), (Byte)value.Length }, 0, cmd, 0, 8);
+            Array.Copy(value, 0, cmd, 8, value.Length);
+            return cmd;
         }
         public Byte[] BLECommandConnectionDisconnect(Byte connection) {
             return new Byte[] { 0, 1, 3, 0, connection };
@@ -1524,6 +1605,9 @@ namespace Bluegiga {
             Array.Copy(oob, 0, cmd, 5, oob.Length);
             return cmd;
         }
+        public Byte[] BLECommandSMWhitelistBonds() {
+            return new Byte[] { 0, 0, 5, 7 };
+        }
         public Byte[] BLECommandGAPSetPrivacyFlags(Byte peripheral_privacy, Byte central_privacy) {
             return new Byte[] { 0, 2, 6, 0, peripheral_privacy, central_privacy };
         }
@@ -1614,6 +1698,27 @@ namespace Bluegiga {
         public Byte[] BLECommandHardwareTimerComparator(Byte timer, Byte channel, Byte mode, UInt16 comparator_value) {
             return new Byte[] { 0, 5, 7, 13, timer, channel, mode, (Byte)(comparator_value), (Byte)(comparator_value >> 8) };
         }
+        public Byte[] BLECommandHardwareIOPortIrqEnable(Byte port, Byte enable_bits) {
+            return new Byte[] { 0, 2, 7, 14, port, enable_bits };
+        }
+        public Byte[] BLECommandHardwareIOPortIrqDirection(Byte port, Byte falling_edge) {
+            return new Byte[] { 0, 2, 7, 15, port, falling_edge };
+        }
+        public Byte[] BLECommandHardwareAnalogComparatorEnable(Byte enable) {
+            return new Byte[] { 0, 1, 7, 16, enable };
+        }
+        public Byte[] BLECommandHardwareAnalogComparatorRead() {
+            return new Byte[] { 0, 0, 7, 17 };
+        }
+        public Byte[] BLECommandHardwareAnalogComparatorConfigIrq(Byte enabled) {
+            return new Byte[] { 0, 1, 7, 18, enabled };
+        }
+        public Byte[] BLECommandHardwareSetRxgain(Byte gain) {
+            return new Byte[] { 0, 1, 7, 19, gain };
+        }
+        public Byte[] BLECommandHardwareUsbEnable(Byte enable) {
+            return new Byte[] { 0, 1, 7, 20, enable };
+        }
         public Byte[] BLECommandTestPHYTX(Byte channel, Byte length, Byte type) {
             return new Byte[] { 0, 3, 8, 0, channel, length, type };
         }
@@ -1635,6 +1740,24 @@ namespace Bluegiga {
             Array.Copy(input, 0, cmd, 5, input.Length);
             return cmd;
         }
+        public Byte[] BLECommandTestChannelMode(Byte mode) {
+            return new Byte[] { 0, 1, 8, 6, mode };
+        }
+        public Byte[] BLECommandDFUReset(Byte dfu) {
+            return new Byte[] { 0, 1, 9, 0, dfu };
+        }
+        public Byte[] BLECommandDFUFlashSetAddress(UInt32 address) {
+            return new Byte[] { 0, 4, 9, 1, (Byte)(address), (Byte)(address >> 8), (Byte)(address >> 16), (Byte)(address >> 24) };
+        }
+        public Byte[] BLECommandDFUFlashUpload(Byte[] data) {
+            Byte[] cmd = new Byte[5 + data.Length];
+            Array.Copy(new Byte[] { 0, (Byte)(1 + data.Length), 9, 2, (Byte)data.Length }, 0, cmd, 0, 5);
+            Array.Copy(data, 0, cmd, 5, data.Length);
+            return cmd;
+        }
+        public Byte[] BLECommandDFUFlashUploadFinish() {
+            return new Byte[] { 0, 0, 9, 3 };
+        }
 
         public event Bluegiga.BLE.Responses.System.ResetEventHandler BLEResponseSystemReset;
         public event Bluegiga.BLE.Responses.System.HelloEventHandler BLEResponseSystemHello;
@@ -1651,6 +1774,9 @@ namespace Bluegiga {
         public event Bluegiga.BLE.Responses.System.WhitelistClearEventHandler BLEResponseSystemWhitelistClear;
         public event Bluegiga.BLE.Responses.System.EndpointRXEventHandler BLEResponseSystemEndpointRX;
         public event Bluegiga.BLE.Responses.System.EndpointSetWatermarksEventHandler BLEResponseSystemEndpointSetWatermarks;
+        public event Bluegiga.BLE.Responses.System.AesSetkeyEventHandler BLEResponseSystemAesSetkey;
+        public event Bluegiga.BLE.Responses.System.AesEncryptEventHandler BLEResponseSystemAesEncrypt;
+        public event Bluegiga.BLE.Responses.System.AesDecryptEventHandler BLEResponseSystemAesDecrypt;
         public event Bluegiga.BLE.Responses.Flash.PSDefragEventHandler BLEResponseFlashPSDefrag;
         public event Bluegiga.BLE.Responses.Flash.PSDumpEventHandler BLEResponseFlashPSDump;
         public event Bluegiga.BLE.Responses.Flash.PSEraseAllEventHandler BLEResponseFlashPSEraseAll;
@@ -1658,12 +1784,14 @@ namespace Bluegiga {
         public event Bluegiga.BLE.Responses.Flash.PSLoadEventHandler BLEResponseFlashPSLoad;
         public event Bluegiga.BLE.Responses.Flash.PSEraseEventHandler BLEResponseFlashPSErase;
         public event Bluegiga.BLE.Responses.Flash.ErasePageEventHandler BLEResponseFlashErasePage;
-        public event Bluegiga.BLE.Responses.Flash.WriteWordsEventHandler BLEResponseFlashWriteWords;
+        public event Bluegiga.BLE.Responses.Flash.WriteDataEventHandler BLEResponseFlashWriteData;
+        public event Bluegiga.BLE.Responses.Flash.ReadDataEventHandler BLEResponseFlashReadData;
         public event Bluegiga.BLE.Responses.Attributes.WriteEventHandler BLEResponseAttributesWrite;
         public event Bluegiga.BLE.Responses.Attributes.ReadEventHandler BLEResponseAttributesRead;
         public event Bluegiga.BLE.Responses.Attributes.ReadTypeEventHandler BLEResponseAttributesReadType;
         public event Bluegiga.BLE.Responses.Attributes.UserReadResponseEventHandler BLEResponseAttributesUserReadResponse;
         public event Bluegiga.BLE.Responses.Attributes.UserWriteResponseEventHandler BLEResponseAttributesUserWriteResponse;
+        public event Bluegiga.BLE.Responses.Attributes.SendEventHandler BLEResponseAttributesSend;
         public event Bluegiga.BLE.Responses.Connection.DisconnectEventHandler BLEResponseConnectionDisconnect;
         public event Bluegiga.BLE.Responses.Connection.GetRssiEventHandler BLEResponseConnectionGetRssi;
         public event Bluegiga.BLE.Responses.Connection.UpdateEventHandler BLEResponseConnectionUpdate;
@@ -1692,6 +1820,7 @@ namespace Bluegiga {
         public event Bluegiga.BLE.Responses.SM.PasskeyEntryEventHandler BLEResponseSMPasskeyEntry;
         public event Bluegiga.BLE.Responses.SM.GetBondsEventHandler BLEResponseSMGetBonds;
         public event Bluegiga.BLE.Responses.SM.SetOobDataEventHandler BLEResponseSMSetOobData;
+        public event Bluegiga.BLE.Responses.SM.WhitelistBondsEventHandler BLEResponseSMWhitelistBonds;
         public event Bluegiga.BLE.Responses.GAP.SetPrivacyFlagsEventHandler BLEResponseGAPSetPrivacyFlags;
         public event Bluegiga.BLE.Responses.GAP.SetModeEventHandler BLEResponseGAPSetMode;
         public event Bluegiga.BLE.Responses.GAP.DiscoverEventHandler BLEResponseGAPDiscover;
@@ -1717,12 +1846,24 @@ namespace Bluegiga {
         public event Bluegiga.BLE.Responses.Hardware.I2CWriteEventHandler BLEResponseHardwareI2CWrite;
         public event Bluegiga.BLE.Responses.Hardware.SetTxpowerEventHandler BLEResponseHardwareSetTxpower;
         public event Bluegiga.BLE.Responses.Hardware.TimerComparatorEventHandler BLEResponseHardwareTimerComparator;
+        public event Bluegiga.BLE.Responses.Hardware.IOPortIrqEnableEventHandler BLEResponseHardwareIOPortIrqEnable;
+        public event Bluegiga.BLE.Responses.Hardware.IOPortIrqDirectionEventHandler BLEResponseHardwareIOPortIrqDirection;
+        public event Bluegiga.BLE.Responses.Hardware.AnalogComparatorEnableEventHandler BLEResponseHardwareAnalogComparatorEnable;
+        public event Bluegiga.BLE.Responses.Hardware.AnalogComparatorReadEventHandler BLEResponseHardwareAnalogComparatorRead;
+        public event Bluegiga.BLE.Responses.Hardware.AnalogComparatorConfigIrqEventHandler BLEResponseHardwareAnalogComparatorConfigIrq;
+        public event Bluegiga.BLE.Responses.Hardware.SetRxgainEventHandler BLEResponseHardwareSetRxgain;
+        public event Bluegiga.BLE.Responses.Hardware.UsbEnableEventHandler BLEResponseHardwareUsbEnable;
         public event Bluegiga.BLE.Responses.Test.PHYTXEventHandler BLEResponseTestPHYTX;
         public event Bluegiga.BLE.Responses.Test.PHYRXEventHandler BLEResponseTestPHYRX;
         public event Bluegiga.BLE.Responses.Test.PHYEndEventHandler BLEResponseTestPHYEnd;
         public event Bluegiga.BLE.Responses.Test.PHYResetEventHandler BLEResponseTestPHYReset;
         public event Bluegiga.BLE.Responses.Test.GetChannelMapEventHandler BLEResponseTestGetChannelMap;
         public event Bluegiga.BLE.Responses.Test.DebugEventHandler BLEResponseTestDebug;
+        public event Bluegiga.BLE.Responses.Test.ChannelModeEventHandler BLEResponseTestChannelMode;
+        public event Bluegiga.BLE.Responses.DFU.ResetEventHandler BLEResponseDFUReset;
+        public event Bluegiga.BLE.Responses.DFU.FlashSetAddressEventHandler BLEResponseDFUFlashSetAddress;
+        public event Bluegiga.BLE.Responses.DFU.FlashUploadEventHandler BLEResponseDFUFlashUpload;
+        public event Bluegiga.BLE.Responses.DFU.FlashUploadFinishEventHandler BLEResponseDFUFlashUploadFinish;
 
         public event Bluegiga.BLE.Events.System.BootEventHandler BLEEventSystemBoot;
         public event Bluegiga.BLE.Events.System.DebugEventHandler BLEEventSystemDebug;
@@ -1730,6 +1871,7 @@ namespace Bluegiga {
         public event Bluegiga.BLE.Events.System.EndpointWatermarkTXEventHandler BLEEventSystemEndpointWatermarkTX;
         public event Bluegiga.BLE.Events.System.ScriptFailureEventHandler BLEEventSystemScriptFailure;
         public event Bluegiga.BLE.Events.System.NoLicenseKeyEventHandler BLEEventSystemNoLicenseKey;
+        public event Bluegiga.BLE.Events.System.ProtocolErrorEventHandler BLEEventSystemProtocolError;
         public event Bluegiga.BLE.Events.Flash.PSKeyEventHandler BLEEventFlashPSKey;
         public event Bluegiga.BLE.Events.Attributes.ValueEventHandler BLEEventAttributesValue;
         public event Bluegiga.BLE.Events.Attributes.UserReadRequestEventHandler BLEEventAttributesUserReadRequest;
@@ -1756,6 +1898,8 @@ namespace Bluegiga {
         public event Bluegiga.BLE.Events.Hardware.IOPortStatusEventHandler BLEEventHardwareIOPortStatus;
         public event Bluegiga.BLE.Events.Hardware.SoftTimerEventHandler BLEEventHardwareSoftTimer;
         public event Bluegiga.BLE.Events.Hardware.ADCResultEventHandler BLEEventHardwareADCResult;
+        public event Bluegiga.BLE.Events.Hardware.AnalogComparatorStatusEventHandler BLEEventHardwareAnalogComparatorStatus;
+        public event Bluegiga.BLE.Events.DFU.BootEventHandler BLEEventDFUBoot;
 
         private Byte[] bgapiRXBuffer = new Byte[65];
         private int bgapiRXBufferPos = 0;
@@ -1837,7 +1981,6 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseSystemReset != null) {
                                     BLEResponseSystemReset(this, new Bluegiga.BLE.Responses.System.ResetEventArgs(
-                                        bgapiRXBuffer[4]
                                     ));
                                 }
                                 SetBusy(false);
@@ -1853,6 +1996,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseSystemAddressGet != null) {
                                     BLEResponseSystemAddressGet(this, new Bluegiga.BLE.Responses.System.AddressGetEventArgs(
+                                        (Byte[])(bgapiRXBuffer.Skip(4).Take(6).ToArray())
                                     ));
                                 }
                             }
@@ -1860,8 +2004,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseSystemRegWrite != null) {
                                     BLEResponseSystemRegWrite(this, new Bluegiga.BLE.Responses.System.RegWriteEventArgs(
-                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8)),
-                                        bgapiRXBuffer[6]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -1869,7 +2012,8 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseSystemRegRead != null) {
                                     BLEResponseSystemRegRead(this, new Bluegiga.BLE.Responses.System.RegReadEventArgs(
-                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8)),
+                                        bgapiRXBuffer[6]
                                     ));
                                 }
                             }
@@ -1877,6 +2021,11 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseSystemGetCounters != null) {
                                     BLEResponseSystemGetCounters(this, new Bluegiga.BLE.Responses.System.GetCountersEventArgs(
+                                        bgapiRXBuffer[4],
+                                        bgapiRXBuffer[5],
+                                        bgapiRXBuffer[6],
+                                        bgapiRXBuffer[7],
+                                        bgapiRXBuffer[8]
                                     ));
                                 }
                             }
@@ -1884,6 +2033,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseSystemGetConnections != null) {
                                     BLEResponseSystemGetConnections(this, new Bluegiga.BLE.Responses.System.GetConnectionsEventArgs(
+                                        bgapiRXBuffer[4]
                                     ));
                                 }
                             }
@@ -1892,7 +2042,7 @@ namespace Bluegiga {
                                 if (BLEResponseSystemReadMemory != null) {
                                     BLEResponseSystemReadMemory(this, new Bluegiga.BLE.Responses.System.ReadMemoryEventArgs(
                                         (UInt32)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8) + (bgapiRXBuffer[5] << 16) + (bgapiRXBuffer[5] << 24)),
-                                        bgapiRXBuffer[8]
+                                        (Byte[])(bgapiRXBuffer.Skip(9).Take(bgapiRXBuffer[8]).ToArray())
                                     ));
                                 }
                             }
@@ -1900,6 +2050,13 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseSystemGetInfo != null) {
                                     BLEResponseSystemGetInfo(this, new Bluegiga.BLE.Responses.System.GetInfoEventArgs(
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8)),
+                                        (UInt16)(bgapiRXBuffer[6] + (bgapiRXBuffer[7] << 8)),
+                                        (UInt16)(bgapiRXBuffer[8] + (bgapiRXBuffer[9] << 8)),
+                                        (UInt16)(bgapiRXBuffer[10] + (bgapiRXBuffer[11] << 8)),
+                                        (UInt16)(bgapiRXBuffer[12] + (bgapiRXBuffer[13] << 8)),
+                                        bgapiRXBuffer[14],
+                                        bgapiRXBuffer[15]
                                     ));
                                 }
                             }
@@ -1907,8 +2064,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseSystemEndpointTX != null) {
                                     BLEResponseSystemEndpointTX(this, new Bluegiga.BLE.Responses.System.EndpointTXEventArgs(
-                                        bgapiRXBuffer[4],
-                                        (Byte[])(bgapiRXBuffer.Skip(6).Take(bgapiRXBuffer[5]).ToArray())
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -1916,8 +2072,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseSystemWhitelistAppend != null) {
                                     BLEResponseSystemWhitelistAppend(this, new Bluegiga.BLE.Responses.System.WhitelistAppendEventArgs(
-                                        (Byte[])(bgapiRXBuffer.Skip(4).Take(6).ToArray()),
-                                        bgapiRXBuffer[10]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -1925,8 +2080,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseSystemWhitelistRemove != null) {
                                     BLEResponseSystemWhitelistRemove(this, new Bluegiga.BLE.Responses.System.WhitelistRemoveEventArgs(
-                                        (Byte[])(bgapiRXBuffer.Skip(4).Take(6).ToArray()),
-                                        bgapiRXBuffer[10]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -1941,8 +2095,8 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseSystemEndpointRX != null) {
                                     BLEResponseSystemEndpointRX(this, new Bluegiga.BLE.Responses.System.EndpointRXEventArgs(
-                                        bgapiRXBuffer[4],
-                                        bgapiRXBuffer[5]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8)),
+                                        (Byte[])(bgapiRXBuffer.Skip(7).Take(bgapiRXBuffer[6]).ToArray())
                                     ));
                                 }
                             }
@@ -1950,9 +2104,30 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseSystemEndpointSetWatermarks != null) {
                                     BLEResponseSystemEndpointSetWatermarks(this, new Bluegiga.BLE.Responses.System.EndpointSetWatermarksEventArgs(
-                                        bgapiRXBuffer[4],
-                                        bgapiRXBuffer[5],
-                                        bgapiRXBuffer[6]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
+                                    ));
+                                }
+                            }
+                            else if (bgapiRXBuffer[3] == 15)
+                            {
+                                if (BLEResponseSystemAesSetkey != null) {
+                                    BLEResponseSystemAesSetkey(this, new Bluegiga.BLE.Responses.System.AesSetkeyEventArgs(
+                                    ));
+                                }
+                            }
+                            else if (bgapiRXBuffer[3] == 16)
+                            {
+                                if (BLEResponseSystemAesEncrypt != null) {
+                                    BLEResponseSystemAesEncrypt(this, new Bluegiga.BLE.Responses.System.AesEncryptEventArgs(
+                                        (Byte[])(bgapiRXBuffer.Skip(5).Take(bgapiRXBuffer[4]).ToArray())
+                                    ));
+                                }
+                            }
+                            else if (bgapiRXBuffer[3] == 17)
+                            {
+                                if (BLEResponseSystemAesDecrypt != null) {
+                                    BLEResponseSystemAesDecrypt(this, new Bluegiga.BLE.Responses.System.AesDecryptEventArgs(
+                                        (Byte[])(bgapiRXBuffer.Skip(5).Take(bgapiRXBuffer[4]).ToArray())
                                     ));
                                 }
                             }
@@ -1983,8 +2158,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseFlashPSSave != null) {
                                     BLEResponseFlashPSSave(this, new Bluegiga.BLE.Responses.Flash.PSSaveEventArgs(
-                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8)),
-                                        (Byte[])(bgapiRXBuffer.Skip(7).Take(bgapiRXBuffer[6]).ToArray())
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -1992,7 +2166,8 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseFlashPSLoad != null) {
                                     BLEResponseFlashPSLoad(this, new Bluegiga.BLE.Responses.Flash.PSLoadEventArgs(
-                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8)),
+                                        (Byte[])(bgapiRXBuffer.Skip(7).Take(bgapiRXBuffer[6]).ToArray())
                                     ));
                                 }
                             }
@@ -2000,7 +2175,6 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseFlashPSErase != null) {
                                     BLEResponseFlashPSErase(this, new Bluegiga.BLE.Responses.Flash.PSEraseEventArgs(
-                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2008,16 +2182,23 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseFlashErasePage != null) {
                                     BLEResponseFlashErasePage(this, new Bluegiga.BLE.Responses.Flash.ErasePageEventArgs(
-                                        bgapiRXBuffer[4]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
                             else if (bgapiRXBuffer[3] == 7)
                             {
-                                if (BLEResponseFlashWriteWords != null) {
-                                    BLEResponseFlashWriteWords(this, new Bluegiga.BLE.Responses.Flash.WriteWordsEventArgs(
-                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8)),
-                                        (Byte[])(bgapiRXBuffer.Skip(7).Take(bgapiRXBuffer[6]).ToArray())
+                                if (BLEResponseFlashWriteData != null) {
+                                    BLEResponseFlashWriteData(this, new Bluegiga.BLE.Responses.Flash.WriteDataEventArgs(
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
+                                    ));
+                                }
+                            }
+                            else if (bgapiRXBuffer[3] == 8)
+                            {
+                                if (BLEResponseFlashReadData != null) {
+                                    BLEResponseFlashReadData(this, new Bluegiga.BLE.Responses.Flash.ReadDataEventArgs(
+                                        (Byte[])(bgapiRXBuffer.Skip(5).Take(bgapiRXBuffer[4]).ToArray())
                                     ));
                                 }
                             }
@@ -2027,9 +2208,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseAttributesWrite != null) {
                                     BLEResponseAttributesWrite(this, new Bluegiga.BLE.Responses.Attributes.WriteEventArgs(
-                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8)),
-                                        bgapiRXBuffer[6],
-                                        (Byte[])(bgapiRXBuffer.Skip(8).Take(bgapiRXBuffer[7]).ToArray())
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2038,7 +2217,9 @@ namespace Bluegiga {
                                 if (BLEResponseAttributesRead != null) {
                                     BLEResponseAttributesRead(this, new Bluegiga.BLE.Responses.Attributes.ReadEventArgs(
                                         (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8)),
-                                        (UInt16)(bgapiRXBuffer[6] + (bgapiRXBuffer[7] << 8))
+                                        (UInt16)(bgapiRXBuffer[6] + (bgapiRXBuffer[7] << 8)),
+                                        (UInt16)(bgapiRXBuffer[8] + (bgapiRXBuffer[9] << 8)),
+                                        (Byte[])(bgapiRXBuffer.Skip(11).Take(bgapiRXBuffer[10]).ToArray())
                                     ));
                                 }
                             }
@@ -2046,7 +2227,9 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseAttributesReadType != null) {
                                     BLEResponseAttributesReadType(this, new Bluegiga.BLE.Responses.Attributes.ReadTypeEventArgs(
-                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8)),
+                                        (UInt16)(bgapiRXBuffer[6] + (bgapiRXBuffer[7] << 8)),
+                                        (Byte[])(bgapiRXBuffer.Skip(9).Take(bgapiRXBuffer[8]).ToArray())
                                     ));
                                 }
                             }
@@ -2054,9 +2237,6 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseAttributesUserReadResponse != null) {
                                     BLEResponseAttributesUserReadResponse(this, new Bluegiga.BLE.Responses.Attributes.UserReadResponseEventArgs(
-                                        bgapiRXBuffer[4],
-                                        bgapiRXBuffer[5],
-                                        (Byte[])(bgapiRXBuffer.Skip(7).Take(bgapiRXBuffer[6]).ToArray())
                                     ));
                                 }
                             }
@@ -2064,8 +2244,14 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseAttributesUserWriteResponse != null) {
                                     BLEResponseAttributesUserWriteResponse(this, new Bluegiga.BLE.Responses.Attributes.UserWriteResponseEventArgs(
-                                        bgapiRXBuffer[4],
-                                        bgapiRXBuffer[5]
+                                    ));
+                                }
+                            }
+                            else if (bgapiRXBuffer[3] == 5)
+                            {
+                                if (BLEResponseAttributesSend != null) {
+                                    BLEResponseAttributesSend(this, new Bluegiga.BLE.Responses.Attributes.SendEventArgs(
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2075,7 +2261,8 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseConnectionDisconnect != null) {
                                     BLEResponseConnectionDisconnect(this, new Bluegiga.BLE.Responses.Connection.DisconnectEventArgs(
-                                        bgapiRXBuffer[4]
+                                        bgapiRXBuffer[4],
+                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8))
                                     ));
                                 }
                             }
@@ -2083,7 +2270,8 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseConnectionGetRssi != null) {
                                     BLEResponseConnectionGetRssi(this, new Bluegiga.BLE.Responses.Connection.GetRssiEventArgs(
-                                        bgapiRXBuffer[4]
+                                        bgapiRXBuffer[4],
+                                        (SByte)(bgapiRXBuffer[5])
                                     ));
                                 }
                             }
@@ -2092,10 +2280,7 @@ namespace Bluegiga {
                                 if (BLEResponseConnectionUpdate != null) {
                                     BLEResponseConnectionUpdate(this, new Bluegiga.BLE.Responses.Connection.UpdateEventArgs(
                                         bgapiRXBuffer[4],
-                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8)),
-                                        (UInt16)(bgapiRXBuffer[7] + (bgapiRXBuffer[8] << 8)),
-                                        (UInt16)(bgapiRXBuffer[9] + (bgapiRXBuffer[10] << 8)),
-                                        (UInt16)(bgapiRXBuffer[11] + (bgapiRXBuffer[12] << 8))
+                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8))
                                     ));
                                 }
                             }
@@ -2103,7 +2288,8 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseConnectionVersionUpdate != null) {
                                     BLEResponseConnectionVersionUpdate(this, new Bluegiga.BLE.Responses.Connection.VersionUpdateEventArgs(
-                                        bgapiRXBuffer[4]
+                                        bgapiRXBuffer[4],
+                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8))
                                     ));
                                 }
                             }
@@ -2111,7 +2297,8 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseConnectionChannelMapGet != null) {
                                     BLEResponseConnectionChannelMapGet(this, new Bluegiga.BLE.Responses.Connection.ChannelMapGetEventArgs(
-                                        bgapiRXBuffer[4]
+                                        bgapiRXBuffer[4],
+                                        (Byte[])(bgapiRXBuffer.Skip(6).Take(bgapiRXBuffer[5]).ToArray())
                                     ));
                                 }
                             }
@@ -2120,7 +2307,7 @@ namespace Bluegiga {
                                 if (BLEResponseConnectionChannelMapSet != null) {
                                     BLEResponseConnectionChannelMapSet(this, new Bluegiga.BLE.Responses.Connection.ChannelMapSetEventArgs(
                                         bgapiRXBuffer[4],
-                                        (Byte[])(bgapiRXBuffer.Skip(6).Take(bgapiRXBuffer[5]).ToArray())
+                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8))
                                     ));
                                 }
                             }
@@ -2128,7 +2315,8 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseConnectionFeaturesGet != null) {
                                     BLEResponseConnectionFeaturesGet(this, new Bluegiga.BLE.Responses.Connection.FeaturesGetEventArgs(
-                                        bgapiRXBuffer[4]
+                                        bgapiRXBuffer[4],
+                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8))
                                     ));
                                 }
                             }
@@ -2144,8 +2332,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseConnectionRawTX != null) {
                                     BLEResponseConnectionRawTX(this, new Bluegiga.BLE.Responses.Connection.RawTXEventArgs(
-                                        bgapiRXBuffer[4],
-                                        (Byte[])(bgapiRXBuffer.Skip(6).Take(bgapiRXBuffer[5]).ToArray())
+                                        bgapiRXBuffer[4]
                                     ));
                                 }
                             }
@@ -2156,10 +2343,7 @@ namespace Bluegiga {
                                 if (BLEResponseATTClientFindByTypeValue != null) {
                                     BLEResponseATTClientFindByTypeValue(this, new Bluegiga.BLE.Responses.ATTClient.FindByTypeValueEventArgs(
                                         bgapiRXBuffer[4],
-                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8)),
-                                        (UInt16)(bgapiRXBuffer[7] + (bgapiRXBuffer[8] << 8)),
-                                        (UInt16)(bgapiRXBuffer[9] + (bgapiRXBuffer[10] << 8)),
-                                        (Byte[])(bgapiRXBuffer.Skip(12).Take(bgapiRXBuffer[11]).ToArray())
+                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8))
                                     ));
                                 }
                             }
@@ -2168,9 +2352,7 @@ namespace Bluegiga {
                                 if (BLEResponseATTClientReadByGroupType != null) {
                                     BLEResponseATTClientReadByGroupType(this, new Bluegiga.BLE.Responses.ATTClient.ReadByGroupTypeEventArgs(
                                         bgapiRXBuffer[4],
-                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8)),
-                                        (UInt16)(bgapiRXBuffer[7] + (bgapiRXBuffer[8] << 8)),
-                                        (Byte[])(bgapiRXBuffer.Skip(10).Take(bgapiRXBuffer[9]).ToArray())
+                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8))
                                     ));
                                 }
                             }
@@ -2179,9 +2361,7 @@ namespace Bluegiga {
                                 if (BLEResponseATTClientReadByType != null) {
                                     BLEResponseATTClientReadByType(this, new Bluegiga.BLE.Responses.ATTClient.ReadByTypeEventArgs(
                                         bgapiRXBuffer[4],
-                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8)),
-                                        (UInt16)(bgapiRXBuffer[7] + (bgapiRXBuffer[8] << 8)),
-                                        (Byte[])(bgapiRXBuffer.Skip(10).Take(bgapiRXBuffer[9]).ToArray())
+                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8))
                                     ));
                                 }
                             }
@@ -2190,8 +2370,7 @@ namespace Bluegiga {
                                 if (BLEResponseATTClientFindInformation != null) {
                                     BLEResponseATTClientFindInformation(this, new Bluegiga.BLE.Responses.ATTClient.FindInformationEventArgs(
                                         bgapiRXBuffer[4],
-                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8)),
-                                        (UInt16)(bgapiRXBuffer[7] + (bgapiRXBuffer[8] << 8))
+                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8))
                                     ));
                                 }
                             }
@@ -2209,8 +2388,7 @@ namespace Bluegiga {
                                 if (BLEResponseATTClientAttributeWrite != null) {
                                     BLEResponseATTClientAttributeWrite(this, new Bluegiga.BLE.Responses.ATTClient.AttributeWriteEventArgs(
                                         bgapiRXBuffer[4],
-                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8)),
-                                        (Byte[])(bgapiRXBuffer.Skip(8).Take(bgapiRXBuffer[7]).ToArray())
+                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8))
                                     ));
                                 }
                             }
@@ -2219,8 +2397,7 @@ namespace Bluegiga {
                                 if (BLEResponseATTClientWriteCommand != null) {
                                     BLEResponseATTClientWriteCommand(this, new Bluegiga.BLE.Responses.ATTClient.WriteCommandEventArgs(
                                         bgapiRXBuffer[4],
-                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8)),
-                                        (Byte[])(bgapiRXBuffer.Skip(8).Take(bgapiRXBuffer[7]).ToArray())
+                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8))
                                     ));
                                 }
                             }
@@ -2228,7 +2405,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseATTClientIndicateConfirm != null) {
                                     BLEResponseATTClientIndicateConfirm(this, new Bluegiga.BLE.Responses.ATTClient.IndicateConfirmEventArgs(
-                                        bgapiRXBuffer[4]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2246,9 +2423,7 @@ namespace Bluegiga {
                                 if (BLEResponseATTClientPrepareWrite != null) {
                                     BLEResponseATTClientPrepareWrite(this, new Bluegiga.BLE.Responses.ATTClient.PrepareWriteEventArgs(
                                         bgapiRXBuffer[4],
-                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8)),
-                                        (UInt16)(bgapiRXBuffer[7] + (bgapiRXBuffer[8] << 8)),
-                                        (Byte[])(bgapiRXBuffer.Skip(10).Take(bgapiRXBuffer[9]).ToArray())
+                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8))
                                     ));
                                 }
                             }
@@ -2257,7 +2432,7 @@ namespace Bluegiga {
                                 if (BLEResponseATTClientExecuteWrite != null) {
                                     BLEResponseATTClientExecuteWrite(this, new Bluegiga.BLE.Responses.ATTClient.ExecuteWriteEventArgs(
                                         bgapiRXBuffer[4],
-                                        bgapiRXBuffer[5]
+                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8))
                                     ));
                                 }
                             }
@@ -2266,7 +2441,7 @@ namespace Bluegiga {
                                 if (BLEResponseATTClientReadMultiple != null) {
                                     BLEResponseATTClientReadMultiple(this, new Bluegiga.BLE.Responses.ATTClient.ReadMultipleEventArgs(
                                         bgapiRXBuffer[4],
-                                        (Byte[])(bgapiRXBuffer.Skip(6).Take(bgapiRXBuffer[5]).ToArray())
+                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8))
                                     ));
                                 }
                             }
@@ -2277,7 +2452,7 @@ namespace Bluegiga {
                                 if (BLEResponseSMEncryptStart != null) {
                                     BLEResponseSMEncryptStart(this, new Bluegiga.BLE.Responses.SM.EncryptStartEventArgs(
                                         bgapiRXBuffer[4],
-                                        bgapiRXBuffer[5]
+                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8))
                                     ));
                                 }
                             }
@@ -2285,7 +2460,6 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseSMSetBondableMode != null) {
                                     BLEResponseSMSetBondableMode(this, new Bluegiga.BLE.Responses.SM.SetBondableModeEventArgs(
-                                        bgapiRXBuffer[4]
                                     ));
                                 }
                             }
@@ -2293,7 +2467,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseSMDeleteBonding != null) {
                                     BLEResponseSMDeleteBonding(this, new Bluegiga.BLE.Responses.SM.DeleteBondingEventArgs(
-                                        bgapiRXBuffer[4]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2301,9 +2475,6 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseSMSetParameters != null) {
                                     BLEResponseSMSetParameters(this, new Bluegiga.BLE.Responses.SM.SetParametersEventArgs(
-                                        bgapiRXBuffer[4],
-                                        bgapiRXBuffer[5],
-                                        bgapiRXBuffer[6]
                                     ));
                                 }
                             }
@@ -2311,8 +2482,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseSMPasskeyEntry != null) {
                                     BLEResponseSMPasskeyEntry(this, new Bluegiga.BLE.Responses.SM.PasskeyEntryEventArgs(
-                                        bgapiRXBuffer[4],
-                                        (UInt32)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8) + (bgapiRXBuffer[6] << 16) + (bgapiRXBuffer[6] << 24))
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2320,6 +2490,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseSMGetBonds != null) {
                                     BLEResponseSMGetBonds(this, new Bluegiga.BLE.Responses.SM.GetBondsEventArgs(
+                                        bgapiRXBuffer[4]
                                     ));
                                 }
                             }
@@ -2327,7 +2498,15 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseSMSetOobData != null) {
                                     BLEResponseSMSetOobData(this, new Bluegiga.BLE.Responses.SM.SetOobDataEventArgs(
-                                        (Byte[])(bgapiRXBuffer.Skip(5).Take(bgapiRXBuffer[4]).ToArray())
+                                    ));
+                                }
+                            }
+                            else if (bgapiRXBuffer[3] == 7)
+                            {
+                                if (BLEResponseSMWhitelistBonds != null) {
+                                    BLEResponseSMWhitelistBonds(this, new Bluegiga.BLE.Responses.SM.WhitelistBondsEventArgs(
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8)),
+                                        bgapiRXBuffer[6]
                                     ));
                                 }
                             }
@@ -2337,8 +2516,6 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseGAPSetPrivacyFlags != null) {
                                     BLEResponseGAPSetPrivacyFlags(this, new Bluegiga.BLE.Responses.GAP.SetPrivacyFlagsEventArgs(
-                                        bgapiRXBuffer[4],
-                                        bgapiRXBuffer[5]
                                     ));
                                 }
                             }
@@ -2346,8 +2523,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseGAPSetMode != null) {
                                     BLEResponseGAPSetMode(this, new Bluegiga.BLE.Responses.GAP.SetModeEventArgs(
-                                        bgapiRXBuffer[4],
-                                        bgapiRXBuffer[5]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2355,7 +2531,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseGAPDiscover != null) {
                                     BLEResponseGAPDiscover(this, new Bluegiga.BLE.Responses.GAP.DiscoverEventArgs(
-                                        bgapiRXBuffer[4]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2363,12 +2539,8 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseGAPConnectDirect != null) {
                                     BLEResponseGAPConnectDirect(this, new Bluegiga.BLE.Responses.GAP.ConnectDirectEventArgs(
-                                        (Byte[])(bgapiRXBuffer.Skip(4).Take(6).ToArray()),
-                                        bgapiRXBuffer[10],
-                                        (UInt16)(bgapiRXBuffer[11] + (bgapiRXBuffer[12] << 8)),
-                                        (UInt16)(bgapiRXBuffer[13] + (bgapiRXBuffer[14] << 8)),
-                                        (UInt16)(bgapiRXBuffer[15] + (bgapiRXBuffer[16] << 8)),
-                                        (UInt16)(bgapiRXBuffer[17] + (bgapiRXBuffer[18] << 8))
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8)),
+                                        bgapiRXBuffer[6]
                                     ));
                                 }
                             }
@@ -2376,6 +2548,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseGAPEndProcedure != null) {
                                     BLEResponseGAPEndProcedure(this, new Bluegiga.BLE.Responses.GAP.EndProcedureEventArgs(
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2384,9 +2557,7 @@ namespace Bluegiga {
                                 if (BLEResponseGAPConnectSelective != null) {
                                     BLEResponseGAPConnectSelective(this, new Bluegiga.BLE.Responses.GAP.ConnectSelectiveEventArgs(
                                         (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8)),
-                                        (UInt16)(bgapiRXBuffer[6] + (bgapiRXBuffer[7] << 8)),
-                                        (UInt16)(bgapiRXBuffer[8] + (bgapiRXBuffer[9] << 8)),
-                                        (UInt16)(bgapiRXBuffer[10] + (bgapiRXBuffer[11] << 8))
+                                        bgapiRXBuffer[6]
                                     ));
                                 }
                             }
@@ -2394,9 +2565,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseGAPSetFiltering != null) {
                                     BLEResponseGAPSetFiltering(this, new Bluegiga.BLE.Responses.GAP.SetFilteringEventArgs(
-                                        bgapiRXBuffer[4],
-                                        bgapiRXBuffer[5],
-                                        bgapiRXBuffer[6]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2404,9 +2573,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseGAPSetScanParameters != null) {
                                     BLEResponseGAPSetScanParameters(this, new Bluegiga.BLE.Responses.GAP.SetScanParametersEventArgs(
-                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8)),
-                                        (UInt16)(bgapiRXBuffer[6] + (bgapiRXBuffer[7] << 8)),
-                                        bgapiRXBuffer[8]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2414,9 +2581,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseGAPSetAdvParameters != null) {
                                     BLEResponseGAPSetAdvParameters(this, new Bluegiga.BLE.Responses.GAP.SetAdvParametersEventArgs(
-                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8)),
-                                        (UInt16)(bgapiRXBuffer[6] + (bgapiRXBuffer[7] << 8)),
-                                        bgapiRXBuffer[8]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2424,8 +2589,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseGAPSetAdvData != null) {
                                     BLEResponseGAPSetAdvData(this, new Bluegiga.BLE.Responses.GAP.SetAdvDataEventArgs(
-                                        bgapiRXBuffer[4],
-                                        (Byte[])(bgapiRXBuffer.Skip(6).Take(bgapiRXBuffer[5]).ToArray())
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2433,8 +2597,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseGAPSetDirectedConnectableMode != null) {
                                     BLEResponseGAPSetDirectedConnectableMode(this, new Bluegiga.BLE.Responses.GAP.SetDirectedConnectableModeEventArgs(
-                                        (Byte[])(bgapiRXBuffer.Skip(4).Take(6).ToArray()),
-                                        bgapiRXBuffer[10]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2444,9 +2607,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseHardwareIOPortConfigIrq != null) {
                                     BLEResponseHardwareIOPortConfigIrq(this, new Bluegiga.BLE.Responses.Hardware.IOPortConfigIrqEventArgs(
-                                        bgapiRXBuffer[4],
-                                        bgapiRXBuffer[5],
-                                        bgapiRXBuffer[6]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2454,9 +2615,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseHardwareSetSoftTimer != null) {
                                     BLEResponseHardwareSetSoftTimer(this, new Bluegiga.BLE.Responses.Hardware.SetSoftTimerEventArgs(
-                                        (UInt32)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8) + (bgapiRXBuffer[5] << 16) + (bgapiRXBuffer[5] << 24)),
-                                        bgapiRXBuffer[8],
-                                        bgapiRXBuffer[9]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2464,9 +2623,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseHardwareADCRead != null) {
                                     BLEResponseHardwareADCRead(this, new Bluegiga.BLE.Responses.Hardware.ADCReadEventArgs(
-                                        bgapiRXBuffer[4],
-                                        bgapiRXBuffer[5],
-                                        bgapiRXBuffer[6]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2474,8 +2631,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseHardwareIOPortConfigDirection != null) {
                                     BLEResponseHardwareIOPortConfigDirection(this, new Bluegiga.BLE.Responses.Hardware.IOPortConfigDirectionEventArgs(
-                                        bgapiRXBuffer[4],
-                                        bgapiRXBuffer[5]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2483,8 +2639,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseHardwareIOPortConfigFunction != null) {
                                     BLEResponseHardwareIOPortConfigFunction(this, new Bluegiga.BLE.Responses.Hardware.IOPortConfigFunctionEventArgs(
-                                        bgapiRXBuffer[4],
-                                        bgapiRXBuffer[5]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2492,9 +2647,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseHardwareIOPortConfigPull != null) {
                                     BLEResponseHardwareIOPortConfigPull(this, new Bluegiga.BLE.Responses.Hardware.IOPortConfigPullEventArgs(
-                                        bgapiRXBuffer[4],
-                                        bgapiRXBuffer[5],
-                                        bgapiRXBuffer[6]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2502,9 +2655,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseHardwareIOPortWrite != null) {
                                     BLEResponseHardwareIOPortWrite(this, new Bluegiga.BLE.Responses.Hardware.IOPortWriteEventArgs(
-                                        bgapiRXBuffer[4],
-                                        bgapiRXBuffer[5],
-                                        bgapiRXBuffer[6]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2512,8 +2663,9 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseHardwareIOPortRead != null) {
                                     BLEResponseHardwareIOPortRead(this, new Bluegiga.BLE.Responses.Hardware.IOPortReadEventArgs(
-                                        bgapiRXBuffer[4],
-                                        bgapiRXBuffer[5]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8)),
+                                        bgapiRXBuffer[6],
+                                        bgapiRXBuffer[7]
                                     ));
                                 }
                             }
@@ -2521,12 +2673,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseHardwareSPIConfig != null) {
                                     BLEResponseHardwareSPIConfig(this, new Bluegiga.BLE.Responses.Hardware.SPIConfigEventArgs(
-                                        bgapiRXBuffer[4],
-                                        bgapiRXBuffer[5],
-                                        bgapiRXBuffer[6],
-                                        bgapiRXBuffer[7],
-                                        bgapiRXBuffer[8],
-                                        bgapiRXBuffer[9]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2534,8 +2681,9 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseHardwareSPITransfer != null) {
                                     BLEResponseHardwareSPITransfer(this, new Bluegiga.BLE.Responses.Hardware.SPITransferEventArgs(
-                                        bgapiRXBuffer[4],
-                                        (Byte[])(bgapiRXBuffer.Skip(6).Take(bgapiRXBuffer[5]).ToArray())
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8)),
+                                        bgapiRXBuffer[6],
+                                        (Byte[])(bgapiRXBuffer.Skip(8).Take(bgapiRXBuffer[7]).ToArray())
                                     ));
                                 }
                             }
@@ -2543,9 +2691,8 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseHardwareI2CRead != null) {
                                     BLEResponseHardwareI2CRead(this, new Bluegiga.BLE.Responses.Hardware.I2CReadEventArgs(
-                                        bgapiRXBuffer[4],
-                                        bgapiRXBuffer[5],
-                                        bgapiRXBuffer[6]
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8)),
+                                        (Byte[])(bgapiRXBuffer.Skip(7).Take(bgapiRXBuffer[6]).ToArray())
                                     ));
                                 }
                             }
@@ -2553,9 +2700,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseHardwareI2CWrite != null) {
                                     BLEResponseHardwareI2CWrite(this, new Bluegiga.BLE.Responses.Hardware.I2CWriteEventArgs(
-                                        bgapiRXBuffer[4],
-                                        bgapiRXBuffer[5],
-                                        (Byte[])(bgapiRXBuffer.Skip(7).Take(bgapiRXBuffer[6]).ToArray())
+                                        bgapiRXBuffer[4]
                                     ));
                                 }
                             }
@@ -2563,7 +2708,6 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseHardwareSetTxpower != null) {
                                     BLEResponseHardwareSetTxpower(this, new Bluegiga.BLE.Responses.Hardware.SetTxpowerEventArgs(
-                                        bgapiRXBuffer[4]
                                     ));
                                 }
                             }
@@ -2571,10 +2715,62 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseHardwareTimerComparator != null) {
                                     BLEResponseHardwareTimerComparator(this, new Bluegiga.BLE.Responses.Hardware.TimerComparatorEventArgs(
-                                        bgapiRXBuffer[4],
-                                        bgapiRXBuffer[5],
-                                        bgapiRXBuffer[6],
-                                        (UInt16)(bgapiRXBuffer[7] + (bgapiRXBuffer[8] << 8))
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
+                                    ));
+                                }
+                            }
+                            else if (bgapiRXBuffer[3] == 14)
+                            {
+                                if (BLEResponseHardwareIOPortIrqEnable != null) {
+                                    BLEResponseHardwareIOPortIrqEnable(this, new Bluegiga.BLE.Responses.Hardware.IOPortIrqEnableEventArgs(
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
+                                    ));
+                                }
+                            }
+                            else if (bgapiRXBuffer[3] == 15)
+                            {
+                                if (BLEResponseHardwareIOPortIrqDirection != null) {
+                                    BLEResponseHardwareIOPortIrqDirection(this, new Bluegiga.BLE.Responses.Hardware.IOPortIrqDirectionEventArgs(
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
+                                    ));
+                                }
+                            }
+                            else if (bgapiRXBuffer[3] == 16)
+                            {
+                                if (BLEResponseHardwareAnalogComparatorEnable != null) {
+                                    BLEResponseHardwareAnalogComparatorEnable(this, new Bluegiga.BLE.Responses.Hardware.AnalogComparatorEnableEventArgs(
+                                    ));
+                                }
+                            }
+                            else if (bgapiRXBuffer[3] == 17)
+                            {
+                                if (BLEResponseHardwareAnalogComparatorRead != null) {
+                                    BLEResponseHardwareAnalogComparatorRead(this, new Bluegiga.BLE.Responses.Hardware.AnalogComparatorReadEventArgs(
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8)),
+                                        bgapiRXBuffer[6]
+                                    ));
+                                }
+                            }
+                            else if (bgapiRXBuffer[3] == 18)
+                            {
+                                if (BLEResponseHardwareAnalogComparatorConfigIrq != null) {
+                                    BLEResponseHardwareAnalogComparatorConfigIrq(this, new Bluegiga.BLE.Responses.Hardware.AnalogComparatorConfigIrqEventArgs(
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
+                                    ));
+                                }
+                            }
+                            else if (bgapiRXBuffer[3] == 19)
+                            {
+                                if (BLEResponseHardwareSetRxgain != null) {
+                                    BLEResponseHardwareSetRxgain(this, new Bluegiga.BLE.Responses.Hardware.SetRxgainEventArgs(
+                                    ));
+                                }
+                            }
+                            else if (bgapiRXBuffer[3] == 20)
+                            {
+                                if (BLEResponseHardwareUsbEnable != null) {
+                                    BLEResponseHardwareUsbEnable(this, new Bluegiga.BLE.Responses.Hardware.UsbEnableEventArgs(
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2584,9 +2780,6 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseTestPHYTX != null) {
                                     BLEResponseTestPHYTX(this, new Bluegiga.BLE.Responses.Test.PHYTXEventArgs(
-                                        bgapiRXBuffer[4],
-                                        bgapiRXBuffer[5],
-                                        bgapiRXBuffer[6]
                                     ));
                                 }
                             }
@@ -2594,7 +2787,6 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseTestPHYRX != null) {
                                     BLEResponseTestPHYRX(this, new Bluegiga.BLE.Responses.Test.PHYRXEventArgs(
-                                        bgapiRXBuffer[4]
                                     ));
                                 }
                             }
@@ -2602,6 +2794,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseTestPHYEnd != null) {
                                     BLEResponseTestPHYEnd(this, new Bluegiga.BLE.Responses.Test.PHYEndEventArgs(
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2616,6 +2809,7 @@ namespace Bluegiga {
                             {
                                 if (BLEResponseTestGetChannelMap != null) {
                                     BLEResponseTestGetChannelMap(this, new Bluegiga.BLE.Responses.Test.GetChannelMapEventArgs(
+                                        (Byte[])(bgapiRXBuffer.Skip(5).Take(bgapiRXBuffer[4]).ToArray())
                                     ));
                                 }
                             }
@@ -2624,6 +2818,46 @@ namespace Bluegiga {
                                 if (BLEResponseTestDebug != null) {
                                     BLEResponseTestDebug(this, new Bluegiga.BLE.Responses.Test.DebugEventArgs(
                                         (Byte[])(bgapiRXBuffer.Skip(5).Take(bgapiRXBuffer[4]).ToArray())
+                                    ));
+                                }
+                            }
+                            else if (bgapiRXBuffer[3] == 6)
+                            {
+                                if (BLEResponseTestChannelMode != null) {
+                                    BLEResponseTestChannelMode(this, new Bluegiga.BLE.Responses.Test.ChannelModeEventArgs(
+                                    ));
+                                }
+                            }
+                        }
+                        else if (bgapiRXBuffer[2] == 9) {
+                            if (bgapiRXBuffer[3] == 0)
+                            {
+                                if (BLEResponseDFUReset != null) {
+                                    BLEResponseDFUReset(this, new Bluegiga.BLE.Responses.DFU.ResetEventArgs(
+                                    ));
+                                }
+                            }
+                            else if (bgapiRXBuffer[3] == 1)
+                            {
+                                if (BLEResponseDFUFlashSetAddress != null) {
+                                    BLEResponseDFUFlashSetAddress(this, new Bluegiga.BLE.Responses.DFU.FlashSetAddressEventArgs(
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
+                                    ));
+                                }
+                            }
+                            else if (bgapiRXBuffer[3] == 2)
+                            {
+                                if (BLEResponseDFUFlashUpload != null) {
+                                    BLEResponseDFUFlashUpload(this, new Bluegiga.BLE.Responses.DFU.FlashUploadEventArgs(
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
+                                    ));
+                                }
+                            }
+                            else if (bgapiRXBuffer[3] == 3)
+                            {
+                                if (BLEResponseDFUFlashUploadFinish != null) {
+                                    BLEResponseDFUFlashUploadFinish(this, new Bluegiga.BLE.Responses.DFU.FlashUploadFinishEventArgs(
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2686,6 +2920,14 @@ namespace Bluegiga {
                             {
                                 if (BLEEventSystemNoLicenseKey != null) {
                                     BLEEventSystemNoLicenseKey(this, new Bluegiga.BLE.Events.System.NoLicenseKeyEventArgs(
+                                    ));
+                                }
+                            }
+                            else if (bgapiRXBuffer[3] == 6)
+                            {
+                                if (BLEEventSystemProtocolError != null) {
+                                    BLEEventSystemProtocolError(this, new Bluegiga.BLE.Events.System.ProtocolErrorEventArgs(
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8))
                                     ));
                                 }
                             }
@@ -2966,8 +3208,27 @@ namespace Bluegiga {
                                     ));
                                 }
                             }
+                            else if (bgapiRXBuffer[3] == 3)
+                            {
+                                if (BLEEventHardwareAnalogComparatorStatus != null) {
+                                    BLEEventHardwareAnalogComparatorStatus(this, new Bluegiga.BLE.Events.Hardware.AnalogComparatorStatusEventArgs(
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8) + (bgapiRXBuffer[5] << 16) + (bgapiRXBuffer[5] << 24)),
+                                        bgapiRXBuffer[8]
+                                    ));
+                                }
+                            }
                         }
                         else if (bgapiRXBuffer[2] == 8) {
+                        }
+                        else if (bgapiRXBuffer[2] == 9) {
+                            if (bgapiRXBuffer[3] == 0)
+                            {
+                                if (BLEEventDFUBoot != null) {
+                                    BLEEventDFUBoot(this, new Bluegiga.BLE.Events.DFU.BootEventArgs(
+                                        (UInt16)(bgapiRXBuffer[4] + (bgapiRXBuffer[5] << 8) + (bgapiRXBuffer[5] << 16) + (bgapiRXBuffer[5] << 24))
+                                    ));
+                                }
+                            }
                         }
                     }
 
