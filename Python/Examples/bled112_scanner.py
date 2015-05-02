@@ -168,14 +168,14 @@ Sample Output Explanation:
     group = optparse.OptionGroup(p, "Output Options")
     group.add_option('--quiet', '-q', action="store_true", help="Quiet mode (suppress initial scan parameter display)")
     group.add_option('--friendly', '-f', action="store_true", help="Friendly mode (output in human-readable format)")
-    group.add_option('--display', '-d', type="string", help="Display fields and order (default '%default')\n"
+    group.add_option('--display', '-d', type="string", help="Display fields and order (default '%s')\n"
         "  t = Unix time, with milliseconds\n"
         "  r = RSSI measurement (signed integer)\n"
         "  p = Packet type (0 = normal, 4 = scan response)\n"
         "  s = Sender MAC address (hexadecimal)\n"
         "  a = Address type (0 = public, 1 = random)\n"
         "  b = Bonding status (255 = no bond, else bond handle)\n"
-        "  d = Advertisement data payload (hexadecimal)", metavar="FIELDS")
+        "  d = Advertisement data payload (hexadecimal)" % p.defaults['display'], metavar="FIELDS")
     p.add_option_group(group)
 
     # actually parse all of the arguments
