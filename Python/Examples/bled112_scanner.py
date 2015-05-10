@@ -312,7 +312,11 @@ Sample Output Explanation:
 
     # start scanning now
     #print "Entering scanning mode for general discoverable..."
-    ble_cmd_gap_discover(ser, 1)
+    # Note: In 'gap_discover_limited' (0) and 'gap_discover_generic' (1) modes
+    # all 'non-conforming' (without 'flags' or with incorrect 'flags' value)
+    # adverizing packets are silently discarded. All packets are visible in
+    # 'gap_discover_observation' (2) mode. It is helpfull for debugging.
+    ble_cmd_gap_discover(ser, 2)
 
     while (1):
         # catch all incoming data
