@@ -391,6 +391,7 @@ class BGLib(object):
     ble_evt_system_endpoint_watermark_tx = BGAPIEvent()
     ble_evt_system_script_failure = BGAPIEvent()
     ble_evt_system_no_license_key = BGAPIEvent()
+    ble_evt_system_protocol_error = BGAPIEvent()
     ble_evt_flash_ps_key = BGAPIEvent()
     ble_evt_attributes_value = BGAPIEvent()
     ble_evt_attributes_user_read_request = BGAPIEvent()
@@ -978,6 +979,9 @@ class BGLib(object):
                         self.ble_evt_system_script_failure({ 'address': address, 'reason': reason })
                     elif packet_command == 5: # ble_evt_system_no_license_key
                         self.ble_evt_system_no_license_key({  })
+                    elif packet_command == 6: # ble_evt_system_protocol_error
+                        reason = struct.unpack('<H', self.bgapi_rx_payload[:2])[0]
+                        self.ble_evt_system_protocol_error({ 'reason': reason })
                 elif packet_class == 1:
                     if packet_command == 0: # ble_evt_flash_ps_key
                         key, value_len = struct.unpack('<HB', self.bgapi_rx_payload[:3])
