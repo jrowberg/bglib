@@ -1960,7 +1960,7 @@ namespace Bluegiga {
                 bgapiRXBuffer[bgapiRXBufferPos++] = ch;
                 if (bgapiRXBufferPos == 2) {
                     // just received "Length Low" byte, so store expected packet length
-                    bgapiRXDataLen = ch + ((bgapiRXBuffer[0] & 0x03) << 8);
+                    bgapiRXDataLen = ch + ((bgapiRXBuffer[0] & 0x07) << 8);
                 } else if (bgapiRXBufferPos == bgapiRXDataLen + 4) {
                     // just received last expected byte
                     /*#ifdef DEBUG
