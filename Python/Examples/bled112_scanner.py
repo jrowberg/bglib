@@ -168,14 +168,14 @@ Sample Output Explanation:
     group = optparse.OptionGroup(p, "Output Options")
     group.add_option('--quiet', '-q', action="store_true", help="Quiet mode (suppress initial scan parameter display)")
     group.add_option('--friendly', '-f', action="store_true", help="Friendly mode (output in human-readable format)")
-    group.add_option('--display', '-d', type="string", help="Display fields and order (default '%default')\n"
+    group.add_option('--display', '-d', type="string", help="Display fields and order (default '%s')\n"
         "  t = Unix time, with milliseconds\n"
         "  r = RSSI measurement (signed integer)\n"
         "  p = Packet type (0 = normal, 4 = scan response)\n"
         "  s = Sender MAC address (hexadecimal)\n"
         "  a = Address type (0 = public, 1 = random)\n"
         "  b = Bonding status (255 = no bond, else bond handle)\n"
-        "  d = Advertisement data payload (hexadecimal)", metavar="FIELDS")
+        "  d = Advertisement data payload (hexadecimal)" % p.defaults['display'], metavar="FIELDS")
     p.add_option_group(group)
 
     # actually parse all of the arguments
@@ -312,7 +312,11 @@ Sample Output Explanation:
 
     # start scanning now
     #print "Entering scanning mode for general discoverable..."
-    ble_cmd_gap_discover(ser, 1)
+    # Note: In 'gap_discover_limited' (0) and 'gap_discover_generic' (1) modes
+    # all 'non-conforming' (without 'flags' or with incorrect 'flags' value)
+    # adverizing packets are silently discarded. All packets are visible in
+    # 'gap_discover_observation' (2) mode. It is helpfull for debugging.
+    ble_cmd_gap_discover(ser, 2)
 
     while (1):
         # catch all incoming data
