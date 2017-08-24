@@ -3131,7 +3131,7 @@ namespace Bluegiga {
                                 if (BLEEventSMPasskeyDisplay != null) {
                                     BLEEventSMPasskeyDisplay(this, new Bluegiga.BLE.Events.SM.PasskeyDisplayEventArgs(
                                         bgapiRXBuffer[4],
-                                        (UInt16)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8) + (bgapiRXBuffer[6] << 16) + (bgapiRXBuffer[6] << 24))
+                                        (UInt32)(bgapiRXBuffer[5] + (bgapiRXBuffer[6] << 8) + (bgapiRXBuffer[7] << 16) + (bgapiRXBuffer[8] << 24))
                                     ));
                                 }
                             }
