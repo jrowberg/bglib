@@ -9,17 +9,16 @@
 # ================================================================
 
 from xml.dom.minidom import parseString
-from sets import Set
 import string
 
 # open, read, and close the BLEAPI XML data
-print "Reading bleapi.xml..."
+print("Reading bleapi.xml...")
 file = open('bleapi.xml', 'r')
 data = file.read()
 file.close()
 
 # parse XML into a DOM structure
-print "Parsing BLE API definition..."
+print("Parsing BLE API definition...")
 dom = parseString(data)
 
 # read relevant dom nodes for highlighter generation
@@ -43,7 +42,7 @@ struct_definitions = []
 
 for ble_class in ble_classes:
     class_name = ble_class.attributes['name'].value
-    print "Gathering command, event, and enum data from main class '" + class_name + "'..."
+    print("Gathering command, event, and enum data from main class '" + class_name + "'...")
 
     if len(response_callback_parser_conditions) > 0:
         response_callback_parser_conditions.append('else if (bgapiRXBuffer[2] == ' + ble_class.attributes['index'].value + ') {')
@@ -158,7 +157,7 @@ for ble_class in ble_classes:
                 elif (ble_return.attributes['type'].value == 'uint32'):
                     parameters.append('UInt32 ' + ble_return.attributes['name'].value)
                     param_init.append('this.' + ble_return.attributes['name'].value + ' = ' + ble_return.attributes['name'].value + ';')
-                    response_args.append('(UInt32)(bgapiRXBuffer[' + str(buf_pos) + '] + (bgapiRXBuffer[' + str(buf_pos + 1) + '] << 8) + (bgapiRXBuffer[' + str(buf_pos + 1) + '] << 16) + (bgapiRXBuffer[' + str(buf_pos + 1) + '] << 24))')
+                    response_args.append('(UInt32)(bgapiRXBuffer[' + str(buf_pos) + '] + (bgapiRXBuffer[' + str(buf_pos + 1) + '] << 8) + (bgapiRXBuffer[' + str(buf_pos + 2) + '] << 16) + (bgapiRXBuffer[' + str(buf_pos + 3) + '] << 24))')
                     buf_pos += 4
                 elif (ble_return.attributes['type'].value == 'int8'):
                     parameters.append('SByte ' + ble_return.attributes['name'].value)
@@ -173,7 +172,7 @@ for ble_class in ble_classes:
                 elif (ble_return.attributes['type'].value == 'int32'):
                     parameters.append('Int32 ' + ble_return.attributes['name'].value)
                     param_init.append('this.' + ble_return.attributes['name'].value + ' = ' + ble_return.attributes['name'].value + ';')
-                    response_args.append('(Int32)(bgapiRXBuffer[' + str(buf_pos) + '] + (bgapiRXBuffer[' + str(buf_pos + 1) + '] << 8) + (bgapiRXBuffer[' + str(buf_pos + 1) + '] << 16) + (bgapiRXBuffer[' + str(buf_pos + 1) + '] << 24))')
+                    response_args.append('(Int32)(bgapiRXBuffer[' + str(buf_pos) + '] + (bgapiRXBuffer[' + str(buf_pos + 1) + '] << 8) + (bgapiRXBuffer[' + str(buf_pos + 2) + '] << 16) + (bgapiRXBuffer[' + str(buf_pos + 3) + '] << 24))')
                     buf_pos += 4
                 elif (ble_return.attributes['type'].value == 'bd_addr'):
                     parameters.append('Byte[] ' + ble_return.attributes['name'].value)
@@ -274,7 +273,7 @@ for ble_class in ble_classes:
                 elif (ble_param.attributes['type'].value == 'uint32'):
                     parameters.append('UInt32 ' + ble_param.attributes['name'].value)
                     param_init.append('this.' + ble_param.attributes['name'].value + ' = ' + ble_param.attributes['name'].value + ';')
-                    event_args.append('(UInt16)(bgapiRXBuffer[' + str(buf_pos) + '] + (bgapiRXBuffer[' + str(buf_pos + 1) + '] << 8) + (bgapiRXBuffer[' + str(buf_pos + 1) + '] << 16) + (bgapiRXBuffer[' + str(buf_pos + 1) + '] << 24))')
+                    event_args.append('(UInt32)(bgapiRXBuffer[' + str(buf_pos) + '] + (bgapiRXBuffer[' + str(buf_pos + 1) + '] << 8) + (bgapiRXBuffer[' + str(buf_pos + 2) + '] << 16) + (bgapiRXBuffer[' + str(buf_pos + 3) + '] << 24))')
                     buf_pos += 4
                 elif (ble_param.attributes['type'].value == 'int8'):
                     parameters.append('SByte ' + ble_param.attributes['name'].value)
@@ -289,7 +288,7 @@ for ble_class in ble_classes:
                 elif (ble_param.attributes['type'].value == 'int32'):
                     parameters.append('Int32 ' + ble_param.attributes['name'].value)
                     param_init.append('this.' + ble_param.attributes['name'].value + ' = ' + ble_param.attributes['name'].value + ';')
-                    event_args.append('(Int32)(bgapiRXBuffer[' + str(buf_pos) + '] + (bgapiRXBuffer[' + str(buf_pos + 1) + '] << 8) + (bgapiRXBuffer[' + str(buf_pos + 1) + '] << 16) + (bgapiRXBuffer[' + str(buf_pos + 1) + '] << 24))')
+                    event_args.append('(Int32)(bgapiRXBuffer[' + str(buf_pos) + '] + (bgapiRXBuffer[' + str(buf_pos + 1) + '] << 8) + (bgapiRXBuffer[' + str(buf_pos + 2) + '] << 16) + (bgapiRXBuffer[' + str(buf_pos + 3) + '] << 24))')
                     buf_pos += 4
                 elif (ble_param.attributes['type'].value == 'bd_addr'):
                     parameters.append('Byte[] ' + ble_param.attributes['name'].value)
@@ -351,8 +350,8 @@ for ble_class in ble_classes:
         constant_macros.append('')
 
 # create C# library files
-print "Writing C# source library files in 'BGLib\\MSVCSharp'..."
-source = open('BGLib\\MSVCSharp\\BGLib.cs', 'w')
+print("Writing C# source library files in 'BGLib\\MSVCSharp'...")
+source = open('BGLib.cs', 'w')
 source.write('// Bluegiga BGLib C# interface library\n\
 // 2013-01-15 by Jeff Rowberg <jeff@rowberg.net\n\
 // Updates should (hopefully) always be available at https://github.com/jrowberg/bglib\n\
@@ -466,7 +465,7 @@ namespace Bluegiga {\n\
                 bgapiRXBuffer[bgapiRXBufferPos++] = ch;\n\
                 if (bgapiRXBufferPos == 2) {\n\
                     // just received "Length Low" byte, so store expected packet length\n\
-                    bgapiRXDataLen = ch + ((bgapiRXBuffer[0] & 0x03) << 8);\n\
+                    bgapiRXDataLen = ch + ((bgapiRXBuffer[0] & 0x07) << 8);\n\
                 } else if (bgapiRXBufferPos == bgapiRXDataLen + 4) {\n\
                     // just received last expected byte\n\
                     /*#ifdef DEBUG\n\
@@ -510,10 +509,10 @@ namespace Bluegiga {\n\
 ')
 source.close()
 
-print "Finished!\n"
+print("Finished!\n")
 
-print "C# Installation Instructions:"
-print "===================================="
-print "1. Add BGLib.cs to your project"
-print "2. Import Bluegiga.* in your source file(s)"
-print "3. Add event handlers for desired BGLib response and event packets\n"
+print("C# Installation Instructions:")
+print("====================================")
+print("1. Add BGLib.cs to your project")
+print("2. Import Bluegiga.* in your source file(s)")
+print("3. Add event handlers for desired BGLib response and event packets\n")
