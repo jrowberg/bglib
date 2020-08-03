@@ -1,7 +1,7 @@
 bglib
 =====
 
-BGLib implementations for Bluegiga BLE112 Bluetooth Smart module.
+BGLib implementations for Bluegiga/Silicon Labs BLE112 Bluetooth Smart module and Silicon Labs Blue Gecko (EFR32).
 
 License info
 ============
