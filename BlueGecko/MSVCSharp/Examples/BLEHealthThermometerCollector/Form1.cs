@@ -20,8 +20,6 @@ namespace BLEHealthThermometerCollector
         public Boolean isAttached = false;
         public Dictionary<string, string> portDict = new Dictionary<string, string>();
 
-
-        
         /* ================================================================ */
         /*                BEGIN MAIN EVENT-DRIVEN APP LOGIC                 */
         /* ================================================================ */
@@ -32,11 +30,15 @@ namespace BLEHealthThermometerCollector
         public const UInt16 STATE_FINDING_SERVICES = 3;
         public const UInt16 STATE_FINDING_ATTRIBUTES = 4;
         public const UInt16 STATE_LISTENING_MEASUREMENTS = 5;
-        
+        public const UInt16 STATE_SCAN_END_REQUEST = 6;
+
+
         public UInt16 app_state = STATE_STANDBY;        // current application state
         public Byte connection_handle = 0;              // connection handle
         public UInt32 thermometer_service_handle = 0;
         public UInt16 thermometer_characteristic_handle = 0;
+        public byte[] target_device_address;
+        public Byte target_device_address_type;
 
         // for master/scanner devices, the "gap_scan_response" event is a common entry-like point
         // this filters adv packets to find devices which advertise the Health Thermometer service
@@ -55,7 +57,7 @@ namespace BLEHealthThermometerCollector
             Console.Write(log);
             ThreadSafeDelegate(delegate { txtLog.AppendText(log); });
 
-            // pull all advertised service info from ad packet
+            // pull all advertised service info from adv packet
             List<Byte[]> ad_services = new List<Byte[]>();
             Byte[] this_field = {};
             int bytes_left = 0;
@@ -94,8 +96,11 @@ namespace BLEHealthThermometerCollector
             }
 
             // check for 0x1809 (official health thermometer service UUID)
-            if (ad_services.Any(a => a.SequenceEqual(new Byte[] { 0x18, 0x09 })) && app_state != STATE_STANDBY) {
-                Console.Write("Found service!");
+            if (ad_services.Any(a => a.SequenceEqual(new Byte[] { 0x18, 0x09 })))
+            {
+
+                Console.Write("Found service! Attempting to connect." + Environment.NewLine);
+
                 // Stop scanning
                 cmd = bglib.BLECommandLEGAPEndProcedure();
                 bglib.SendCommand(serialAPI, cmd);
@@ -107,25 +112,13 @@ namespace BLEHealthThermometerCollector
                 ThreadSafeDelegate(delegate { txtLog.AppendText(log); });
 #endif
 
-                //while (bglib.IsBusy()) ;
-
-                Thread.Sleep(1); //pause for 1ms to provide space in between consecutive commands
-
-                // connect to this device
-                cmd = bglib.BLECommandLEGAPConnect(e.address, e.address_type, 0x01); // 0x01 = 1Mbit PHY
-                bglib.SendCommand(serialAPI, cmd);
-
-#if SERIAL_DEBUG
-                // DEBUG: display bytes written
-                log = String.Format("=> TX ({0}) [ {1}]", cmd.Length, ByteArrayToHexString(cmd)) + Environment.NewLine;
-                Console.Write(log);
-                ThreadSafeDelegate(delegate { txtLog.AppendText(log); });
-#endif
-                //while (bglib.IsBusy()) ;
-
-                // update state
-                app_state = STATE_CONNECTING;
+                /* We are going to connect in the response handler for le_gap_end_procedure because
+                 * le_gap_procedure will also cancel the connect request if called too early! */
+                target_device_address = e.address;
+                target_device_address_type = e.address_type;
+                app_state = STATE_SCAN_END_REQUEST;
             }
+            
         }
 
         // the "connection_opened" event occurs when a new connection is established
@@ -152,7 +145,6 @@ namespace BLEHealthThermometerCollector
             Console.Write(log);
             ThreadSafeDelegate(delegate { txtLog.AppendText(log); });
 #endif
-            //while (bglib.IsBusy()) ;
 
             // update state
             app_state = STATE_FINDING_SERVICES;
@@ -231,7 +223,6 @@ namespace BLEHealthThermometerCollector
                     Console.Write(log);
                     ThreadSafeDelegate(delegate { txtLog.AppendText(log); });
 #endif
-                    //while (bglib.IsBusy()) ;
 
                     // update state
                     app_state = STATE_FINDING_ATTRIBUTES;
@@ -258,7 +249,6 @@ namespace BLEHealthThermometerCollector
                     Console.Write(log);
                     ThreadSafeDelegate(delegate { txtLog.AppendText(log); });
 #endif
-                    //while (bglib.IsBusy()) ;
 
                     // update state
                     app_state = STATE_LISTENING_MEASUREMENTS;
@@ -314,7 +304,6 @@ namespace BLEHealthThermometerCollector
                 Console.Write(log);
                 ThreadSafeDelegate(delegate { txtLog.AppendText(log); });
 #endif
-                //while (bglib.IsBusy()) ;
             }
         }
 
@@ -330,6 +319,35 @@ namespace BLEHealthThermometerCollector
             Console.Write(log);
             ThreadSafeDelegate(delegate { txtLog.AppendText(log); });
         }
+
+        public void LEGAPEndProcedureEvent(object sender, BlueGecko.BLE.Responses.LEGAP.EndProcedureEventArgs e)
+        {
+            /* We need to wait on the le_gap_end_procedure event before we send le_gap_connect, or else the 
+             * connection procedure will be ended too! */
+#if SERIAL_DEBUG
+            String log = String.Format("rsp_le_gap_end_procedure: result {0}" + Environment.NewLine,
+               e.result
+               );
+            Console.Write(log);
+            ThreadSafeDelegate(delegate { txtLog.AppendText(log); });
+#endif
+            if (app_state == STATE_SCAN_END_REQUEST)
+            {
+                // scan successfully stopped! connect to the target device
+                Byte[] cmd = bglib.BLECommandLEGAPConnect(target_device_address, target_device_address_type, 0x01); // 0x01 = 1Mbit PHY
+                bglib.SendCommand(serialAPI, cmd);
+
+#if SERIAL_DEBUG
+                // DEBUG: display bytes written
+                log = String.Format("=> TX ({0}) [ {1}]", cmd.Length, ByteArrayToHexString(cmd)) + Environment.NewLine;
+                Console.Write(log);
+                ThreadSafeDelegate(delegate { txtLog.AppendText(log); });
+#endif
+
+                // update state
+                app_state = STATE_CONNECTING;
+            }
+    }
 
         /* ================================================================ */
         /*                 END MAIN EVENT-DRIVEN APP LOGIC                  */
@@ -394,7 +412,7 @@ namespace BLEHealthThermometerCollector
             comboPorts.DisplayMember = "Value";
             comboPorts.ValueMember = "Key";
 
-            // initialize serial port with all of the normal values (should work with BLED112 on USB)
+            // initialize serial port with all of the normal values (works with WSTK NCP or Darwin Tech Dongle)
             serialAPI.Handshake = System.IO.Ports.Handshake.RequestToSend;
             serialAPI.BaudRate = 115200;
             serialAPI.DataBits = 8;
@@ -411,6 +429,7 @@ namespace BLEHealthThermometerCollector
             bglib.BLEEventGATTProcedureCompleted += new BlueGecko.BLE.Events.GATT.ProcedureCompletedEventHandler(this.GATTProcedureCompletedEvent);
             bglib.BLEEventGATTCharacteristicValue += new BlueGecko.BLE.Events.GATT.CharacteristicValueEventHandler(this.GATTCharacteristicValueEvent);
             bglib.BLEEventSystemBoot += new BlueGecko.BLE.Events.System.BootEventHandler(this.SystemBootEvent);
+            bglib.BLEResponseLEGAPEndProcedure += new BlueGecko.BLE.Responses.LEGAP.EndProcedureEventHandler(this.LEGAPEndProcedureEvent);
         }
 
         private void btnRefresh_Click(object sender, EventArgs e)
@@ -430,6 +449,10 @@ namespace BLEHealthThermometerCollector
             {
                 portDict.Add("0", "Error " + ex.Message);
             }
+
+            /* Refresh combo with new data */
+            comboPorts.DataSource = new BindingSource(portDict, null);
+      
         }
 
         private void btnAttach_Click(object sender, EventArgs e)
@@ -485,7 +508,7 @@ namespace BLEHealthThermometerCollector
             cmd = bglib.BLECommandLEGAPSetDiscoveryTiming(1, 0xC8, 0xC8); // 1Mbit PHY, 125ms interval, 125ms window
             bglib.SendCommand(serialAPI, cmd);
 
-            Thread.Sleep(1); // sleep for 1ms to allow space in between commands
+            Thread.Sleep(5); // sleep for 5ms to allow space in between commands
 
 #if SERIAL_DEBUG
             // DEBUG: display bytes written
@@ -494,13 +517,11 @@ namespace BLEHealthThermometerCollector
             ThreadSafeDelegate(delegate { txtLog.AppendText(log); });
 #endif
 
-            //while (bglib.IsBusy()) ;
-
             // set discovery type parameters
             cmd = bglib.BLECommandLEGAPSetDiscoveryType(1,1); // 1Mbit PHY, active scanning
             bglib.SendCommand(serialAPI, cmd);
 
-            Thread.Sleep(1); // sleep for 1ms to allow space in between commands
+            Thread.Sleep(5); // sleep for 5ms to allow space in between commands
 
 #if SERIAL_DEBUG
             // DEBUG: display bytes written
@@ -508,7 +529,6 @@ namespace BLEHealthThermometerCollector
             Console.Write(log);
             ThreadSafeDelegate(delegate { txtLog.AppendText(log); });
 #endif
-            //while (bglib.IsBusy()) ;
 
             // begin scanning for BLE peripherals
             cmd = bglib.BLECommandLEGAPStartDiscovery(1,1); // 1Mbit PHY, generic discovery mode
@@ -520,7 +540,6 @@ namespace BLEHealthThermometerCollector
             Console.Write(log);
             ThreadSafeDelegate(delegate { txtLog.AppendText(log); });
 #endif
-            //while (bglib.IsBusy()) ;
 
             // update state
             app_state = STATE_SCANNING;
@@ -548,7 +567,6 @@ namespace BLEHealthThermometerCollector
             Console.Write(log);
             ThreadSafeDelegate(delegate { txtLog.AppendText(log); });
 #endif
-            //while (bglib.IsBusy()) ;
 
             // enable "GO" button to allow them to start again
             btnGo.Enabled = true;
