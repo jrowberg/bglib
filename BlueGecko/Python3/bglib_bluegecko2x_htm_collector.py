@@ -1,0 +1,387 @@
+#!/usr/bin/env python
+
+""" Blue Gecko v2.x BGAPI/BGLib demo: health thermometer collector
+
+Changelog:
+    2020-08-03 - Convert to Blue Gecko v2.x API (Kris Young)
+    2014-10-15 - Add logfile output mode
+    2014-07-05 - Fix indication subscription to use 2-byte value
+    2013-06-07 - Fix "address_type" to support Random (e.g. iPhone as peripheral)
+    2013-05-15 - Added comments, script arguments
+    2013-04-28 - Initial release
+
+============================================
+Blue Gecko BGLib Python interface library test health thermometer collector app
+2013-07-05 by Jeff Rowberg <jeff@rowberg.net>
+
+Updates should (hopefully) always be available at https://github.com/jrowberg/bglib
+
+============================================
+BGLib Python interface library code is placed under the MIT license
+Copyright (c) 2014 Jeff Rowberg
+Copyright (c) 2020 Silicon Laboratories
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+===============================================
+
+"""
+
+__author__ = "Jeff Rowberg, Kris Young"
+__license__ = "MIT"
+__version__ = "2020-08-05"
+__email__ = "jeff@rowberg.net, kris.young@silabs.com"
+
+"""
+BASIC ARCHITECTURAL OVERVIEW:
+    The program starts, initializes the dongle to a known state, then starts
+    scanning. Each time an advertisement packet is found, a scan response
+    event packet is generated. These packets are read by polling the serial
+    port to which the Blue Gecko Network Co-Processor (NCP) is attached.
+
+    The basic process is as follows:
+      a. Scan for devices
+      b. If the desired UUID is found in an adv packet, connect to that device
+      c. Search by UUID for the target service handle range
+      d. Search through the target service hand range by UUID to find the
+         thermometer measurement attribute handle
+      e. Enable indications on the thermometer measurement attribute
+      f. Read and display incoming thermometer values until terminated (Ctrl+C)
+
+FUNCTION ANALYSIS:
+
+1. __main__:
+    Initializes the serial port and BGLib object to attach event handlers,
+    then sends commands to cause the device to disconnect, stop advertising,
+    and stop scanning (i.e. return to a known idle/standby state). Some of
+    these commands will fail since the device cannot be doing all of these
+    things at the same time, but this is not a problem. __main__ finishes
+    by setting scan parameters and initiating a scan with the
+    "le_gap_start_discovery" command.
+
+2. my_gecko_evt_le_gap_scan_response:
+    Raised during scanning whenever an advertisement packet is detected. The
+    data provided includes the MAC address, RSSI, and ADV packet data payload.
+    This payload includes fields which contain any services being advertised,
+    which allows us to scan for a specific service. In this demo, the service
+    we are searching for has a standard 16-bit UUID which is contained in the
+    "uuid_htm_service" variable. Once a match is found, the script initiates
+    a connection request with the "le_gap_connect" command.
+
+3. my_gecko_evt_le_connection_opened
+    Raised when the connection sis established. Once a connection is established,
+    the script begins a service discovery with the
+    "gecko_cmd_gatt_discover_primary_services_by_uuid" command.
+
+4. my_gecko_evt_gatt_service
+    Raised for each group found during the search started in #3 that matches the
+    supplied service UUID. The returned start/end handle values are stored for usage later.
+    We cannot use them immediately because the ongoing read-by-group-type procedure
+    must finish first.
+
+5. my_gecko_evt_gatt_characteristic
+    Raised for each matching attribute found during the search started after the service
+    search completes. The search is started using
+    "gecko_cmd_gatt_discover_characteristics_by_uuid", so we're looking for the
+    specific UUID matching the unique health thermometer measurement attribute
+    contained in the "uuid_htm_temp_meas_characteristic" (0x2a1c).
+
+6. my_gecko_evt_gatt_procedure_completed
+    Raised when an attribute client procedure finishes, which in this script
+    means when the "gecko_cmd_gatt_discover_primary_services_by_uuid" (service
+    search) or the "gecko_cmd_gatt_discover_characteristics_by_uuid" (descriptor
+    search) completes. Since both processes terminate with this same event, we
+    must keep track of the state so we know which one has actually just finished.
+    The completion of the service search will (assuming the service is found)
+    trigger the start of the descriptor search, and the completion of the
+    descriptor search will (assuming the attributes are found) trigger enabling
+    indications on the measurement characteristic.
+
+7. my_gecko_evt_gatt_characteristic_value
+    Raised each time the remote device pushes new data via notifications or
+    indications. (Notifications and indications are basically the same, except
+    that indications are acknowledged while notifications are not--like TCP vs.
+    UDP.) In this script, the remote slave device pushes temperature
+    measurements out as indications approximately once per second. These values
+    are displayed to the console. Note that indications have to be acknowledged,
+    which this script does using gecko_cmd_gatt_set_characteristic_notification
+    with an argument of 0x0002.
+
+NOTE: This script is written for version 2.x of the Blue Gecko API. This will
+not be compatible with bglib.py generated from version 3.x of the Blue Gecko API.
+"""
+
+import bglib, serial, time, datetime, optparse, signal
+
+ble = 0
+ser = 0
+peripheral_list = []
+connection_handle = 0
+thermometer_service_handle_range = 0
+thermometer_characteristic_handle = 0
+
+uuid_htm_service = [0x18, 0x09] # 0x1809
+uuid_htm_temp_meas_characteristic = [0x2a, 0x1c] # 0x2A1C
+
+STATE_STANDBY = 0
+STATE_CONNECTING = 1
+STATE_FINDING_SERVICES = 2
+STATE_FINDING_ATTRIBUTES = 3
+STATE_LISTENING_MEASUREMENTS = 4
+state = STATE_STANDBY
+
+# handler to notify of an API parser timeout condition
+def my_timeout(sender, args):
+    # might want to try the following lines to reset, though it probably
+    # wouldn't work at this point if it's already timed out:
+    #ble.send_command(ser, ble.gecko_cmd_system_reset(0))
+    #ble.check_activity(ser, 1)
+
+    print("BGAPI parser timed out. Make sure the BLE device is in a known/idle state.")
+
+# gap_scan_response handler
+def my_gecko_evt_le_gap_scan_response(sender, args):
+    global state, ble, ser, uuid_htm_service
+
+
+    if args['packet_type'] == 0:
+        print("Found advertisement ",end='')
+    elif args['packet_type'] == 4:
+        print("Found scan response ",end='')
+    print ("from %s, RSSI %d, payload: %s" % (':'.join(['%02X' % b for b in args['address'][::-1]]),
+            args['rssi'],(' '.join(['%02X' % b for b in args['data']]))))
+
+    # pull all advertised service info from ad packet
+    ad_services = []
+    this_field = []
+    bytes_left = 0
+    for b in args['data']:
+        if bytes_left == 0:
+            bytes_left = b
+            this_field = []
+        else:
+            this_field.append(b)
+            bytes_left = bytes_left - 1
+            if bytes_left == 0:
+                if this_field[0] == 0x02 or this_field[0] == 0x03: # partial or complete list of 16-bit UUIDs
+                    for i in range(int((len(this_field) - 1) / 2)):
+                        ad_services.append(this_field[-1 - i*2 : -3 - i*2 : -1])
+                if this_field[0] == 0x04 or this_field[0] == 0x05: # partial or complete list of 32-bit UUIDs
+                    for i in range(int((len(this_field) - 1) / 4)):
+                        ad_services.append(this_field[-1 - i*4 : -5 - i*4 : -1])
+                if this_field[0] == 0x06 or this_field[0] == 0x07: # partial or complete list of 128-bit UUIDs
+                    for i in range(int((len(this_field) - 1) / 16)):
+                        ad_services.append(this_field[-1 - i*16 : -17 - i*16 : -1])
+
+    # check for 0x1809 (official thermometer service UUID)
+    if uuid_htm_service in ad_services:
+
+        print("Found HTM service!")
+        if not args['address'] in peripheral_list:
+            peripheral_list.append(args['address'])
+            #print("%s" % ':'.join(['%02X' % b for b in args['sender'][::-1]]))
+
+            # Stop discovery
+            ble.send_command(ser, ble.gecko_cmd_le_gap_end_procedure())
+            ble.check_activity(ser, 1)
+
+            # connect to this device using 1Mbit PHY (0x01)
+            ble.send_command(ser, ble.gecko_cmd_le_gap_connect(args['address'], args['address_type'], 0x01))
+            ble.check_activity(ser, 1)
+
+            state = STATE_CONNECTING
+
+# connection_status handler
+def my_gecko_evt_le_connection_opened(sender, args):
+    global state, ble, ser, connection_handle
+
+    # connected, now perform service discovery
+    print("Connected to %s" % ':'.join(['%02X' % b for b in args['address'][::-1]]))
+    connection_handle = args['connection']
+    ble.send_command(ser, ble.gecko_cmd_gatt_discover_primary_services_by_uuid(args['connection'],
+            list(reversed(uuid_htm_service))))
+    ble.check_activity(ser, 1)
+
+    state = STATE_FINDING_SERVICES
+
+# gatt_service handler
+def my_gecko_evt_gatt_service(sender, args):
+    global ble, ser, thermometer_service_handle_range
+
+    # Set the handle range here - will be handled in my_gecko_evt_gatt_procedure_completed
+    thermometer_service_handle_range = args['service']
+
+# gatt_characteristic handler
+def my_gecko_evt_gatt_characteristic(sender, args):
+    global state, ble, ser, thermometer_service_handle_range, thermometer_characteristic_handle
+
+    # Set the handle here - will be handled in my_gecko_evt_gatt_procedure_completed
+    thermometer_characteristic_handle = args['characteristic']
+
+# attclient_procedure_completed handler
+def my_gecko_evt_gatt_procedure_completed(sender, args):
+    global state, ble, ser, connection_handle, thermometer_service_handle_range, thermometer_characteristic_handle
+
+    # check if we just finished searching for services
+    if state == STATE_FINDING_SERVICES:
+        if thermometer_service_handle_range > 0:
+            print("Found 'Health Thermometer' service with UUID 0x1809")
+
+            # found the Health Thermometer service, so now search for the attributes inside
+            state = STATE_FINDING_ATTRIBUTES
+            ble.send_command(ser, ble.gecko_cmd_gatt_discover_characteristics_by_uuid(connection_handle,
+                thermometer_service_handle_range, list(reversed(uuid_htm_temp_meas_characteristic))))
+            ble.check_activity(ser, 1)
+        else:
+            print("Could not find 'Health Thermometer' service with UUID 0x1809")
+
+    # check if we just finished searching for attributes within the thermometer service
+    elif state == STATE_FINDING_ATTRIBUTES:
+        if thermometer_characteristic_handle > 0:
+            print("Found 'Health Thermometer' measurement attribute with UUID 0x2A1C")
+            print("Enabling indications...")
+
+            # found the measurement + client characteristic configuration, so enable indications
+            # (this is done by writing 0x0002 to the client characteristic configuration attribute)
+            state = STATE_LISTENING_MEASUREMENTS
+            ble.send_command(ser, ble.gecko_cmd_gatt_set_characteristic_notification(connection_handle, thermometer_characteristic_handle, 0x02))
+            ble.check_activity(ser, 1)
+        else:
+            print("Could not find 'Health Thermometer' measurement attribute with UUID 0x2A1C")
+
+# attclient_attribute_value handler
+def my_gecko_evt_gatt_characteristic_value(sender, args):
+    global state, ble, ser, connection_handle, thermometer_characteristic_handle
+
+    # check for a new value from the connected peripheral's temperature measurement attribute
+    if args['connection'] == connection_handle and args['characteristic'] == thermometer_characteristic_handle:
+        htm_flags = args['value'][0]
+        htm_exponent = args['value'][4]
+        htm_mantissa = (args['value'][3] << 16) | (args['value'][2] << 8) | args['value'][1]
+        if htm_exponent > 127: # convert to signed 8-bit int
+            htm_exponent = htm_exponent - 256
+        htm_measurement = htm_mantissa * pow(10, htm_exponent)
+        temp_type = 'C'
+        if htm_flags & 0x01: # value sent is Fahrenheit, not Celsius
+            temp_type = 'F'
+
+        print("Temperature: %.1f%c %c" % (htm_measurement, u"\N{DEGREE SIGN}", temp_type))
+
+    # Reply with confirmation to indication
+    ble.send_command(ser, ble.gecko_cmd_gatt_send_characteristic_confirmation(connection_handle))
+    ble.check_activity(ser, 1)
+
+def my_gecko_evt_system_boot(sender, args):
+
+    print("Boot message received! Version {}.{}.{} build {}".format(args['major'], args['minor'], args['patch'],args['build']))
+
+def my_gecko_evt_le_connection_closed(sender, args):
+
+    print("Connection closed, reason={}".format(hex(args['reason'])))
+
+def main():
+    global ble, ser
+
+    # create option parser
+    p = optparse.OptionParser(description='BGLib Demo: Health Thermometer \
+Collector v' + __version__)
+
+    # set defaults for options
+    p.set_defaults(port="/dev/ttyACM0", baud=115200, packet=False,
+        debug=False, rtscts=True)
+
+    # create serial port options argument group
+    group = optparse.OptionGroup(p, "Connection Options")
+    group.add_option('--port', '-p', type="string", help="Serial port device name \
+(default /dev/ttyACM0)", metavar="PORT")
+    group.add_option('--baud', '-b', type="int", help="Serial port baud rate \
+(default 115200)", metavar="BAUD")
+    group.add_option('--debug', '-d', action="store_true", help="Debug mode \
+(show raw RX/TX API packets)")
+    group.add_option('--rtscts', '-r', type="int", help="RTS/CTS hw flow control \
+enable=1/disable=0 (default enabled=1)")
+    p.add_option_group(group)
+
+    # actually parse all of the arguments
+    options, arguments = p.parse_args()
+    
+    # create and setup BGLib object
+    ble = bglib.BGLib()
+    ble.packet_mode = options.packet
+    ble.debug = options.debug
+
+    # add handler for BGAPI timeout condition (hopefully won't happen)
+    ble.on_timeout += my_timeout
+
+    # add handlers for BGAPI events
+    ble.gecko_evt_le_gap_scan_response += my_gecko_evt_le_gap_scan_response
+    ble.gecko_evt_le_connection_opened += my_gecko_evt_le_connection_opened
+    ble.gecko_evt_le_connection_closed += my_gecko_evt_le_connection_closed
+    ble.gecko_evt_gatt_service += my_gecko_evt_gatt_service
+    ble.gecko_evt_gatt_characteristic += my_gecko_evt_gatt_characteristic
+    ble.gecko_evt_gatt_procedure_completed += my_gecko_evt_gatt_procedure_completed
+    ble.gecko_evt_gatt_characteristic_value += my_gecko_evt_gatt_characteristic_value
+    ble.gecko_evt_system_boot += my_gecko_evt_system_boot
+
+    # create serial port object
+    try:
+        ser = serial.Serial(port=options.port, baudrate=options.baud,
+            rtscts=options.rtscts, timeout=1, writeTimeout=1)
+    except serial.SerialException as e:
+        print("\n================================================================")
+        print("Port error (name='%s', baud='%ld'): %s" % (options.port, options.baud, e))
+        print("================================================================")
+        exit(2)
+
+    # flush buffers
+    ser.flushInput()
+    ser.flushOutput()
+
+    # Reboot NCP (will generate boot event)
+    ble.send_command(ser, ble.gecko_cmd_system_reset(0))
+    ble.check_activity(ser, 1)
+
+    # set discovery timing parameters
+    ble.send_command(ser, ble.gecko_cmd_le_gap_set_discovery_timing(1, 0xC8, 0xC8))
+    ble.check_activity(ser, 1)
+
+    # set discovery type parameters
+    ble.send_command(ser, ble.gecko_cmd_le_gap_set_discovery_type(1, 1))
+    ble.check_activity(ser, 1)
+
+    # start scanning now
+    print("Scanning for BLE peripherals...")
+    ble.send_command(ser, ble.gecko_cmd_le_gap_start_discovery(1,1))
+    ble.check_activity(ser, 1)
+
+    while (1):
+        # check for all incoming data (no timeout, non-blocking)
+        ble.check_activity(ser)
+
+        # don't burden the CPU
+        time.sleep(0.01)
+
+# gracefully exit without a big exception message if possible
+def ctrl_c_handler(signal, frame):
+    print("Control-C received - exiting. Goodbye!")
+    exit(0)
+
+signal.signal(signal.SIGINT, ctrl_c_handler)
+
+if __name__ == '__main__':
+    main()
